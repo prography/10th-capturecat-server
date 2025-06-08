@@ -1,3 +1,4 @@
 rootProject.name = 'capture-cat'
 
 include 'capturecat-core'
+include 'capturecat-support'
