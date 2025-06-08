@@ -1,1 +1,3 @@
-rootProject.name = 'server'
+rootProject.name = 'capture-cat'
+
+include 'capturecat-core'
