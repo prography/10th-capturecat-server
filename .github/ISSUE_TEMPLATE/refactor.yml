@@ -9,13 +9,6 @@ body:
         ## 🛠️ 리팩토링 목적
         기존 코드의 가독성, 유지보수성, 성능 등을 향상시키기 위한 리팩토링 작업을 기록합니다.
 
-  - type: input
-    id: related-component
-    attributes:
-      label: 📦 관련 모듈/컴포넌트
-      description: 리팩토링 대상이 되는 모듈이나 컴포넌트를 명확히 작성해 주세요.
-      placeholder: ex) CalendarView, AuthService, api/v1/user
-
   - type: textarea
     id: refactor-reason
     attributes:
@@ -32,9 +25,7 @@ body:
       label: 🧩 주요 변경 사항 또는 계획
       description: 리팩토링을 어떻게 진행할지 구체적인 변경 방향을 작성해 주세요.
       placeholder: |
-        - 조건 분기를 전략 패턴으로 치환
-        - 공통 로직을 util 함수로 분리
-        - 특정 쿼리를 인덱스 기반으로 변경
+        - 양방향 의존성 단방향으로 변경
 
   - type: textarea
     id: task-list
