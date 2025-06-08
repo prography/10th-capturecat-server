@@ -1,1 +1,6 @@
-rootProject.name = 'server'
+rootProject.name = 'capture-cat'
+
+include 'capturecat-core'
+include 'capturecat-support'
+include 'capturecat-tests:api-docs'
+include 'capturecat-clients'
