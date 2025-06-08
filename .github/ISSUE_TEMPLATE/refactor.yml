@@ -1,0 +1,46 @@
+name: "리팩토링"
+description: "기존 기능이나 코드 구조를 개선합니다."
+labels: ["refactor"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🛠️ 리팩토링 목적
+        기존 코드의 가독성, 유지보수성, 성능 등을 향상시키기 위한 리팩토링 작업을 기록합니다.
+
+  - type: input
+    id: related-component
+    attributes:
+      label: 📦 관련 모듈/컴포넌트
+      description: 리팩토링 대상이 되는 모듈이나 컴포넌트를 명확히 작성해 주세요.
+      placeholder: ex) CalendarView, AuthService, api/v1/user
+
+  - type: textarea
+    id: refactor-reason
+    attributes:
+      label: 🎯 리팩토링 사유
+      description: 어떤 문제가 있었고, 리팩토링을 통해 어떤 개선을 기대하는지 작성해 주세요.
+      placeholder: |
+        - 복잡한 조건 분기로 인해 테스트 작성이 어려움
+        - 동일한 로직이 여러 파일에 중복되어 있음
+        - 성능 병목이 발생하고 있음
+
+  - type: textarea
+    id: refactor-plan
+    attributes:
+      label: 🧩 주요 변경 사항 또는 계획
+      description: 리팩토링을 어떻게 진행할지 구체적인 변경 방향을 작성해 주세요.
+      placeholder: |
+        - 조건 분기를 전략 패턴으로 치환
+        - 공통 로직을 util 함수로 분리
+        - 특정 쿼리를 인덱스 기반으로 변경
+
+  - type: textarea
+    id: task-list
+    attributes:
+      label: ✅ 세부 작업(Task)
+      description: 리팩토링을 위해 필요한 작업들을 체크리스트로 작성해 주세요.
+      placeholder: |
+        - [ ] 조회 성능 개선
+        - [ ] 코드 중복 제거

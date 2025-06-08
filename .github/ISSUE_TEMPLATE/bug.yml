@@ -1,0 +1,58 @@
+name: "버그 리포트 (Bug Report)"
+description: "기능이 의도한 대로 동작하지 않는 문제를 제보합니다."
+labels: [ "bug" ]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 버그 내용
+        현재 발생 중인 문제에 대한 **상세 정보와 재현 가능한 상황**을 입력해 주세요.
+        다음 항목을 포함하면 빠르게 대응할 수 있습니다.
+          - 어떤 환경(브라우저, OS, 기기 등)에서
+          - 어떤 행동(어떤 페이지, 어떤 버튼 클릭 등)을 했을 때
+          - 실제로 어떤 문제가 발생했는지
+          - 기대했던 정상 동작은 무엇인지
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 🔍 상세 내용
+      description: 버그가 발생한 상황을 가능한 자세히 설명해 주세요.
+      placeholder: |
+        - 어떤 페이지에서 발생했는지
+        - 어떤 버튼을 클릭했는지
+        - 어떤 에러 메시지가 나타났는지
+        - 예상했던 동작과 실제 동작의 차이점
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 📋 재현 방법
+      description: 문제를 재현할 수 있는 구체적인 단계가 있다면 작성해 주세요.
+      placeholder: |
+        1. Safari 브라우저로 접속
+        2. 로그인 진행
+        3. 마이페이지 클릭
+        4. 빈 화면 출력 확인, 500 에러 발생
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ 기대 동작
+      description: 버그가 없었다면 어떤 동작이 일어났어야 하는지 작성해 주세요.
+      placeholder: 예) 마이페이지에 사용자 이름과 프로필 이미지가 표시되어야 합니다.
+
+  - type: input
+    id: env
+    attributes:
+      label: 💻 실행 환경
+      description: OS, 브라우저 버전, 디바이스, 앱 버전 등 가능한 환경 정보를 입력해 주세요.
+      placeholder: 예) iOS 17 / Safari 17.1 / iPhone 13
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 🖼️ 스크린샷 또는 로그
+      description: 버그를 보여주는 스크린샷, 동영상, 콘솔 로그 등이 있다면 첨부해 주세요.
+      placeholder: 드래그 앤 드롭으로 첨부하거나, 관련 메시지를 입력해 주세요.
