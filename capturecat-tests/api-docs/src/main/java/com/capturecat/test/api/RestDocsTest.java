@@ -1,0 +1,84 @@
+package com.capturecat.test.api;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.module.mockmvc.specification.MockMvcRequestSpecification;
+
+/**
+ * Spring Rest Docs 테스트를 위한 공통 기반 클래스입니다.
+ * 이 클래스를 상속받는 모든 테스트는 Rest Docs 기능을 사용하게 됩니다.
+ */
+@ExtendWith(RestDocumentationExtension.class)
+public abstract class RestDocsTest {
+
+    protected MockMvcRequestSpecification mockMvc;
+
+    private RestDocumentationContextProvider restDocumentation;
+
+    @BeforeEach
+    public void setUp(RestDocumentationContextProvider restDocumentation) {
+        this.restDocumentation = restDocumentation;
+    }
+
+    /**
+     * RestAssuredMockMvc의 요청 스펙 반환
+     * 테스트 코드에서 given() 메서드를 통해 요청 빌더를 얻어 사용할 수 있음
+     *
+     * @return MockMvcRequestSpecification - MockMvc 기반 요청 스펙
+     */
+    protected MockMvcRequestSpecification given() {
+        return mockMvc;
+    }
+
+    /**
+     * 컨트롤러 객체를 받아 MockMvc와 RestAssuredMockMvc 요청 스펙을 초기화하고 반환함
+     * 테스트 대상 컨트롤러에 대해 문서화와 요청 테스트를 함께 수행할 수 있도록 설정
+     *
+     * @param controller 테스트 대상 컨트롤러 인스턴스
+     * @return MockMvcRequestSpecification - 해당 컨트롤러에 대한 요청 스펙
+     */
+    protected MockMvcRequestSpecification mockController(Object controller) {
+        MockMvc mockMvc = createMockMvc(controller);
+        return RestAssuredMockMvc.given().mockMvc(mockMvc);
+    }
+
+    /**
+     * 컨트롤러를 인자로 받아 MockMvc 객체를 생성함
+     * Jackson 메시지 컨버터를 설정하여 JSON 직렬화 설정을 커스터마이징함
+     * 또한 REST Docs 문서화 설정을 적용함
+     *
+     * @param controller 테스트 대상 컨트롤러
+     * @return MockMvc - 문서화 및 테스트에 사용할 MockMvc 객체
+     */
+    private MockMvc createMockMvc(Object controller) {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
+
+        return MockMvcBuilders.standaloneSetup(controller)
+                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
+                .setMessageConverters(converter)
+                .build();
+    }
+
+    /**
+     * Jackson ObjectMapper를 생성하여 날짜와 기간 관련 직렬화 방식을 타임스탬프 대신 ISO 포맷으로 설정함
+     * 모듈 자동 등록 기능도 활성화되어 있음
+     *
+     * @return ObjectMapper - 커스터마이징된 JSON ObjectMapper 인스턴스
+     */
+    private ObjectMapper objectMapper() {
+        return new ObjectMapper().findAndRegisterModules()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
+    }
+}
