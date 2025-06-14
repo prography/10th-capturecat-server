@@ -1,4 +1,4 @@
-package com.capturecat.core;
+package com.capturecat.core.support.handler;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
