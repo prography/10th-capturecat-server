@@ -8,7 +8,8 @@ import lombok.Getter;
 @Getter
 public enum ErrorType {
 
-    DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.EXAMPLE_ERROR, LogLevel.ERROR);
+    DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.EXAMPLE_ERROR, LogLevel.ERROR),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND, LogLevel.WARN);
 
     private final HttpStatus status;
 

@@ -25,4 +25,9 @@ public class ImageTag {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Tag tag;
+
+    public ImageTag(Image image, Tag tag) {
+        this.image = image;
+        this.tag = tag;
+    }
 }
