@@ -63,7 +63,7 @@ class ImageControllerTest extends RestDocsTest {
                                 parameterWithName("imageId").description("태그를 등록할 이미지 ID")
                         ),
                         requestFields(
-                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
+                                fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
                         ),
                         responseFields(
                                 fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
@@ -90,7 +90,7 @@ class ImageControllerTest extends RestDocsTest {
                                 parameterWithName("imageId").description("태그를 등록할 이미지 ID")
                         ),
                         requestFields(
-                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
+                                fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
                         ),
                         responseFields(
                                 fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
@@ -119,7 +119,7 @@ class ImageControllerTest extends RestDocsTest {
                                 parameterWithName("imageId").description("태그를 등록할 이미지 ID")
                         ),
                         requestFields(
-                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
+                                fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
                         ),
                         responseFields(
                                 fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
