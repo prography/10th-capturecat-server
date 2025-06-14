@@ -1,0 +1,2 @@
+== Introduce
+캡쳐캣 Core API 문서입니다.

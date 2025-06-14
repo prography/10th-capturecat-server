@@ -23,25 +23,34 @@ subprojects {
     apply plugin: 'org.asciidoctor.jvm.convert'
 
     configurations {
+        asciidoctorExt
         compileOnly {
             extendsFrom annotationProcessor
         }
+    }
+
+    ext {
+        snippetDir = file("build/generated-snippets")
     }
 
     dependencies {
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    }
+
+    asciidoctor {
+        inputs.dir snippetDir
+        configurations 'asciidoctorExt'
+        dependsOn test
     }
 
     bootJar.enabled = false
     jar.enabled = true
 
     tasks.named('test') {
+        outputs.dir snippetDir
         useJUnitPlatform()
-    }
-
-    tasks.named('asciidoctor') {
-        dependsOn test
     }
 }
