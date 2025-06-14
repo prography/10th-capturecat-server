@@ -68,8 +68,36 @@ class TagControllerTest extends RestDocsTest {
                         responseFields(
                                 fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
                                 fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-                                fieldWithPath("error").type(JsonFieldType.OBJECT).ignored()
-                        )));
+                                fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+    }
+
+
+    @Test
+    void 단일_이미지에_태그를_등록_시_태그의_개수가_4개를_초과하면_안_된다() {
+        // given
+        AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
+        Long imageId = 1L;
+        willThrow(new CoreException(ErrorType.TOO_MANY_TAGS)).given(tagService).addTagsToImage(anyLong(), any());
+
+        // when & then
+        given().contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .then()
+                .status(HttpStatus.BAD_REQUEST)
+                .apply(document("addTagsToImage/tooManyTags", requestPreprocessor(), responsePreprocessor(),
+                        pathParameters(
+                                parameterWithName("imageId").description("태그를 등록할 이미지 ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("tags").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+                                fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
+                                fieldWithPath("error").type(JsonFieldType.OBJECT).description("에러 정보"),
+                                fieldWithPath("error.code").type(JsonFieldType.STRING).description("에러 코드"),
+                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지"))));
     }
 
     @Test
@@ -86,7 +114,7 @@ class TagControllerTest extends RestDocsTest {
                 .when().post("/api/v1/images/{imageId}/tags", imageId)
                 .then()
                 .status(HttpStatus.NOT_FOUND)
-                .apply(document("addTagsToImage", requestPreprocessor(), responsePreprocessor(),
+                .apply(document("addTagsToImage/imageNotFound", requestPreprocessor(), responsePreprocessor(),
                         pathParameters(
                                 parameterWithName("imageId").description("태그를 등록할 이미지 ID")
                         ),
@@ -98,7 +126,6 @@ class TagControllerTest extends RestDocsTest {
                                 fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
                                 fieldWithPath("error").type(JsonFieldType.OBJECT).description("에러 정보"),
                                 fieldWithPath("error.code").type(JsonFieldType.STRING).description("에러 코드"),
-                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지")
-                        )));
+                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지"))));
     }
 }
