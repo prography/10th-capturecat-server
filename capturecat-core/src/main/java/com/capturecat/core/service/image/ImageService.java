@@ -1,11 +1,11 @@
-package com.capturecat.core.service.tag;
+package com.capturecat.core.service.image;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.capturecat.core.api.tag.AddTagsToImageRequest;
+import com.capturecat.core.api.image.AddTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TagService {
+public class ImageService {
 
     private static final int TAG_MAX_COUNT = 4;
 

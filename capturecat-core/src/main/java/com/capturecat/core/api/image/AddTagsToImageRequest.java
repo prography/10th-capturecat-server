@@ -1,4 +1,4 @@
-package com.capturecat.core.api.tag;
+package com.capturecat.core.api.image;
 
 import java.util.List;
 

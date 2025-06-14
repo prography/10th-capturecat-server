@@ -1,4 +1,4 @@
-package com.capturecat.core.api.tag;
+package com.capturecat.core.api.image;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import com.capturecat.core.service.tag.TagService;
+import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.handler.CoreExceptionHandler;
@@ -29,19 +29,19 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 
-class TagControllerTest extends RestDocsTest {
+class ImageControllerTest extends RestDocsTest {
 
-    private TagService tagService;
+    private ImageService imageService;
 
-    private TagController tagController;
+    private ImageController imageController;
 
     private CoreExceptionHandler coreExceptionHandler = new CoreExceptionHandler();
 
     @BeforeEach
     void setUp() {
-        tagService = mock(TagService.class);
-        tagController = new TagController(tagService);
-        mockMvc = mockController(tagController, coreExceptionHandler);
+        imageService = mock(ImageService.class);
+        imageController = new ImageController(imageService);
+        mockMvc = mockController(imageController, coreExceptionHandler);
     }
 
     @Test
@@ -49,7 +49,7 @@ class TagControllerTest extends RestDocsTest {
         // given
         AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2"));
         Long imageId = 1L;
-        willDoNothing().given(tagService).addTagsToImage(anyLong(), any());
+        willDoNothing().given(imageService).addTagsToImage(anyLong(), any());
 
 
         // when & then
@@ -77,7 +77,7 @@ class TagControllerTest extends RestDocsTest {
         // given
         AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
         Long imageId = 1L;
-        willThrow(new CoreException(ErrorType.TOO_MANY_TAGS)).given(tagService).addTagsToImage(anyLong(), any());
+        willThrow(new CoreException(ErrorType.TOO_MANY_TAGS)).given(imageService).addTagsToImage(anyLong(), any());
 
         // when & then
         given().contentType(ContentType.JSON)
@@ -105,7 +105,7 @@ class TagControllerTest extends RestDocsTest {
         // given
         AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2"));
         Long imageId = 1L;
-        willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND)).given(tagService).addTagsToImage(anyLong(), any());
+        willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND)).given(imageService).addTagsToImage(anyLong(), any());
 
 
         // when & then
