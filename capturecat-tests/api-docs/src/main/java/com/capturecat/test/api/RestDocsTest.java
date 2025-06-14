@@ -42,11 +42,12 @@ public abstract class RestDocsTest {
     }
 
     /**
-     * 컨트롤러 객체를 받아 MockMvc와 RestAssuredMockMvc 요청 스펙을 초기화하고 반환함
-     * 테스트 대상 컨트롤러에 대해 문서화와 요청 테스트를 함께 수행할 수 있도록 설정
+     * 주어진 컨트롤러 및 컨트롤러 어드바이스를 기반으로 MockMvc와 RestAssuredMockMvc 요청 스펙을 초기화합니다.
+     * 이를 통해 테스트 대상 컨트롤러에 대해 API 요청 테스트와 Spring REST Docs 문서 생성을 함께 수행할 수 있습니다.
      *
      * @param controller 테스트 대상 컨트롤러 인스턴스
-     * @return MockMvcRequestSpecification - 해당 컨트롤러에 대한 요청 스펙
+     * @param controllerAdvice 예외 처리 등을 위한 @ControllerAdvice 인스턴스
+     * @return 요청 테스트 및 문서화를 위한 MockMvcRequestSpecification 객체
      */
     protected MockMvcRequestSpecification mockController(Object controller, Object controllerAdvice) {
         MockMvc mockMvc = createMockMvc(controller, controllerAdvice);
@@ -54,12 +55,13 @@ public abstract class RestDocsTest {
     }
 
     /**
-     * 컨트롤러를 인자로 받아 MockMvc 객체를 생성함
-     * Jackson 메시지 컨버터를 설정하여 JSON 직렬화 설정을 커스터마이징함
-     * 또한 REST Docs 문서화 설정을 적용함
+     * 주어진 컨트롤러 및 컨트롤러 어드바이스를 설정하여 MockMvc 인스턴스를 생성합니다.
+     * - Jackson 메시지 컨버터를 통해 JSON 직렬화/역직렬화 설정을 커스터마이징하고,
+     * - REST Docs 문서화 설정을 함께 적용합니다.
      *
-     * @param controller 테스트 대상 컨트롤러
-     * @return MockMvc - 문서화 및 테스트에 사용할 MockMvc 객체
+     * @param controller 테스트 대상 컨트롤러 인스턴스
+     * @param controllerAdvice 예외 처리 등을 위한 @ControllerAdvice 인스턴스
+     * @return 문서화 및 테스트에 사용할 MockMvc 객체
      */
     private MockMvc createMockMvc(Object controller, Object controllerAdvice) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
