@@ -18,7 +18,7 @@ public class ImageController {
 
     @PostMapping("/api/v1/images/{imageId}/tags")
     public ApiResponse<?> addTagsToImage(@PathVariable Long imageId, @RequestBody AddTagsToImageRequest request) {
-        imageService.addTagsToImage(imageId, request);
+        imageService.addTagsToImage(imageId, request.tagNames());
         return ApiResponse.success();
     }
 }

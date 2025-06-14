@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.capturecat.core.api.image.AddTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -28,17 +27,17 @@ public class ImageService {
     private final TagRepository tagRepository;
 
     @Transactional
-    public void addTagsToImage(Long imageId, AddTagsToImageRequest request) {
+    public void addTagsToImage(Long imageId, List<String> tagNames) {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
         long existedTagCount = imageTagRepository.countByImage(image);
-        int newTagCount = request.tags().size();
+        int newTagCount = tagNames.size();
         if (existedTagCount + newTagCount > TAG_MAX_COUNT) {
             throw new CoreException(ErrorType.TOO_MANY_TAGS);
         }
 
-        List<Tag> newTag = request.tags().stream()
+        List<Tag> newTag = tagNames.stream()
                 .map(Tag::new)
                 .toList();
 
