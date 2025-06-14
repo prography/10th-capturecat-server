@@ -1,0 +1,24 @@
+server:
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
+
+spring:
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        format_sql: true
+  output:
+    ansi:
+      enabled: always
+
+logging:
+  level:
+    com.capturecat.core: DEBUG
+    org:
+      hibernate.orm.jdbc.bind: TRACE  # sql 파라미터 바인딩
+      springframework.security: DEBUG

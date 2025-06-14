@@ -1,4 +1,4 @@
-package com.capturecat.core;
+package com.capturecat.core.api;
 
 import java.util.HashMap;
 import java.util.Map;
