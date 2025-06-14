@@ -48,8 +48,8 @@ public abstract class RestDocsTest {
      * @param controller 테스트 대상 컨트롤러 인스턴스
      * @return MockMvcRequestSpecification - 해당 컨트롤러에 대한 요청 스펙
      */
-    protected MockMvcRequestSpecification mockController(Object controller) {
-        MockMvc mockMvc = createMockMvc(controller);
+    protected MockMvcRequestSpecification mockController(Object controller, Object controllerAdvice) {
+        MockMvc mockMvc = createMockMvc(controller, controllerAdvice);
         return RestAssuredMockMvc.given().mockMvc(mockMvc);
     }
 
@@ -61,12 +61,13 @@ public abstract class RestDocsTest {
      * @param controller 테스트 대상 컨트롤러
      * @return MockMvc - 문서화 및 테스트에 사용할 MockMvc 객체
      */
-    private MockMvc createMockMvc(Object controller) {
+    private MockMvc createMockMvc(Object controller, Object controllerAdvice) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper());
 
         return MockMvcBuilders.standaloneSetup(controller)
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
                 .setMessageConverters(converter)
+                .setControllerAdvice(controllerAdvice)
                 .build();
     }
 
