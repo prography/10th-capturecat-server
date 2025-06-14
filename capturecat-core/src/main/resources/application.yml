@@ -15,6 +15,10 @@ spring:
   output:
     ansi:
       enabled: always
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 60MB
 
 logging:
   level:

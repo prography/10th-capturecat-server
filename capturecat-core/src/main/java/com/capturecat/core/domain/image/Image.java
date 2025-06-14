@@ -24,6 +24,7 @@ public class Image extends BaseTimeEntity {
     private long size;
 
     //todo : user 정보 매핑
+    //todo : createdby, modifiedby 설정
 
     @Builder
     public Image(Long id, String fileName, String fileUrl, long size) {
