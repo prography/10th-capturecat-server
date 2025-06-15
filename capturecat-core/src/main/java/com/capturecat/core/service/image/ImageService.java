@@ -7,10 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
-import com.capturecat.core.domain.tag.ImageTag;
+import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
-import com.capturecat.core.domain.tag.TagRepository;
+import com.capturecat.core.domain.tag.TagFactory;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -24,7 +24,8 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final ImageTagRepository imageTagRepository;
-    private final TagRepository tagRepository;
+    private final TagFactory tagFactory;
+    private final ImageTagFactory imageTagFactory;
 
     @Transactional
     public void addTagsToImage(Long imageId, List<String> tagNames) {
@@ -37,19 +38,7 @@ public class ImageService {
             throw new CoreException(ErrorType.TOO_MANY_TAGS);
         }
 
-        List<Tag> existedTags = tagRepository.findByNameIn(tagNames);
-        List<Tag> notExistedTags = tagNames.stream()
-                .filter(tagName -> existedTags.stream().noneMatch(t -> t.getName().equals(tagName)))
-                .map(Tag::new)
-                .toList();
-        tagRepository.saveAll(notExistedTags);
-
-        existedTags.addAll(notExistedTags);
-        List<ImageTag> newImageTags = existedTags.stream()
-                .filter(t -> imageTagRepository.existsByImageAndTag(image, t))
-                .map(t -> new ImageTag(image, t))
-                .toList();
-
-        imageTagRepository.saveAll(newImageTags);
+        List<Tag> tags = tagFactory.create(tagNames);
+        imageTagFactory.create(image, tags);
     }
 }
