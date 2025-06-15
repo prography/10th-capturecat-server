@@ -13,17 +13,12 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/images")
+@RequestMapping(("/v1/images"))
 @RequiredArgsConstructor
 public class ImageController {
 
     private final ImageService imageService;
 
-    @PostMapping("/api/v1/images/{imageId}/tags")
-    public ApiResponse<?> addTagsToImage(@PathVariable Long imageId, @RequestBody AddTagsToImageRequest request) {
-        imageService.addTagsToImage(imageId, request.tagNames());
-        return ApiResponse.success();
-    }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> upload(@RequestParam List<MultipartFile> files) throws IOException {
@@ -32,5 +27,10 @@ public class ImageController {
         return ResponseEntity.ok(ApiResponse.success(urls));
     }
 
+    @PostMapping("/{imageId}/tags")
+    public ApiResponse<?> addTagsToImage(@PathVariable Long imageId, @RequestBody AddTagsToImageRequest request) {
+        imageService.addTagsToImage(imageId, request.tagNames());
+        return ApiResponse.success();
+    }
 
 }

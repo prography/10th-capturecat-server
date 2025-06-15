@@ -26,7 +26,7 @@ public class SecurityConfig {
         
         http
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/health", "/docs/**", "/api/**").permitAll()
+                        .requestMatchers("/health", "/docs/**", "/v1/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
