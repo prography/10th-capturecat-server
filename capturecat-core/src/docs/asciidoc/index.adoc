@@ -9,4 +9,6 @@
 
 include::{adocPath}/introduce.adoc[]
 
+include::{adocPath}/image.adoc[]
+
 include::{adocPath}/health.adoc[]
