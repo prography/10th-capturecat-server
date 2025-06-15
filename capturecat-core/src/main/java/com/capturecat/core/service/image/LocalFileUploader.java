@@ -14,8 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
-@Profile("local")
 @Slf4j
+@Profile({"local", "test"})
 @RequiredArgsConstructor
 public class LocalFileUploader extends AbstractFileUploader {
 

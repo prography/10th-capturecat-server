@@ -9,13 +9,12 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import java.io.IOException;
 
 @Slf4j
 @Service
-@Profile("!local")
+@Profile({"dev", "prod"})
 @RequiredArgsConstructor
 public class S3FileUploader extends AbstractFileUploader {
 
@@ -36,8 +35,6 @@ public class S3FileUploader extends AbstractFileUploader {
 
         return String.join("/", s3Properties.urlPrefix(), key);
     }
-
-
 
 
 }

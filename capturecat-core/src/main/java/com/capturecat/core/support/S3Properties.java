@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.validation.annotation.Validated;
 
 
-@Profile("!local")
+@Profile({"dev", "prod"})
 @Validated
 @ConfigurationProperties(prefix = "image.s3")
 public record S3Properties(
