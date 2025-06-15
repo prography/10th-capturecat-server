@@ -12,13 +12,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ImageTagFactory {
 
-    private final ImageTagRepository imageTagRepository;
-
-    public void create(Image image, List<Tag> tags) {
-        List<ImageTag> imageTags = tags.stream()
-                .filter(tag -> !imageTagRepository.existsByImageAndTag(image, tag))
+    public List<ImageTag> create(Image image, List<Tag> tags) {
+        return tags.stream()
                 .map(tag -> new ImageTag(image, tag))
                 .toList();
-        imageTagRepository.saveAll(imageTags);
     }
 }
