@@ -5,16 +5,10 @@
 :toc: left
 :toclevels: 3
 :sectlinks:
-:snippets: build/generated-snippets
+:adocPath: src/docs/asciidoc
 
-== Introduce
-캡쳐캣 Core API 문서입니다.
+include::{adocPath}/introduce.adoc[]
 
-== Health API
-=== Health Check Get API
-==== Curl Request
-include::{snippets}/healthCheck/curl-request.adoc[]
-==== Http Response
-include::{snippets}/healthCheck/http-response.adoc[]
-==== Response Fields
-include::{snippets}/healthCheck/response-fields.adoc[]
+include::{adocPath}/image.adoc[]
+
+include::{adocPath}/health.adoc[]

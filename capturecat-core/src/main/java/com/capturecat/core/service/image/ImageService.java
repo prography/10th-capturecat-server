@@ -2,19 +2,30 @@ package com.capturecat.core.service.image;
 
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.tag.*;
+import com.capturecat.core.support.error.CoreException;
+import com.capturecat.core.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 
 @Service
 @RequiredArgsConstructor
 public class ImageService {
     private final FileUploader fileUploader;
     private final ImageRepository imageRepository;
+    private final ImageTagRepository imageTagRepository;
+    private final TagRepository tagRepository;
+    private final ImageTagFactory imageTagFactory;
+    private final TagMaxCountValidator tagMaxCountValidator;
 
     /**
      * 이미지를 저장하고 저장 위치를 DB에 저장한다.
@@ -44,5 +55,25 @@ public class ImageService {
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new IllegalArgumentException("Only image files are allowed.");
         }
+    }
+
+
+    @Transactional
+    public void addTagsToImage(Long imageId, List<String> tagNames) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+        Set<String> existingTagNames = new HashSet<>(imageTagRepository.findTagNamesByImage(image));
+
+        tagMaxCountValidator.validate(existingTagNames, tagNames);
+
+        List<Tag> newTags = tagNames.stream()
+                .filter(tagName -> !existingTagNames.contains(tagName))
+                .map(Tag::new)
+                .toList();
+
+        tagRepository.saveAll(newTags);
+        List<ImageTag> imageTags = imageTagFactory.create(image, newTags);
+        imageTagRepository.saveAll(imageTags);
     }
 }
