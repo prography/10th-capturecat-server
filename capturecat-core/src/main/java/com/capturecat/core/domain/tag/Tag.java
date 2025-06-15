@@ -8,10 +8,12 @@ import jakarta.persistence.Id;
 import com.capturecat.core.domain.BaseTimeEntity;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Tag extends BaseTimeEntity {
 
     @Id

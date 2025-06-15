@@ -37,15 +37,19 @@ public class ImageService {
             throw new CoreException(ErrorType.TOO_MANY_TAGS);
         }
 
-        List<Tag> newTag = tagNames.stream()
+        List<Tag> existedTags = tagRepository.findByNameIn(tagNames);
+        List<Tag> notExistedTags = tagNames.stream()
+                .filter(tagName -> existedTags.stream().noneMatch(t -> t.getName().equals(tagName)))
                 .map(Tag::new)
                 .toList();
+        tagRepository.saveAll(notExistedTags);
 
-        List<ImageTag> newImageTags = newTag.stream()
+        existedTags.addAll(notExistedTags);
+        List<ImageTag> newImageTags = existedTags.stream()
+                .filter(t -> imageTagRepository.existsByImageAndTag(image, t))
                 .map(t -> new ImageTag(image, t))
                 .toList();
 
-        tagRepository.saveAll(newTag);
         imageTagRepository.saveAll(newImageTags);
     }
 }

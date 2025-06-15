@@ -7,4 +7,6 @@ import com.capturecat.core.domain.image.Image;
 public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
     long countByImage(Image image);
+
+    boolean existsByImageAndTag(Image image, Tag tag);
 }
