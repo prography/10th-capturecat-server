@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import com.capturecat.core.domain.BaseTimeEntity;
 import com.capturecat.core.domain.image.Image;
 
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ImageTag {
+public class ImageTag extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
