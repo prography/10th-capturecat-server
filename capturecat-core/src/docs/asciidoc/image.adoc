@@ -1,0 +1,10 @@
+== 이미지 API
+=== 단일 이미지에 태그 등록
+==== 성공
+operation::addTagsToImage[snippets='curl-request,request-fields,http-response,response-fields']
+
+==== 실패 - 태그 최대 개수 초과
+operation::addTagsToImage/tooManyTags[snippets='http-response,response-fields']
+
+==== 실패 - 이미지가 존재하지 않음
+operation::addTagsToImage/imageNotFound[snippets='http-response,response-fields']

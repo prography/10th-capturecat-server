@@ -4,4 +4,6 @@ dependencies {
     api 'org.springframework.restdocs:spring-restdocs-mockmvc'
     api 'org.springframework.restdocs:spring-restdocs-restassured'
     api 'io.rest-assured:spring-mock-mvc'
+    api 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

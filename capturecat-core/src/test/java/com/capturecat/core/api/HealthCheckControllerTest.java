@@ -1,11 +1,11 @@
-package com.capturecat.core;
+package com.capturecat.core.api;
 
-import com.capturecat.core.api.HealthCheckController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import com.capturecat.core.support.handler.CoreExceptionHandler;
 import com.capturecat.test.api.RestDocsTest;
 
 import io.restassured.http.ContentType;
@@ -23,7 +23,7 @@ class HealthCheckControllerTest extends RestDocsTest {
     @BeforeEach
     void setUp() {
         healthCheckController = new HealthCheckController();
-        mockMvc = mockController(healthCheckController);
+        mockMvc = mockController(healthCheckController, new CoreExceptionHandler());
     }
 
     @Test
