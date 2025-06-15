@@ -1,0 +1,68 @@
+== API 공통 응답
+
+[[응답-객체-형식]]
+=== 응답 객체 형식
+API 요청이 성공하면 다음과 같은 형식으로 응답을 반환해요.
+
+[source,json]
+----
+{
+  "resultType": "SUCCESS",
+  "data": "{DATA}",
+  "error": null
+}
+----
+
+==== 필드 설명
+* `resultType`: 요청의 결과 상태를 나타내요. 성공 시 `SUCCESS` 값을 가집니다.
+* `data`: 요청에 대한 실제 응답 데이터를 포함해요. 요청에 따라 다양한 형식이 될 수 있어요.
+* `error`: 요청 처리 중 발생한 오류 정보를 포함해요. 성공 시 `null` 값을 가집니다.
+
+==== 예시
+[source,json]
+----
+{
+  "resultType": "SUCCESS",
+  "data": {
+    "id": 123,
+    "name": "Example Item"
+  },
+  "error": null
+}
+----
+
+[[에러-객체-형식]]
+=== 에러 객체 형식
+API 요청이 실패하면 다음과 같은 형식으로 응답을 반환해요.
+
+[source,json]
+----
+{
+  "resultType": "ERROR",
+  "data": null,
+  "error": {
+    "code": "{ERROR_CODE}",
+    "message": "{ERROR_MESSAGE}"
+  }
+}
+----
+
+==== 오류 필드 설명
+* `resultType`: 요청의 결과 상태를 나타내요. 실패 시 `ERROR` 값을 가집니다.
+* `data`: 요청에 대한 실제 응답 데이터가 없으므로 `null` 값을 가집니다.
+* `error`: 요청 처리 중 발생한 오류 정보를 포함해요.
+  - `code`: 오류 코드로, 특정 오류를 식별하는 데 사용됩니다.
+  - `message`: 오류에 대한 설명 메시지로, 사용자에게 표시됩니다.
+
+==== 오류 예시
+[source,json]
+----
+{
+  "resultType": "ERROR",
+  "data": null,
+  "error": {
+    "code": "NOT_FOUND_ITEM",
+    "message": "아이템을 찾을 수 없어요."
+  }
+}
+----
