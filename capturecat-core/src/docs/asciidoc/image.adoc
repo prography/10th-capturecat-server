@@ -1,10 +1,12 @@
+[[이미지-API]]
 == 이미지 API
-=== 단일 이미지에 태그 등록
+
+[[단일-이미지-태그-등록]]
+=== 단일 이미지 태그 등록
 ==== 성공
 operation::addTagsToImage[snippets='curl-request,request-fields,http-response,response-fields']
 
-==== 실패 - 태그 최대 개수 초과
-operation::addTagsToImage/tooManyTags[snippets='http-response,response-fields']
+==== 실패
+단일 이미지에 태그 등록이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
-==== 실패 - 이미지가 존재하지 않음
-operation::addTagsToImage/imageNotFound[snippets='http-response,response-fields']
+<<단일-이미지-태그-등록, 단일 이미지에 태그 등록 API에서 발생할 수 있는 에러>>를 살펴보세요.

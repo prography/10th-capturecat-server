@@ -1,0 +1,10 @@
+:snippets: ../../../build/generated-snippets
+
+== API 에러 코드
+
+[[API-별-에러]]
+=== API 별 에러
+
+[[단일-이미지-태그-등록]]
+==== 단일 이미지 태그 등록
+include::{snippets}/errorCode/addTagsToImage/error-codes.adoc[]
