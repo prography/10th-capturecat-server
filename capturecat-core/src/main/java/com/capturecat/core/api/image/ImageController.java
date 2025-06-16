@@ -1,7 +1,6 @@
 package com.capturecat.core.api.image;
 
 import com.capturecat.core.api.image.dto.ImageMapper;
-import com.capturecat.core.api.image.dto.ImageReqDto.ImageUploadDto;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.service.image.ImageService;
