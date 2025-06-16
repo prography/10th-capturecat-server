@@ -1,11 +1,15 @@
 package com.capturecat.core.service.image;
 
+import com.capturecat.core.api.image.dto.ImageRespDto.ImageDto;
+import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.*;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 
+
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -26,11 +31,13 @@ public class ImageService {
     private final TagRepository tagRepository;
     private final ImageTagFactory imageTagFactory;
     private final TagMaxCountValidator tagMaxCountValidator;
+    private final ModelMapper modelMapper;
 
     /**
      * 이미지를 저장하고 저장 위치를 DB에 저장한다.
      * 저장 경로를 브라우저 주소창에 입력하면 이미지가 나타난다.
      */
+    @Transactional
     public List<Image> save(List<MultipartFile> files) throws IOException {
         List<Image> images = new ArrayList<>();
 
@@ -50,14 +57,6 @@ public class ImageService {
         return imageRepository.saveAll(images);
     }
 
-    private void validate(MultipartFile file) {
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("Only image files are allowed.");
-        }
-    }
-
-
     @Transactional
     public void addTagsToImage(Long imageId, List<String> tagNames) {
         Image image = imageRepository.findById(imageId)
@@ -75,5 +74,12 @@ public class ImageService {
         tagRepository.saveAll(newTags);
         List<ImageTag> imageTags = imageTagFactory.create(image, newTags);
         imageTagRepository.saveAll(imageTags);
+    }
+
+    private void validate(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Only image files are allowed.");
+        }
     }
 }
