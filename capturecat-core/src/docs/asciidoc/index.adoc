@@ -15,4 +15,4 @@ include::{adocPath}/image.adoc[]
 
 include::{adocPath}/health.adoc[]
 
-include::{adocPath}/error-code.adoc[]
+include::{adocPath}/error-codes.adoc[]
