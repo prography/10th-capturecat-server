@@ -31,6 +31,10 @@ spring:
 image:
   local:
     base-path: ${user.home}/Desktop/capturecat/upload
+  s3:
+    bucket: dummy
+    dir_prefix: dummy
+    url-prefix: dummy
 
 logging:
   level:

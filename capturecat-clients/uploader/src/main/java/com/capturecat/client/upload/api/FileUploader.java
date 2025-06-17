@@ -1,4 +1,4 @@
-package com.capturecat.core.service.image;
+package com.capturecat.client.upload.api;
 
 import org.springframework.web.multipart.MultipartFile;
 

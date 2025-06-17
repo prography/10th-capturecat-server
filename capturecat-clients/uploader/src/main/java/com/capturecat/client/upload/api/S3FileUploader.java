@@ -1,6 +1,6 @@
-package com.capturecat.core.service.image;
+package com.capturecat.client.upload.api;
 
-import com.capturecat.core.support.S3Properties;
+import com.capturecat.client.upload.config.S3Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;

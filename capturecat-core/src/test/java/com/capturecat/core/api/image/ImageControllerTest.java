@@ -7,7 +7,6 @@ import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.handler.CoreExceptionHandler;
-import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.test.api.RestDocsTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;

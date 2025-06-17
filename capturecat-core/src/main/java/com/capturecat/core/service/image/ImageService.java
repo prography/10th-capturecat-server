@@ -1,7 +1,7 @@
 package com.capturecat.core.service.image;
 
+import com.capturecat.client.upload.api.FileUploader;
 import com.capturecat.core.api.image.dto.ImageMapper;
-import com.capturecat.core.api.image.dto.ImageRespDto.ImageDto;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -9,8 +9,6 @@ import com.capturecat.core.domain.tag.*;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
