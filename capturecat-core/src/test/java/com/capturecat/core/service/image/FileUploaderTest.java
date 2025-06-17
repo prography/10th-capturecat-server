@@ -1,5 +1,6 @@
 package com.capturecat.core.service.image;
 
+import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.domain.image.ImageRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class ImageServiceTest {
     @Mock
     private ImageRepository imageRepository;
 
+    @Mock
+    private ImageMapper imageMapper;
+
     @Test
     @DisplayName("이미지 업로드 성공(파일2개)")
     void uploadImages_success() throws IOException {
@@ -46,7 +50,8 @@ class ImageServiceTest {
 
         //then
         verify(fileUploader, times(2)).upload(any());
+        verify(imageMapper, times(1)).toDto(anyList());
         verify(imageRepository, times(1)).saveAll(any());
-        verifyNoMoreInteractions(fileUploader, imageRepository);
+        verifyNoMoreInteractions(fileUploader, imageMapper, imageRepository);
     }
 }

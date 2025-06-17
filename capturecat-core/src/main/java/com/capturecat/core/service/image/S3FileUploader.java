@@ -4,7 +4,7 @@ import com.capturecat.core.support.S3Properties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 
 @Slf4j
-@Service
+@Component
 @Profile({"dev", "prod"})
 @RequiredArgsConstructor
 public class S3FileUploader extends AbstractFileUploader {
