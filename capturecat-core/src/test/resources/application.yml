@@ -28,6 +28,10 @@ spring:
     ansi:
       enabled: always
 
+image:
+  local:
+    base-path: ${user.home}/Desktop/capturecat/upload
+
 logging:
   level:
     com.capturecat.core: DEBUG

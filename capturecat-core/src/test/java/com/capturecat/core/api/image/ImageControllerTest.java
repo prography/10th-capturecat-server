@@ -1,35 +1,40 @@
 package com.capturecat.core.api.image;
 
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.restdocs.payload.JsonFieldType;
-
+import com.capturecat.core.DummyObject;
+import com.capturecat.core.api.image.dto.ImageMapper;
+import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.handler.CoreExceptionHandler;
+import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.test.api.RestDocsTest;
-
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.List;
 
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 
+@Transactional
 class ImageControllerTest extends RestDocsTest {
+
+    private static final String URL_PREFIX = "/v1/images";
 
     private ImageService imageService;
 
@@ -37,11 +42,46 @@ class ImageControllerTest extends RestDocsTest {
 
     private CoreExceptionHandler coreExceptionHandler = new CoreExceptionHandler();
 
+    private final ImageMapper mapper = new ImageMapper(new ModelMapper());
+
     @BeforeEach
     void setUp() {
         imageService = mock(ImageService.class);
         imageController = new ImageController(imageService);
         mockMvc = mockController(imageController, coreExceptionHandler);
+    }
+
+    @Test
+    void 이미지를_업로드한다() throws IOException {
+        // given
+        List<Image> images = DummyObject.newMockImages(1, 2);
+        when(imageService.save(any())).thenReturn(mapper.toDto(images));
+
+        // when & then
+        given().contentType(MediaType.MULTIPART_FORM_DATA)
+                .multiPart("files", "cat.jpg", "file-content-1".getBytes())
+                .multiPart("files", "dog.jpg", "file-content-2".getBytes())
+                .when()
+                .post(URL_PREFIX + "/upload")
+                .then()
+                .status(HttpStatus.OK)
+                .apply(document("upload", requestPreprocessor(), responsePreprocessor(),
+                        requestParts(
+                                partWithName("files").description("업로드할 이미지 파일들")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("DB에 저장된 이미지 정보"),
+                                fieldWithPath("data.images").type(JsonFieldType.ARRAY).description("업로드된 이미지 목록"),
+                                fieldWithPath("data.images[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
+                                fieldWithPath("data.images[].fileName").type(JsonFieldType.STRING).description("파일 이름"),
+                                fieldWithPath("data.images[].fileUrl").type(JsonFieldType.STRING).description("파일 URL"),
+                                fieldWithPath("data.images[].size").type(JsonFieldType.NUMBER).description("파일 크기"),
+                                fieldWithPath("data.images[].createdDate").type(JsonFieldType.STRING).description("이미지 생성 일시"),
+                                fieldWithPath("data.images[].lastModifiedDate").type(JsonFieldType.STRING).description("이미지 최종 수정 일시"),
+                                fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored()
+                        )
+                ));
     }
 
     @Test
@@ -55,7 +95,7 @@ class ImageControllerTest extends RestDocsTest {
         // when & then
         given().contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post(URL_PREFIX + "/{imageId}/tags", imageId)
                 .then()
                 .status(HttpStatus.OK)
                 .apply(document("addTagsToImage", requestPreprocessor(), responsePreprocessor(),
@@ -82,7 +122,7 @@ class ImageControllerTest extends RestDocsTest {
         // when & then
         given().contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post(URL_PREFIX + "/{imageId}/tags", imageId)
                 .then()
                 .status(HttpStatus.BAD_REQUEST)
                 .apply(document("addTagsToImage/tooManyTags", requestPreprocessor(), responsePreprocessor(),
@@ -111,7 +151,7 @@ class ImageControllerTest extends RestDocsTest {
         // when & then
         given().contentType(ContentType.JSON)
                 .body(request)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post(URL_PREFIX + "/{imageId}/tags", imageId)
                 .then()
                 .status(HttpStatus.NOT_FOUND)
                 .apply(document("addTagsToImage/imageNotFound", requestPreprocessor(), responsePreprocessor(),

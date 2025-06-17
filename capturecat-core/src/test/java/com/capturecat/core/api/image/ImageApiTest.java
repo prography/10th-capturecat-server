@@ -47,7 +47,7 @@ class ImageApiTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(단일_이미지_태그_등록_요청)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post("/v1/images/{imageId}/tags", imageId)
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
@@ -60,7 +60,7 @@ class ImageApiTest {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(단일_이미지_태그_등록_요청1)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post("/v1/images/{imageId}/tags", imageId)
                 .then();
 
         AddTagsToImageRequest 단일_이미지_태그_등록_요청2 = new AddTagsToImageRequest(List.of("tag1", "tag2", "tag3"));
@@ -69,7 +69,7 @@ class ImageApiTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(단일_이미지_태그_등록_요청2)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post("/v1/images/{imageId}/tags", imageId)
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
@@ -82,7 +82,7 @@ class ImageApiTest {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(단일_이미지_태그_등록_요청1)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post("/v1/images/{imageId}/tags", imageId)
                 .then();
 
         AddTagsToImageRequest 단일_이미지_태그_등록_요청2 = new AddTagsToImageRequest(List.of("tag1", "tag3", "tag4", "tag5"));
@@ -91,7 +91,7 @@ class ImageApiTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(단일_이미지_태그_등록_요청2)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post("/v1/images/{imageId}/tags", imageId)
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
     }
@@ -105,7 +105,7 @@ class ImageApiTest {
         ErrorMessage error = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(단일_이미지_태그_등록_요청)
-                .when().post("/api/v1/images/{imageId}/tags", imageId)
+                .when().post("/v1/images/{imageId}/tags", imageId)
                 .then().log().all()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .extract().jsonPath().getObject("error", ErrorMessage.class);

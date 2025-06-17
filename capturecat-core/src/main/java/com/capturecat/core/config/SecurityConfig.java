@@ -19,12 +19,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        //todo: cors 설정
+        
+        http
+                .csrf(AbstractHttpConfigurer::disable);
+        
         http
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/health", "/docs/**", "/api/**").permitAll()
+                        .requestMatchers("/health", "/docs/**", "/v1/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .csrf(AbstractHttpConfigurer::disable);
+                );
 
         return http.build();
     }
