@@ -15,6 +15,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// AWS SDK for S3
+	implementation platform("software.amazon.awssdk:bom:2.25.19") // BOM: AWS SDK 버전 통일
+	implementation 'software.amazon.awssdk:s3'
+	implementation 'org.modelmapper:modelmapper:3.2.0'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'org.postgresql:postgresql'
 }
