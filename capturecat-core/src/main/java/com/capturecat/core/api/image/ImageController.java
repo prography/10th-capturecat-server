@@ -20,14 +20,12 @@ import java.util.List;
 public class ImageController {
 
     private final ImageService imageService;
-    private final ImageMapper mapper;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ImageListDto>> upload(List<MultipartFile> files) throws IOException {
         //todo:태그 파싱 (이미지 파일과 태그(텍스트 값)를 같이 보내려면 클라이언트에서는 multipart/form-data 방식밖에 없음)
-        List<Image> images = imageService.save(files);
+        ImageListDto result = imageService.save(files);
 
-        ImageListDto result = mapper.toDto(images);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 

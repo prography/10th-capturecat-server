@@ -47,7 +47,7 @@ class ImageControllerTest extends RestDocsTest {
     @BeforeEach
     void setUp() {
         imageService = mock(ImageService.class);
-        imageController = new ImageController(imageService, mapper);
+        imageController = new ImageController(imageService);
         mockMvc = mockController(imageController, coreExceptionHandler);
     }
 
@@ -55,7 +55,7 @@ class ImageControllerTest extends RestDocsTest {
     void 이미지를_업로드한다() throws IOException {
         // given
         List<Image> images = DummyObject.newMockImages(1, 2);
-        when(imageService.save(any())).thenReturn(images);
+        when(imageService.save(any())).thenReturn(mapper.toDto(images));
 
         // when & then
         given().contentType(MediaType.MULTIPART_FORM_DATA)

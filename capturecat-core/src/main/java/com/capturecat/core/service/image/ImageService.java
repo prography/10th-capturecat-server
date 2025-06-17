@@ -1,5 +1,6 @@
 package com.capturecat.core.service.image;
 
+import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageDto;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
@@ -31,14 +32,14 @@ public class ImageService {
     private final TagRepository tagRepository;
     private final ImageTagFactory imageTagFactory;
     private final TagMaxCountValidator tagMaxCountValidator;
-    private final ModelMapper modelMapper;
+    private final ImageMapper mapper;
 
     /**
      * 이미지를 저장하고 저장 위치를 DB에 저장한다.
      * 저장 경로를 브라우저 주소창에 입력하면 이미지가 나타난다.
      */
     @Transactional
-    public List<Image> save(List<MultipartFile> files) throws IOException {
+    public ImageListDto save(List<MultipartFile> files) throws IOException {
         List<Image> images = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -54,7 +55,8 @@ public class ImageService {
             images.add(savedImage);
         }
 
-        return imageRepository.saveAll(images);
+        imageRepository.saveAll(images);
+        return mapper.toDto(images);
     }
 
     @Transactional
