@@ -6,5 +6,5 @@ import java.io.IOException;
 
 //todo: client 모듈로 옮길 것
 public interface FileUploader {
-    String upload(MultipartFile file) throws IOException;
+    String upload(MultipartFile file);
 }

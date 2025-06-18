@@ -23,7 +23,7 @@ public class S3FileUploader extends AbstractFileUploader {
     private final S3Properties s3Properties;
 
     @Override
-    public String upload(MultipartFile file) throws IOException {
+    public String upload(MultipartFile file) {
         String key = buildKey(s3Properties.dirPrefix(), file);
 
         PutObjectRequest request = PutObjectRequest.builder()

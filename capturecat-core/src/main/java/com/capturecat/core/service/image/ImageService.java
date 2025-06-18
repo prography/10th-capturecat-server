@@ -1,6 +1,7 @@
 package com.capturecat.core.service.image;
 
 import com.capturecat.client.upload.FileUploader;
+import com.capturecat.client.upload.UploadException;
 import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
@@ -37,17 +38,22 @@ public class ImageService {
      * 저장 경로를 브라우저 주소창에 입력하면 이미지가 나타난다.
      */
     @Transactional
-    public ImageListDto save(List<MultipartFile> files) throws IOException {
+    public ImageListDto save(List<MultipartFile> files) {
         List<Image> images = new ArrayList<>();
+        String fileUploadedUrl;
 
         for (MultipartFile file : files) {
             validate(file);
 
-            String fileUrl = fileUploader.upload(file);
+            try {
+                fileUploadedUrl = fileUploader.upload(file);
+            } catch (UploadException e){
+                throw new CoreException(ErrorType.IMAGE_UPLOAD_FAILED);
+            }
 
             Image savedImage = Image.builder()
                     .fileName(file.getOriginalFilename())
-                    .fileUrl(fileUrl)
+                    .fileUrl(fileUploadedUrl)
                     .size(file.getSize())
                     .build();
             images.add(savedImage);
@@ -79,7 +85,7 @@ public class ImageService {
     private void validate(MultipartFile file) {
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("Only image files are allowed.");
+            throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
         }
     }
 }
