@@ -9,6 +9,10 @@
 
 include::{adocPath}/introduce.adoc[]
 
+include::{adocPath}/common-response.adoc[]
+
 include::{adocPath}/image.adoc[]
 
 include::{adocPath}/health.adoc[]
+
+include::{adocPath}/error-codes.adoc[]
