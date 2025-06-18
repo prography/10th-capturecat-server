@@ -1,4 +1,4 @@
-package com.capturecat.client.upload.api;
+package com.capturecat.client.upload;
 
 import com.capturecat.client.upload.config.S3Properties;
 import lombok.RequiredArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -31,7 +32,13 @@ public class S3FileUploader extends AbstractFileUploader {
                 .contentType(file.getContentType())
                 .build();
 
-        s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+        try {
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+        } catch (IOException e) {
+            throw new UploadException(ErrorCode.S3_UPLOAD_FAILED_IO, e);
+        } catch (SdkException e) {
+            throw new UploadException(ErrorCode.S3_DOWNLOAD_FAILED_SDK, e);
+        }
 
         return String.join("/", s3Properties.urlPrefix(), key);
     }
