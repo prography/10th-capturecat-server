@@ -1,12 +1,17 @@
-:snippets: ../../../build/generated-snippets
-
-== API 에러 코드
+= API 에러 코드
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+:snippets: build/generated-snippets
 
 [[API-별-에러]]
-=== API 별 에러
+== API 별 에러
 
 [[단일-이미지-태그-등록]]
-==== 단일 이미지 태그 등록
+=== 단일 이미지 태그 등록
 include::{snippets}/errorCode/addTagsToImage/error-codes.adoc[]
 
 
@@ -14,5 +19,5 @@ include::{snippets}/errorCode/addTagsToImage/error-codes.adoc[]
 
 
 [[이미지-태그-삭제]]
-==== 이미지 태그 삭제
+=== 이미지 태그 삭제
 include::{snippets}/errorCode/removeTagsToImage/error-codes.adoc[]
