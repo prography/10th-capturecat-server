@@ -1,24 +1,33 @@
 package com.capturecat.core.api.image;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 
+import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.support.error.ErrorCode;
 import com.capturecat.core.support.error.ErrorMessage;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ImageApiTest {
@@ -28,6 +37,9 @@ class ImageApiTest {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private ImageTagRepository imageTagRepository;
 
     private Long imageId;
 
@@ -113,5 +125,60 @@ class ImageApiTest {
         //then
         assertThat(error.code()).isEqualTo(ErrorCode.EXCEED_MAX_TAG_COUNT.name());
         assertThat(error.message()).isEqualTo(ErrorCode.EXCEED_MAX_TAG_COUNT.getMessage());
+    }
+
+    @Test
+    void 이미지_태그를_삭제한다() {
+        // given
+        AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(List.of("tag1", "tag2"));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(단일_이미지_태그_등록_요청)
+                .when().post("/v1/images/{imageId}/tags", imageId)
+                .then();
+
+        RemoveTagsToImageRequest 태그_삭제_요청 = new RemoveTagsToImageRequest(List.of(1L, 2L));
+
+        // when
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(태그_삭제_요청)
+                .when().delete("/v1/images/{imageId}/tags", imageId)
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value());
+
+        // then
+        // TODO: 이미지 조회 및 태그 목록 조회 API 개발 후 재검증
+        Image image = imageRepository.findById(imageId).get();
+        List<String> tagNamesByImage = imageTagRepository.findTagNamesByImage(image);
+        assertThat(tagNamesByImage).isEmpty();
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidTagIdsRequests")
+    void 이미지_태그_삭제_시_잘못된_요청인_경우_400을_반환한다(RemoveTagsToImageRequest 태그_삭제_요청) {
+        // when
+        ExtractableResponse<Response> 태그_삭제_응답 = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(태그_삭제_요청)
+                .when().delete("/v1/images/{imageId}/tags", imageId)
+                .then().log().all()
+                .extract();
+
+        // then
+        ErrorMessage 오류_메시지 = 태그_삭제_응답.jsonPath().getObject("error", ErrorMessage.class);
+        assertSoftly(softly -> {
+            softly.assertThat(태그_삭제_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            softly.assertThat(오류_메시지.code()).isEqualTo(ErrorCode.INVALID_REQUEST.name());
+            softly.assertThat(오류_메시지.message()).isEqualTo(ErrorCode.INVALID_REQUEST.getMessage());
+        });
+    }
+
+    private static Stream<RemoveTagsToImageRequest> invalidTagIdsRequests() {
+        return Stream.of(
+                new RemoveTagsToImageRequest(null),
+                new RemoveTagsToImageRequest(Collections.emptyList())
+        );
     }
 }

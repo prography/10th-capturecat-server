@@ -10,7 +10,8 @@ public enum ErrorType {
 
     DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.EXAMPLE_ERROR, LogLevel.ERROR),
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND_IMAGE, LogLevel.WARN),
-    TOO_MANY_TAGS(HttpStatus.BAD_REQUEST, ErrorCode.EXCEED_MAX_TAG_COUNT, LogLevel.WARN);
+    TOO_MANY_TAGS(HttpStatus.BAD_REQUEST, ErrorCode.EXCEED_MAX_TAG_COUNT, LogLevel.WARN),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, LogLevel.WARN);
 
     private final HttpStatus status;
 
