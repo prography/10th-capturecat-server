@@ -1,15 +1,8 @@
 package com.capturecat.core.api.image;
 
-import com.capturecat.core.DummyObject;
-import com.capturecat.core.api.image.dto.ImageMapper;
-import com.capturecat.core.domain.image.Image;
-import com.capturecat.core.service.image.ImageService;
-import com.capturecat.core.support.error.CoreException;
-import com.capturecat.core.support.error.ErrorType;
-import com.capturecat.core.support.handler.CoreExceptionHandler;
-import com.capturecat.core.support.response.ApiResponse;
-import com.capturecat.test.api.RestDocsTest;
-import io.restassured.http.ContentType;
+import java.io.IOException;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -18,18 +11,32 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.List;
+import com.capturecat.core.DummyObject;
+import com.capturecat.core.api.image.dto.ImageMapper;
+import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
+import com.capturecat.core.domain.image.Image;
+import com.capturecat.core.service.image.ImageService;
+import com.capturecat.core.support.handler.CoreExceptionHandler;
+import com.capturecat.test.api.RestDocsTest;
+
+import io.restassured.http.ContentType;
 
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.when;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 
 @Transactional
 class ImageControllerTest extends RestDocsTest {
@@ -111,61 +118,29 @@ class ImageControllerTest extends RestDocsTest {
                                 fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
     }
 
-
     @Test
-    void 단일_이미지에_태그를_등록_시_태그의_개수가_4개를_초과하면_안_된다() {
+    void 태그를_삭제한다() {
         // given
-        AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
         Long imageId = 1L;
-        willThrow(new CoreException(ErrorType.TOO_MANY_TAGS)).given(imageService).addTagsToImage(anyLong(), any());
+        RemoveTagsToImageRequest request = new RemoveTagsToImageRequest(List.of(1L, 2L));
+        willDoNothing().given(imageService).removeTagsToImage(anyLong(), anyList());
 
         // when & then
         given().contentType(ContentType.JSON)
                 .body(request)
-                .when().post(URL_PREFIX + "/{imageId}/tags", imageId)
+                .when().delete(URL_PREFIX + "/{imageId}/tags", imageId)
                 .then()
-                .status(HttpStatus.BAD_REQUEST)
-                .apply(document("addTagsToImage/tooManyTags", requestPreprocessor(), responsePreprocessor(),
+                .status(HttpStatus.OK)
+                .apply(document("removeTagsToImage", requestPreprocessor(), responsePreprocessor(),
                         pathParameters(
-                                parameterWithName("imageId").description("태그를 등록할 이미지 ID")
+                                parameterWithName("imageId").description("태그를 삭제할 이미지 ID")
                         ),
                         requestFields(
-                                fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
+                                fieldWithPath("tagIds").type(JsonFieldType.ARRAY).description("삭제할 태그 ID 목록")
                         ),
                         responseFields(
                                 fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
                                 fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-                                fieldWithPath("error").type(JsonFieldType.OBJECT).description("에러 정보"),
-                                fieldWithPath("error.code").type(JsonFieldType.STRING).description("에러 코드"),
-                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지"))));
-    }
-
-    @Test
-    void 단일_이미지에_태그를_등록_시_이미지가_존재하지_않으면_예외가_발생한다() {
-        // given
-        AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2"));
-        Long imageId = 1L;
-        willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND)).given(imageService).addTagsToImage(anyLong(), any());
-
-
-        // when & then
-        given().contentType(ContentType.JSON)
-                .body(request)
-                .when().post(URL_PREFIX + "/{imageId}/tags", imageId)
-                .then()
-                .status(HttpStatus.NOT_FOUND)
-                .apply(document("addTagsToImage/imageNotFound", requestPreprocessor(), responsePreprocessor(),
-                        pathParameters(
-                                parameterWithName("imageId").description("태그를 등록할 이미지 ID")
-                        ),
-                        requestFields(
-                                fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")
-                        ),
-                        responseFields(
-                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-                                fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-                                fieldWithPath("error").type(JsonFieldType.OBJECT).description("에러 정보"),
-                                fieldWithPath("error.code").type(JsonFieldType.STRING).description("에러 코드"),
-                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지"))));
+                                fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
     }
 }

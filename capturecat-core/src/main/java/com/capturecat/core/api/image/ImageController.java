@@ -1,18 +1,26 @@
 package com.capturecat.core.api.image;
 
-import com.capturecat.core.api.image.dto.ImageMapper;
-import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
-import com.capturecat.core.domain.image.Image;
-import com.capturecat.core.service.image.ImageService;
-import com.capturecat.core.support.response.ApiResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
+import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
+import com.capturecat.core.service.image.ImageService;
+import com.capturecat.core.support.response.ApiResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(("/v1/images"))
@@ -35,4 +43,9 @@ public class ImageController {
         return ApiResponse.success();
     }
 
+    @DeleteMapping("/{imageId}/tags")
+    public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId, @RequestBody @Valid RemoveTagsToImageRequest request) {
+        imageService.removeTagsToImage(imageId, request.tagIds());
+        return ApiResponse.success();
+    }
 }
