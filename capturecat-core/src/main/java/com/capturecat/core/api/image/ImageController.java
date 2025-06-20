@@ -1,8 +1,6 @@
 package com.capturecat.core.api.image;
 
-import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
-import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.support.response.ApiResponse;
 import lombok.RequiredArgsConstructor;

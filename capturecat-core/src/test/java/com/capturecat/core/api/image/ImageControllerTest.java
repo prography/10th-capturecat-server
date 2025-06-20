@@ -11,10 +11,12 @@ import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.test.api.RestDocsTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,13 +54,14 @@ class ImageControllerTest extends RestDocsTest {
     }
 
     @Test
-    void 이미지를_업로드한다() throws IOException {
+    void 이미지업로드_성공() {
         // given
         List<Image> images = DummyObject.newMockImages(1, 2);
         when(imageService.save(any())).thenReturn(mapper.toDto(images));
 
         // when & then
-        given().contentType(MediaType.MULTIPART_FORM_DATA)
+        given()
+                .contentType(MediaType.MULTIPART_FORM_DATA)
                 .multiPart("files", "cat.jpg", "file-content-1".getBytes())
                 .multiPart("files", "dog.jpg", "file-content-2".getBytes())
                 .when()
@@ -82,6 +85,54 @@ class ImageControllerTest extends RestDocsTest {
                                 fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored()
                         )
                 ));
+    }
+
+    @Test
+    void 이미지업로드_실패_타입오류() {
+        // given
+        willThrow(new CoreException(ErrorType.INVALID_IMAGE_FORMAT)).given(imageService).save(any());
+
+        //when & then
+        given()
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .multiPart("files", "not-an-image.txt", "some plain text".getBytes(), "text/plain")
+                .when()
+                .post(URL_PREFIX + "/upload")
+                .then()
+                .status(HttpStatus.BAD_REQUEST)
+                .apply(document("errorCode/upload/invalidImageFormat", requestPreprocessor(), responsePreprocessor(),
+                        requestParts(partWithName("files").description("업로드할 이미지 파일들")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+                                fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
+                                fieldWithPath("error").type(JsonFieldType.OBJECT).description("에러 정보"),
+                                fieldWithPath("error.code").type(JsonFieldType.STRING).description("에러 코드"),
+                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지"))));
+    }
+
+    @Test
+    void 이미지업로드_실패_S3업로드오류() {
+        // given
+        willThrow(new CoreException(ErrorType.IMAGE_UPLOAD_FAILED)).given(imageService).save(any());
+
+        //when & then
+        given()
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .multiPart("files", "cat.jpg", "file-content-1".getBytes())
+                .when()
+                .post(URL_PREFIX + "/upload")
+                .then()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .apply(document("errorCode/upload/imageUploadFailed", requestPreprocessor(), responsePreprocessor(),
+                        requestParts(partWithName("files").description("업로드할 이미지 파일들")
+                        ),
+                        responseFields(
+                                fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+                                fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
+                                fieldWithPath("error").type(JsonFieldType.OBJECT).description("에러 정보"),
+                                fieldWithPath("error.code").type(JsonFieldType.STRING).description("에러 코드"),
+                                fieldWithPath("error.message").type(JsonFieldType.STRING).description("에러 메시지"))));
     }
 
     @Test
