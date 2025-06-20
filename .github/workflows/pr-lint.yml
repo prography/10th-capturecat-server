@@ -1,0 +1,31 @@
+name: Lint PR Titles
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  lint-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prTitle = context.payload.pull_request.title;
+            const regex = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9-_]+\))?: .+$/
+            if (!regex.test(prTitle)) {
+              console.log("❌ Invalid PR title.");
+              
+              const invalidMessage = "PR 제목은 다음 형식을 따라야 합니다:\n\n" +
+                "  <type>(<optional-scope>): <subject>\n\n" +
+                "- type: 필수 (아래 중 하나여야 합니다)\n" +
+                "  feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert\n" +
+                "✅ 올바른 예시:\n" +
+                "- feat: 로그인 기능 추가\n" +
+                "- fix: 로그인 실패 버그 수정\n" +
+                "- chore: 의존성 업데이트\n";
+                "👉 참고: [컨벤셔널 커밋 가이드](https://www.conventionalcommits.org)";
+            
+              throw new Error("Invalid PR title".);
+            }
+            console.log("✅ PR title is valid.");
