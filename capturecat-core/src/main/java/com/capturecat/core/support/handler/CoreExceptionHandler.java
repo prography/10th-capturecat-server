@@ -1,6 +1,7 @@
 package com.capturecat.core.support.handler;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -23,6 +24,13 @@ public class CoreExceptionHandler {
         }
         return ResponseEntity.status(e.getErrorType().getStatus())
                 .body(ApiResponse.error(e.getErrorType()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.warn("Validation error occurred: {}", e.getMessage(), e);
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(ErrorType.INVALID_REQUEST));
     }
 
     @ExceptionHandler(Exception.class)

@@ -33,4 +33,9 @@ public class ImageController {
         return ApiResponse.success();
     }
 
+    @DeleteMapping("/{imageId}/tags")
+    public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId, @RequestBody @Valid RemoveTagsToImageRequest request) {
+        imageService.removeTagsToImage(imageId, request.tagIds());
+        return ApiResponse.success();
+    }
 }

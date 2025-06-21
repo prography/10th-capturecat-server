@@ -9,13 +9,9 @@ import com.capturecat.core.domain.image.Image;
 
 public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
-    long countByImage(Image image);
-
-    @Query("SELECT COUNT(it) FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.name IN :tagNames")
-    long countByImageAndTagNameIn(Image image, List<String> tagNames);
-
     @Query("SELECT t.name FROM ImageTag it JOIN it.tag t WHERE it.image = :image")
     List<String> findTagNamesByImage(Image image);
 
-    boolean existsByImageAndTag(Image image, Tag tag);
+    @Query("SELECT it FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.id IN :tagIds")
+    List<ImageTag> findByImageAndTagIds(Image image, List<Long> tagIds);
 }
