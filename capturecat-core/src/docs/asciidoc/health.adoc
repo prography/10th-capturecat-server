@@ -1,3 +1,5 @@
 == Health API
+
 === Health Check Get API
+
 operation::healthCheck[snippets='curl-request,http-response,response-fields']

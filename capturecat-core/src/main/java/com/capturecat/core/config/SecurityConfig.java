@@ -16,25 +16,25 @@ import lombok.extern.slf4j.Slf4j;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        //todo: cors 설정
-        
-        http
-                .csrf(AbstractHttpConfigurer::disable);
-        
-        http
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/health", "/docs/**", "/v1/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+		// todo: cors 설정
 
-        return http.build();
-    }
+		http.csrf(AbstractHttpConfigurer::disable);
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+		http.authorizeHttpRequests(
+				authorizeRequests -> authorizeRequests.requestMatchers("/health", "/docs/**", "/v1/**")
+					.permitAll()
+					.anyRequest()
+					.authenticated());
+
+		return http.build();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+	}
+
 }

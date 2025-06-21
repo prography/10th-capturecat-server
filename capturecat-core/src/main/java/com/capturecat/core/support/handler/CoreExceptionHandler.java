@@ -15,28 +15,27 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class CoreExceptionHandler {
 
-    @ExceptionHandler(CoreException.class)
-    public ResponseEntity<ApiResponse<?>> handleCoreException(CoreException e) {
-        switch (e.getErrorType().getLogLevel()) {
-            case ERROR -> log.error("CoreException occurred: {}", e.getMessage(), e);
-            case WARN -> log.warn("CoreException occurred: {}", e.getMessage(), e);
-            default -> log.info("CoreException occurred: {}", e.getMessage(), e);
-        }
-        return ResponseEntity.status(e.getErrorType().getStatus())
-                .body(ApiResponse.error(e.getErrorType()));
-    }
+	@ExceptionHandler(CoreException.class)
+	public ResponseEntity<ApiResponse<?>> handleCoreException(CoreException e) {
+		switch (e.getErrorType().getLogLevel()) {
+			case ERROR -> log.error("CoreException occurred: {}", e.getMessage(), e);
+			case WARN -> log.warn("CoreException occurred: {}", e.getMessage(), e);
+			default -> log.info("CoreException occurred: {}", e.getMessage(), e);
+		}
+		return ResponseEntity.status(e.getErrorType().getStatus()).body(ApiResponse.error(e.getErrorType()));
+	}
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Validation error occurred: {}", e.getMessage(), e);
-        return ResponseEntity.badRequest()
-                .body(ApiResponse.error(ErrorType.INVALID_REQUEST));
-    }
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+		log.warn("Validation error occurred: {}", e.getMessage(), e);
+		return ResponseEntity.badRequest().body(ApiResponse.error(ErrorType.INVALID_REQUEST));
+	}
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
-        log.error("Exception occurred: {}", e.getMessage(), e);
-        return ResponseEntity.status(ErrorType.DEFAULT_ERROR.getStatus())
-                .body(ApiResponse.error(ErrorType.DEFAULT_ERROR));
-    }
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
+		log.error("Exception occurred: {}", e.getMessage(), e);
+		return ResponseEntity.status(ErrorType.DEFAULT_ERROR.getStatus())
+			.body(ApiResponse.error(ErrorType.DEFAULT_ERROR));
+	}
+
 }

@@ -12,9 +12,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ImageTagFactory {
 
-    public List<ImageTag> create(Image image, List<Tag> tags) {
-        return tags.stream()
-                .map(tag -> new ImageTag(image, tag))
-                .toList();
-    }
+	public List<ImageTag> create(Image image, List<Tag> tags) {
+		return tags.stream().map(tag -> new ImageTag(image, tag)).toList();
+	}
+
 }

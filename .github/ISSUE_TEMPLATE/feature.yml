@@ -1,6 +1,6 @@
 name: "기능 제안 (Feature Request)"
 description: "새로운 기능 또는 명세를 추가 및 제안합니다."
-labels: ["feature"]
+labels: [ "feature" ]
 
 body:
   - type: markdown

@@ -3,7 +3,11 @@ plugins {
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'io.spring.javaformat' version '0.0.46'
+    id 'checkstyle'
 }
+
+apply from: 'lint.gradle'
 
 allprojects {
     group = 'com.capturecat'
@@ -49,7 +53,7 @@ subprojects {
     bootJar.enabled = false
     jar.enabled = true
 
-    tasks.named('test') {
+    test {
         outputs.dir snippetDir
         useJUnitPlatform()
     }
