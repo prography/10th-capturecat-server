@@ -1,9 +1,8 @@
 package com.capturecat.core.support.error;
 
+import lombok.Getter;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.http.HttpStatus;
-
-import lombok.Getter;
 
 @Getter
 public enum ErrorType {
@@ -12,7 +11,6 @@ public enum ErrorType {
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND_IMAGE, LogLevel.WARN),
     TOO_MANY_TAGS(HttpStatus.BAD_REQUEST, ErrorCode.EXCEED_MAX_TAG_COUNT, LogLevel.WARN),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, LogLevel.WARN),
-    TOO_MANY_TAGS(HttpStatus.BAD_REQUEST, ErrorCode.EXCEED_MAX_TAG_COUNT, LogLevel.WARN),
     IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.S3_FILE_UPLOAD_FAILED, LogLevel.ERROR),
     INVALID_IMAGE_FORMAT(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_IMAGE_FORMAT, LogLevel.WARN);
 

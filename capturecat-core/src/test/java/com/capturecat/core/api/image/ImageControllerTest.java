@@ -1,44 +1,34 @@
 package com.capturecat.core.api.image;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.capturecat.core.DummyObject;
+import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.service.image.ImageService;
+import com.capturecat.core.support.error.CoreException;
+import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.handler.CoreExceptionHandler;
 import com.capturecat.test.api.RestDocsTest;
-
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.when;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 
 @Transactional
 class ImageControllerTest extends RestDocsTest {

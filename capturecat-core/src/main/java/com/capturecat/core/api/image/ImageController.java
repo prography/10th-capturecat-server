@@ -1,15 +1,17 @@
 package com.capturecat.core.api.image;
 
+import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
+import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.support.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -20,7 +22,7 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<ImageListDto>> upload(List<MultipartFile> files) throws IOException {
+    public ResponseEntity<ApiResponse<ImageListDto>> upload(List<MultipartFile> files) {
         //todo:태그 파싱 (이미지 파일과 태그(텍스트 값)를 같이 보내려면 클라이언트에서는 multipart/form-data 방식밖에 없음)
         ImageListDto result = imageService.save(files);
 

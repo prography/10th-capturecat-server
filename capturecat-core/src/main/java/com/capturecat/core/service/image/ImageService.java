@@ -1,27 +1,11 @@
 package com.capturecat.core.service.image;
 
 import com.capturecat.client.upload.FileUploader;
-import com.capturecat.client.upload.UploadException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
-import com.capturecat.core.domain.tag.ImageTag;
-import com.capturecat.core.domain.tag.ImageTagFactory;
-import com.capturecat.core.domain.tag.ImageTagRepository;
-import com.capturecat.core.domain.tag.Tag;
-import com.capturecat.core.domain.tag.TagMaxCountValidator;
-import com.capturecat.core.domain.tag.TagRepository;
+import com.capturecat.core.domain.tag.*;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +36,7 @@ public class ImageService {
      * 저장 경로를 브라우저 주소창에 입력하면 이미지가 나타난다.
      */
     @Transactional
-    public ImageListDto save(List<MultipartFile> files) throws IOException {
+    public ImageListDto save(List<MultipartFile> files) {
         List<Image> images = new ArrayList<>();
 
         for (MultipartFile file : files) {
