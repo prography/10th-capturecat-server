@@ -1,4 +1,4 @@
-package com.capturecat.core.service.image;
+package com.capturecat.client.upload;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +32,15 @@ public class LocalFileUploader extends AbstractFileUploader {
 
 
     @Override
-    public String upload(MultipartFile file) throws IOException {
+    public String upload(MultipartFile file) {
         String savedFileName = buildFileName(file.getOriginalFilename());
         Path destination = storagePath.resolve(savedFileName);
 
-        file.transferTo(destination.toFile());
-
+        try {
+            file.transferTo(destination.toFile());
+        } catch (IOException e) {
+            throw new UploadException(ErrorCode.LOCAL_UPLOAD_FAILED, e);
+        }
         return destination.toAbsolutePath().toString();
     }
 }

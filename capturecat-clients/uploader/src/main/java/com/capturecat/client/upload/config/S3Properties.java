@@ -1,4 +1,4 @@
-package com.capturecat.core.support;
+package com.capturecat.client.upload.config;
 
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;

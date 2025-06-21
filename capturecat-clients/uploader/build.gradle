@@ -1,0 +1,9 @@
+dependencies {
+    // AWS SDK for S3
+    implementation platform("software.amazon.awssdk:bom:2.25.19") // BOM: AWS SDK 버전 통일
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework:spring-web'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+}
