@@ -7,6 +7,8 @@ plugins {
     id 'checkstyle'
 }
 
+apply from: 'lint.gradle'
+
 allprojects {
     group = 'com.capturecat'
     version = '0.0.1-SNAPSHOT'
