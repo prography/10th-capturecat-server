@@ -12,6 +12,8 @@ operation::upload[snippets='curl-request,request-parts,http-response,response-fi
 
 이미지 업로드가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
+<<error-codes#이미지-업로드, 이미지-업로드 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
 [[단일-이미지-태그-등록]]
 === 단일 이미지 태그 등록
 

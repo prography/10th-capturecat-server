@@ -10,6 +10,10 @@
 [[API-별-에러]]
 == API 별 에러
 
+[[이미지-업로드]]
+=== 이미지 업로드
+include::{snippets}/errorCode/upload/error-codes.adoc[]
+
 [[단일-이미지-태그-등록]]
 === 단일 이미지 태그 등록
 
