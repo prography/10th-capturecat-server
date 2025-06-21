@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/error-codes")
 public class ErrorCodeController {
 
-    @GetMapping
-    public ResponseEntity<?> errorCodes() {
-        return ResponseEntity.ok().build();
-    }
+	@GetMapping
+	public ResponseEntity<?> errorCodes() {
+		return ResponseEntity.ok().build();
+	}
+
 }

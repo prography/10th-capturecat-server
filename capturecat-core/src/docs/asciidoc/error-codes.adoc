@@ -12,12 +12,10 @@
 
 [[단일-이미지-태그-등록]]
 === 단일 이미지 태그 등록
+
 include::{snippets}/errorCode/addTagsToImage/error-codes.adoc[]
-
-
-
-
 
 [[이미지-태그-삭제]]
 === 이미지 태그 삭제
+
 include::{snippets}/errorCode/removeTagsToImage/error-codes.adoc[]

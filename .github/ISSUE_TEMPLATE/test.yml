@@ -1,6 +1,6 @@
 name: "테스트 보강 (Test Improvement)"
 description: "기존 테스트 커버리지를 보완하거나 새로운 테스트 케이스를 추가합니다."
-labels: ["test"]
+labels: [ "test" ]
 
 body:
   - type: markdown

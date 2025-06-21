@@ -9,17 +9,18 @@ import org.springframework.restdocs.snippet.TemplatedSnippet;
 
 public class ErrorCodeSnippet extends TemplatedSnippet {
 
-    private List<ErrorCodeDescriptor> descriptors;
+	private List<ErrorCodeDescriptor> descriptors;
 
-    public ErrorCodeSnippet(List<ErrorCodeDescriptor> descriptors) {
-        super("error-codes", null);
-        this.descriptors = descriptors;
-    }
+	public ErrorCodeSnippet(List<ErrorCodeDescriptor> descriptors) {
+		super("error-codes", null);
+		this.descriptors = descriptors;
+	}
 
-    @Override
-    protected Map<String, Object> createModel(Operation operation) {
-        Map<String, Object> model = new HashMap<>();
-        model.put("fields", descriptors);
-        return model;
-    }
+	@Override
+	protected Map<String, Object> createModel(Operation operation) {
+		Map<String, Object> model = new HashMap<>();
+		model.put("fields", descriptors);
+		return model;
+	}
+
 }

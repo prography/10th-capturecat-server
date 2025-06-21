@@ -1,6 +1,6 @@
 name: "리팩토링"
 description: "기존 기능이나 코드 구조를 개선합니다."
-labels: ["refactor"]
+labels: [ "refactor" ]
 
 body:
   - type: markdown

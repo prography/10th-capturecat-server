@@ -9,9 +9,10 @@ import com.capturecat.core.domain.image.Image;
 
 public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
-    @Query("SELECT t.name FROM ImageTag it JOIN it.tag t WHERE it.image = :image")
-    List<String> findTagNamesByImage(Image image);
+	@Query("SELECT t.name FROM ImageTag it JOIN it.tag t WHERE it.image = :image")
+	List<String> findTagNamesByImage(Image image);
 
-    @Query("SELECT it FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.id IN :tagIds")
-    List<ImageTag> findByImageAndTagIds(Image image, List<Long> tagIds);
+	@Query("SELECT it FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.id IN :tagIds")
+	List<ImageTag> findByImageAndTagIds(Image image, List<Long> tagIds);
+
 }

@@ -283,7 +283,7 @@ The following rules in the Naver coding convention cannot be checked by this con
 
         <!-- [import-grouping] -->
         <module name="ImportOrder">
-            <property name="groups" value="java., jakarta., javax., org., net., /com\.(?!capturecat)/, /(?!java\.|jakarta\.|javax\.|com\.|org\.|net\.)/, com.capturecat."/>
+            <property name="groups" value="java., javax., org., net., /com\.(?!nhncorp|navercorp|naver)/, /(?!java\.|javax\.|com\.|org\.|net\.)/, com.nhncorp., com.navercorp., com.naver."/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="top"/>
@@ -419,6 +419,11 @@ The following rules in the Naver coding convention cannot be checked by this con
         </module>
     </module>
 
+    <!--- Suppression -->
+    <module name="SuppressionFilter">
+        <property name="file" value="${suppressionFile}"/>
+        <property name="optional" value="true"/>
+    </module>
 
     <!--- Exclude module-info.java -->
     <module name="BeforeExecutionExclusionFileFilter">

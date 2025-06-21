@@ -3,30 +3,37 @@
 
 [[이미지-업로드]]
 === 이미지 업로드
+
 ==== 성공
+
 operation::upload[snippets='curl-request,request-parts,http-response,response-fields']
 
 ==== 실패
+
 이미지 업로드가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
-
-
 
 [[단일-이미지-태그-등록]]
 === 단일 이미지 태그 등록
+
 ==== 성공
+
 operation::addTagsToImage[snippets='curl-request,request-fields,http-response,response-fields']
 
 ==== 실패
+
 단일 이미지에 태그 등록이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
 <<error-codes#단일-이미지-태그-등록, 단일 이미지에 태그 등록 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
 [[이미지-태그-삭제]]
 === 이미지 태그 삭제
+
 ==== 성공
+
 operation::removeTagsToImage[snippets='curl-request,request-fields,http-response,response-fields']
 
 ==== 실패
+
 이미지 태그 삭제가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
 <<error-codes#이미지-태그-삭제, 이미지 태그 삭제 API에서 발생할 수 있는 에러>>를 살펴보세요.
