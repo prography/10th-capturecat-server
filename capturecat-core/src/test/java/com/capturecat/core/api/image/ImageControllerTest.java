@@ -25,7 +25,6 @@ import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.service.image.ImageService;
-import com.capturecat.core.support.handler.CoreExceptionHandler;
 import com.capturecat.test.api.RestDocsTest;
 
 @Transactional
@@ -39,13 +38,11 @@ class ImageControllerTest extends RestDocsTest {
 
 	private ImageController imageController;
 
-	private CoreExceptionHandler coreExceptionHandler = new CoreExceptionHandler();
-
 	@BeforeEach
 	void setUp() {
 		imageService = mock(ImageService.class);
 		imageController = new ImageController(imageService);
-		mockMvc = mockController(imageController, coreExceptionHandler);
+		mockMvc = mockController(imageController);
 	}
 
 	@Test

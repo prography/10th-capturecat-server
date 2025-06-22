@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import io.restassured.http.ContentType;
 
 import com.capturecat.core.support.error.ErrorType;
-import com.capturecat.core.support.handler.CoreExceptionHandler;
 import com.capturecat.test.api.RestDocsTest;
 import com.capturecat.test.snippet.ErrorCodeDescriptor;
 import com.capturecat.test.snippet.ErrorCodeSnippet;
@@ -31,7 +30,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@BeforeEach
 	void setUp() {
 		errorCodeController = new ErrorCodeController();
-		mockMvc = mockController(errorCodeController, new CoreExceptionHandler());
+		mockMvc = mockController(errorCodeController);
 	}
 
 	@Test
