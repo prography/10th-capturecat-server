@@ -42,7 +42,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
-				IMAGE_UPLOAD_FAILED);
+			IMAGE_UPLOAD_FAILED);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
 	}
 
@@ -50,6 +50,13 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	void 태그_삭제_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REQUEST, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/removeTagsToImage", errorCodeDescriptors);
+	}
+
+	@Test
+	void 공통_태그_등록_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
+			IMAGE_UPLOAD_FAILED);
+		generateErrorDocs("errorCode/addCommonTags", errorCodeDescriptors);
 	}
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {

@@ -86,6 +86,45 @@ public class ImageService {
 	}
 
 	@Transactional
+	public void addCommonTags(List<MultipartFile> files, List<String> tagNames) {
+		List<Tag> tags = tagRepository.findByNameIn(tagNames);
+
+		List<Tag> newTags = tagNames.stream()
+			.filter(tagName -> tags.stream().noneMatch(t -> t.isSameNameAs(tagName)))
+			.map(Tag::new)
+			.toList();
+
+		List<Tag> savedNewTags = tagRepository.saveAll(newTags);
+
+		List<Tag> allTagsToAssociate = new ArrayList<>(tags);
+		allTagsToAssociate.addAll(savedNewTags);
+
+		List<Image> images = new ArrayList<>();
+		for (MultipartFile file : files) {
+			validate(file);
+
+			String fileUrl = fileUploader.upload(file);
+
+			Image savedImage = Image.builder()
+				.fileName(file.getOriginalFilename())
+				.fileUrl(fileUrl)
+				.size(file.getSize())
+				.build();
+			images.add(savedImage);
+		}
+
+		List<Image> savedImages = imageRepository.saveAll(images);
+
+		savedNewTags.addAll(tags);
+
+		List<ImageTag> allImageTags = new ArrayList<>();
+		for (Image savedImage : savedImages) {
+			allImageTags.addAll(imageTagFactory.create(savedImage, allTagsToAssociate));
+		}
+		imageTagRepository.saveAll(allImageTags);
+	}
+
+	@Transactional
 	public void removeTagsToImage(Long imageId, List<Long> tagIds) {
 		Image image = imageRepository.findById(imageId).orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 		List<ImageTag> imageTags = imageTagRepository.findByImageAndTagIds(image, tagIds);
