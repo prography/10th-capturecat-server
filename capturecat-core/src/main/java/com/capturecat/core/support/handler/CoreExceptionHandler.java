@@ -16,26 +16,27 @@ import lombok.extern.slf4j.Slf4j;
 public class CoreExceptionHandler {
 
 	@ExceptionHandler(CoreException.class)
-	public ResponseEntity<ApiResponse<?>> handleCoreException(CoreException e) {
-		switch (e.getErrorType().getLogLevel()) {
-			case ERROR -> log.error("CoreException occurred: {}", e.getMessage(), e);
-			case WARN -> log.warn("CoreException occurred: {}", e.getMessage(), e);
-			default -> log.info("CoreException occurred: {}", e.getMessage(), e);
+	public ResponseEntity<ApiResponse<?>> handleCoreException(CoreException exception) {
+		switch (exception.getErrorType().getLogLevel()) {
+			case ERROR -> log.error("CoreException occurred: {}", exception.getMessage(), exception);
+			case WARN -> log.warn("CoreException occurred: {}", exception.getMessage(), exception);
+			default -> log.info("CoreException occurred: {}", exception.getMessage(), exception);
 		}
-		return ResponseEntity.status(e.getErrorType().getStatus()).body(ApiResponse.error(e.getErrorType()));
+		return ResponseEntity.status(exception.getErrorType().getStatus())
+			.body(ApiResponse.error(exception.getErrorType()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-		log.warn("Validation error occurred: {}", e.getMessage(), e);
+	public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(
+		MethodArgumentNotValidException exception) {
+		log.warn("Validation error occurred: {}", exception.getMessage(), exception);
 		return ResponseEntity.badRequest().body(ApiResponse.error(ErrorType.INVALID_REQUEST));
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
-		log.error("Exception occurred: {}", e.getMessage(), e);
+	public ResponseEntity<ApiResponse<?>> handleException(Exception exception) {
+		log.error("Exception occurred: {}", exception.getMessage(), exception);
 		return ResponseEntity.status(ErrorType.DEFAULT_ERROR.getStatus())
 			.body(ApiResponse.error(ErrorType.DEFAULT_ERROR));
 	}
-
 }
