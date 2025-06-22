@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.RequiredArgsConstructor;
+
 import com.capturecat.client.upload.FileUploader;
 import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
@@ -22,8 +24,6 @@ import com.capturecat.core.domain.tag.TagMaxCountValidator;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
