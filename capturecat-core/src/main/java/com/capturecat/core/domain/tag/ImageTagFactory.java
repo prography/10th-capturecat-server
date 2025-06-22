@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.capturecat.core.domain.image.Image;
-
 import lombok.RequiredArgsConstructor;
+
+import com.capturecat.core.domain.image.Image;
 
 @Component
 @RequiredArgsConstructor

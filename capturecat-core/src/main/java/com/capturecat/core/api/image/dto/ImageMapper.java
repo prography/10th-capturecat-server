@@ -5,11 +5,11 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
+
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageDto;
 import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
-
-import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
