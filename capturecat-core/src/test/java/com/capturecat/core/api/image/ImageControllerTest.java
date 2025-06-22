@@ -55,21 +55,19 @@ class ImageControllerTest extends RestDocsTest {
 		given().contentType(MediaType.MULTIPART_FORM_DATA)
 			.multiPart("files", "cat.jpg", "file-content-1".getBytes())
 			.multiPart("files", "dog.jpg", "file-content-2".getBytes())
-			.when()
-			.post(URL_PREFIX + "/upload")
-			.then()
-			.status(HttpStatus.OK)
+			.when().post(URL_PREFIX + "/upload")
+			.then().status(HttpStatus.OK)
 			.apply(document("upload", requestPreprocessor(), responsePreprocessor(),
 				requestParts(partWithName("files").description("업로드할 이미지 파일들")),
-				responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("DB에 저장된 이미지 정보"),
 					fieldWithPath("data.images").type(JsonFieldType.ARRAY).description("업로드된 이미지 목록"),
 					fieldWithPath("data.images[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
 					fieldWithPath("data.images[].fileName").type(JsonFieldType.STRING).description("파일 이름"),
 					fieldWithPath("data.images[].fileUrl").type(JsonFieldType.STRING).description("파일 URL"),
 					fieldWithPath("data.images[].size").type(JsonFieldType.NUMBER).description("파일 크기"),
-					fieldWithPath("data.images[].createdDate").type(JsonFieldType.STRING)
-						.description("이미지 생성 일시"),
+					fieldWithPath("data.images[].createdDate").type(JsonFieldType.STRING).description("이미지 생성 일시"),
 					fieldWithPath("data.images[].lastModifiedDate").type(JsonFieldType.STRING)
 						.description("이미지 최종 수정 일시"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
@@ -85,14 +83,13 @@ class ImageControllerTest extends RestDocsTest {
 		// when & then
 		given().contentType(ContentType.JSON)
 			.body(request)
-			.when()
-			.post(URL_PREFIX + "/{imageId}/tags", imageId)
-			.then()
-			.status(HttpStatus.OK)
+			.when().post(URL_PREFIX + "/{imageId}/tags", imageId)
+			.then().status(HttpStatus.OK)
 			.apply(document("addTagsToImage", requestPreprocessor(), responsePreprocessor(),
 				pathParameters(parameterWithName("imageId").description("태그를 등록할 이미지 ID")),
 				requestFields(fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")),
-				responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
 					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
 	}
@@ -107,14 +104,13 @@ class ImageControllerTest extends RestDocsTest {
 		// when & then
 		given().contentType(ContentType.JSON)
 			.body(request)
-			.when()
-			.delete(URL_PREFIX + "/{imageId}/tags", imageId)
-			.then()
-			.status(HttpStatus.OK)
+			.when().delete(URL_PREFIX + "/{imageId}/tags", imageId)
+			.then().status(HttpStatus.OK)
 			.apply(document("removeTagsToImage", requestPreprocessor(), responsePreprocessor(),
 				pathParameters(parameterWithName("imageId").description("태그를 삭제할 이미지 ID")),
 				requestFields(fieldWithPath("tagIds").type(JsonFieldType.ARRAY).description("삭제할 태그 ID 목록")),
-				responseFields(fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
 					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
 	}

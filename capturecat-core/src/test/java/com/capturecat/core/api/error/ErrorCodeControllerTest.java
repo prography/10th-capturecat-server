@@ -54,10 +54,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
-			.when()
-			.get("/v1/error-codes")
-			.then()
-			.status(HttpStatus.OK)
+			.when().get("/v1/error-codes")
+			.then().status(HttpStatus.OK)
 			.apply(document(identifier, new ErrorCodeSnippet(errorCodeDescriptors)));
 	}
 
