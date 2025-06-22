@@ -28,8 +28,9 @@ public class LocalFileUploader extends AbstractFileUploader {
 	@PostConstruct
 	public void init() throws IOException {
 		storagePath = Paths.get(basePath);
-		if (!Files.exists(storagePath))
+		if (!Files.exists(storagePath)) {
 			Files.createDirectories(storagePath);
+		}
 	}
 
 	@Override
@@ -39,8 +40,7 @@ public class LocalFileUploader extends AbstractFileUploader {
 
 		try {
 			file.transferTo(destination.toFile());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new UploadException(ErrorCode.LOCAL_UPLOAD_FAILED, e);
 		}
 		return destination.toAbsolutePath().toString();

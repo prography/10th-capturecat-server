@@ -1,4 +1,23 @@
 #!/bin/bash
 
-GIT_DIR=$(git rev-parse --show-toplevel)
-$GIT_DIR/gradlew checkFormat
+# checkstyleMain 실행
+./gradlew checkstyleMain
+MAIN_EXIT_CODE=$? # checkstyleMain의 종료 코드 저장
+
+# checkstyleTest 실행
+./gradlew checkstyleTest
+TEST_EXIT_CODE=$? # checkstyleTest의 종료 코드 저장
+
+# 두 명령어 중 하나라도 0이 아니면 (실패했으면) 커밋을 중단
+if [ $MAIN_EXIT_CODE -ne 0 ] || [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "---"
+  echo "❌ Checkstyle 검사 실패! (Main 또는 Test)"
+  echo "---"
+  exit 1 # 0이 아닌 값으로 종료하여 Git 커밋을 막음
+fi
+
+# 모든 검사가 성공했을 경우
+echo "---"
+echo "✅ Checkstyle 검사 성공! 커밋을 진행합니다."
+echo "---"
+exit 0 # 0으로 종료하여 Git 커밋 진행을 허용

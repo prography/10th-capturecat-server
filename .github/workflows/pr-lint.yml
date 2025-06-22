@@ -26,6 +26,6 @@ jobs:
                 "- chore: 의존성 업데이트\n";
                 "👉 참고: [컨벤셔널 커밋 가이드](https://www.conventionalcommits.org)";
             
-              throw new Error("Invalid PR title".);
+              throw new Error("Invalid PR title.");
             }
             console.log("✅ PR title is valid.");
