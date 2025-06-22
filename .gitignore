@@ -41,3 +41,6 @@ out/
 
 ### Mac ###
 .DS_Store
+
+### report files ###
+reports/

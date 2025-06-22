@@ -1,13 +1,23 @@
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'io.spring.javaformat'
     apply plugin: 'checkstyle'
 
-    dependencies {
-        checkstyle 'io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.46'
+    tasks.withType(Checkstyle) {
+        reports {
+            xml.required = true
+            html.required = true
+            html.outputLocation = rootProject.file("reports/checkstyle/checkstyle.html")
+        }
     }
 
     checkstyle {
+        maxWarnings = 0
+        configFile = rootProject.file("config/checkstyle/checkstyle.xml")
+        configProperties = ["suppressionFile": rootProject.file("config/checkstyle/checkstyle-suppressions.xml")]
+        ignoreFailures = false
         toolVersion = "10.12.4"
     }
+
+    compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
 }
