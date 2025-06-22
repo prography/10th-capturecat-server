@@ -14,6 +14,16 @@ operation::upload[snippets='curl-request,request-parts,http-response,response-fi
 
 <<error-codes#이미지-업로드, 이미지-업로드 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
+[[공통-태그-등록]]
+=== 공통 태그 등록
+==== 성공
+operation::addCommonTags[snippets='curl-request,http-request,request-parts,request-part-request-fields,http-response,response-fields']
+
+==== 실패
+공통 태그 등록이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#공통-태그-등록, 공통 태그 등록 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
 [[단일-이미지-태그-등록]]
 === 단일 이미지 태그 등록
 
