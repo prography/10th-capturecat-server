@@ -17,6 +17,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
+
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
@@ -24,11 +29,6 @@ import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.support.error.ErrorCode;
 import com.capturecat.core.support.error.ErrorMessage;
-
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ImageApiTest {
