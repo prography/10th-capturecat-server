@@ -13,7 +13,8 @@ import com.capturecat.core.domain.image.Image;
 public class ImageTagFactory {
 
 	public List<ImageTag> create(Image image, List<Tag> tags) {
-		return tags.stream().map(tag -> new ImageTag(image, tag)).toList();
+		return tags.stream()
+			.map(tag -> new ImageTag(image, tag))
+			.toList();
 	}
-
 }

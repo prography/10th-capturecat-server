@@ -19,6 +19,7 @@ import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
 import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
+import com.capturecat.core.domain.tag.ImageTaggingDomainService;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagMaxCountValidator;
 import com.capturecat.core.domain.tag.TagRepository;
@@ -30,17 +31,12 @@ import com.capturecat.core.support.error.ErrorType;
 public class ImageService {
 
 	private final FileUploader fileUploader;
-
 	private final ImageRepository imageRepository;
-
 	private final ImageTagRepository imageTagRepository;
-
 	private final TagRepository tagRepository;
-
 	private final ImageTagFactory imageTagFactory;
-
 	private final TagMaxCountValidator tagMaxCountValidator;
-
+	private final ImageTaggingDomainService imageTaggingDomainService;
 	private final ImageMapper mapper;
 
 	/**
@@ -85,21 +81,8 @@ public class ImageService {
 		imageTagRepository.saveAll(imageTags);
 	}
 
-	@Transactional
 	public void addCommonTags(List<MultipartFile> files, List<String> tagNames) {
-		List<Tag> tags = tagRepository.findByNameIn(tagNames);
-
-		List<Tag> newTags = tagNames.stream()
-			.filter(tagName -> tags.stream().noneMatch(t -> t.isSameNameAs(tagName)))
-			.map(Tag::new)
-			.toList();
-
-		List<Tag> savedNewTags = tagRepository.saveAll(newTags);
-
-		List<Tag> allTagsToAssociate = new ArrayList<>(tags);
-		allTagsToAssociate.addAll(savedNewTags);
-
-		List<Image> images = new ArrayList<>();
+		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
 			validate(file);
 
@@ -113,15 +96,7 @@ public class ImageService {
 			images.add(savedImage);
 		}
 
-		List<Image> savedImages = imageRepository.saveAll(images);
-
-		savedNewTags.addAll(tags);
-
-		List<ImageTag> allImageTags = new ArrayList<>();
-		for (Image savedImage : savedImages) {
-			allImageTags.addAll(imageTagFactory.create(savedImage, allTagsToAssociate));
-		}
-		imageTagRepository.saveAll(allImageTags);
+		imageTaggingDomainService.registerNewImagesWithTags(images, tagNames);
 	}
 
 	@Transactional
