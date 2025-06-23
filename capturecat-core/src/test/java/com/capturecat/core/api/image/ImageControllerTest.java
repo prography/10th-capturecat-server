@@ -53,16 +53,16 @@ class ImageControllerTest extends RestDocsTest {
 
 		// when & then
 		given().contentType(ContentType.MULTIPART)
-			.multiPart("requests[0].file", "cat.jpg", "file-content-1".getBytes(), MediaType.IMAGE_JPEG_VALUE)
-			.param("requests[0].tagNames", "고양이", "cat")
-			.multiPart("requests[1].file", "dog.jpg", "file-content-2".getBytes(), MediaType.IMAGE_JPEG_VALUE)
-			.param("requests[1].tagNames", "강아지", "dog")
+			.multiPart("uploadItems[0].file", "cat.jpg", "file-content-1".getBytes(), MediaType.IMAGE_JPEG_VALUE)
+			.param("uploadItems[0].tagNames", "고양이", "cat")
+			.multiPart("uploadItems[1].file", "dog.jpg", "file-content-2".getBytes(), MediaType.IMAGE_JPEG_VALUE)
+			.param("uploadItems[1].tagNames", "강아지", "dog")
 			.when().post(URL_PREFIX + "/upload")
 			.then().status(HttpStatus.OK)
 			.apply(document("upload", requestPreprocessor(), responsePreprocessor(),
 				requestParts(
-					partWithName("requests[0].file").description("첫 번째 이미지 파일"),
-					partWithName("requests[1].file").description("두 번째 이미지 파일")),
+					partWithName("uploadItems[0].file").description("첫 번째 이미지 파일"),
+					partWithName("uploadItems[1].file").description("두 번째 이미지 파일")),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
 					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),

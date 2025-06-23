@@ -11,8 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.client.upload.FileUploader;
-import com.capturecat.core.api.image.dto.ImageAndTagUploadRequest;
-import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -22,6 +20,7 @@ import com.capturecat.core.domain.tag.ImageTaggingDomainService;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagMaxCountValidator;
 import com.capturecat.core.domain.tag.TagRepository;
+import com.capturecat.core.service.image.dto.ImageUploadItem;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -38,8 +37,8 @@ public class ImageService {
 	private final ImageTaggingDomainService imageTaggingDomainService;
 	private final ImageMapper mapper;
 
-	public void save(List<ImageAndTagUploadRequest.Request> requests) {
-		for (ImageAndTagUploadRequest.Request request : requests) {
+	public void save(List<ImageUploadItem> requests) {
+		for (ImageUploadItem request : requests) {
 			validate(request.getFile());
 
 			String fileUrl = fileUploader.upload(request.getFile());

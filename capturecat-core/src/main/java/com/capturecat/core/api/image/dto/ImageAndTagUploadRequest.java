@@ -2,22 +2,14 @@ package com.capturecat.core.api.image.dto;
 
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import com.capturecat.core.service.image.dto.ImageUploadItem;
 
 @Setter
 @Getter
 public class ImageAndTagUploadRequest {
 
-	private List<Request> requests;
-
-	@Getter
-	@Setter
-	public static class Request {
-
-		private MultipartFile file;
-		private List<String> tagNames;
-	}
+	private List<ImageUploadItem> uploadItems;
 }

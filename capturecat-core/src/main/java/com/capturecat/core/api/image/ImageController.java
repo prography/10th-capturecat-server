@@ -28,7 +28,7 @@ public class ImageController {
 
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<?> upload(@ModelAttribute ImageAndTagUploadRequest request) {
-		imageService.save(request.getRequests());
+		imageService.save(request.getUploadItems());
 		return ApiResponse.success();
 	}
 

@@ -6,7 +6,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.capturecat.client.upload.FileUploader;
-import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.domain.image.ImageRepository;
 
 @ExtendWith(MockitoExtension.class)
