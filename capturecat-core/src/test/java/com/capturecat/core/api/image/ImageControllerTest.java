@@ -1,40 +1,39 @@
 package com.capturecat.core.api.image;
 
-import static com.capturecat.test.api.RestDocsUtil.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
+import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.restassured.http.ContentType;
 
-import com.capturecat.core.DummyObject;
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
-import com.capturecat.core.api.image.dto.ImageMapper;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
-import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.test.api.RestDocsTest;
 
 class ImageControllerTest extends RestDocsTest {
 
 	private static final String URL_PREFIX = "/v1/images";
-
-	private final ImageMapper mapper = new ImageMapper(new ModelMapper());
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private ImageService imageService;
 
@@ -48,61 +47,26 @@ class ImageControllerTest extends RestDocsTest {
 	}
 
 	@Test
-	void 이미지업로드_성공() {
+	void 이미지_업로드_후_태그를_생성한다() {
 		// given
-		List<Image> images = DummyObject.newMockImages(1, 2);
-		when(imageService.save(any())).thenReturn(mapper.toDto(images));
-
-		// when & then
-		given().contentType(MediaType.MULTIPART_FORM_DATA)
-			.multiPart("files", "cat.jpg", "file-content-1".getBytes())
-			.multiPart("files", "dog.jpg", "file-content-2".getBytes())
-			.when().post(URL_PREFIX + "/upload")
-			.then().status(HttpStatus.OK)
-			.apply(document("upload", requestPreprocessor(), responsePreprocessor(),
-				requestParts(partWithName("files").description("업로드할 이미지 파일들")),
-				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
-					fieldWithPath("data").type(JsonFieldType.OBJECT).description("DB에 저장된 이미지 정보"),
-					fieldWithPath("data.images").type(JsonFieldType.ARRAY).description("업로드된 이미지 목록"),
-					fieldWithPath("data.images[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
-					fieldWithPath("data.images[].fileName").type(JsonFieldType.STRING).description("파일 이름"),
-					fieldWithPath("data.images[].fileUrl").type(JsonFieldType.STRING).description("파일 URL"),
-					fieldWithPath("data.images[].size").type(JsonFieldType.NUMBER).description("파일 크기"),
-					fieldWithPath("data.images[].createdDate").type(JsonFieldType.STRING).description("이미지 생성 일시"),
-					fieldWithPath("data.images[].lastModifiedDate").type(JsonFieldType.STRING)
-						.description("이미지 최종 수정 일시"),
-					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
-	}
-
-	@Test
-	void 공통_태그를_등록한다() throws JsonProcessingException {
-		// given
-		AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2"));
-		willDoNothing().given(imageService).addCommonTags(anyList(), any());
+		willDoNothing().given(imageService).save(anyList());
 
 		// when & then
 		given().contentType(ContentType.MULTIPART)
-			.accept(ContentType.JSON)
-			.log().all()
-			.multiPart("files", "cat.jpg", "file-content-1".getBytes())
-			.multiPart("files", "dog.jpg", "file-content-2".getBytes())
-			.multiPart("request",  "request.json", objectMapper.writeValueAsString(request),
-				MediaType.APPLICATION_JSON_VALUE)
-			.when().post(URL_PREFIX + "/common-tags")
+			.multiPart("requests[0].file", "cat.jpg", "file-content-1".getBytes(), MediaType.IMAGE_JPEG_VALUE)
+			.param("requests[0].tagNames", "고양이", "cat")
+			.multiPart("requests[1].file", "dog.jpg", "file-content-2".getBytes(), MediaType.IMAGE_JPEG_VALUE)
+			.param("requests[1].tagNames", "강아지", "dog")
+			.when().post(URL_PREFIX + "/upload")
 			.then().status(HttpStatus.OK)
-			.log().all()
-			.apply(document("addCommonTags", requestPreprocessor(), responsePreprocessor(),
+			.apply(document("upload", requestPreprocessor(), responsePreprocessor(),
 				requestParts(
-					partWithName("files").description("업로드할 이미지 파일들"),
-					partWithName("request").description("공통 태그 등록 요청")),
-				requestPartFields("request",
-					fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("태그 이름 목록")
-				),
+					partWithName("requests[0].file").description("첫 번째 이미지 파일"),
+					partWithName("requests[1].file").description("두 번째 이미지 파일")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
+					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 
 	@Test

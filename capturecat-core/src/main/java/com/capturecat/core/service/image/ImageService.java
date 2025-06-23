@@ -1,6 +1,5 @@
 package com.capturecat.core.service.image;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,8 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.client.upload.FileUploader;
+import com.capturecat.core.api.image.dto.ImageAndTagUploadRequest;
 import com.capturecat.core.api.image.dto.ImageMapper;
-import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -39,28 +38,19 @@ public class ImageService {
 	private final ImageTaggingDomainService imageTaggingDomainService;
 	private final ImageMapper mapper;
 
-	/**
-	 * 이미지를 저장하고 저장 위치를 DB에 저장한다. 저장 경로를 브라우저 주소창에 입력하면 이미지가 나타난다.
-	 */
-	@Transactional
-	public ImageListDto save(List<MultipartFile> files) {
-		List<Image> images = new ArrayList<>();
+	public void save(List<ImageAndTagUploadRequest.Request> requests) {
+		for (ImageAndTagUploadRequest.Request request : requests) {
+			validate(request.getFile());
 
-		for (MultipartFile file : files) {
-			validate(file);
+			String fileUrl = fileUploader.upload(request.getFile());
 
-			String fileUrl = fileUploader.upload(file);
-
-			Image savedImage = Image.builder()
-				.fileName(file.getOriginalFilename())
+			Image image = Image.builder()
+				.fileName(request.getFile().getOriginalFilename())
 				.fileUrl(fileUrl)
-				.size(file.getSize())
+				.size(request.getFile().getSize())
 				.build();
-			images.add(savedImage);
+			imageTaggingDomainService.registerNewImagesWithTags(image, request.getTagNames());
 		}
-
-		imageRepository.saveAll(images);
-		return mapper.toDto(images);
 	}
 
 	@Transactional
@@ -81,24 +71,6 @@ public class ImageService {
 		imageTagRepository.saveAll(imageTags);
 	}
 
-	public void addCommonTags(List<MultipartFile> files, List<String> tagNames) {
-		List<Image> images = new ArrayList<>(files.size());
-		for (MultipartFile file : files) {
-			validate(file);
-
-			String fileUrl = fileUploader.upload(file);
-
-			Image savedImage = Image.builder()
-				.fileName(file.getOriginalFilename())
-				.fileUrl(fileUrl)
-				.size(file.getSize())
-				.build();
-			images.add(savedImage);
-		}
-
-		imageTaggingDomainService.registerNewImagesWithTags(images, tagNames);
-	}
-
 	@Transactional
 	public void removeTagsToImage(Long imageId, List<Long> tagIds) {
 		Image image = imageRepository.findById(imageId).orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
@@ -115,5 +87,4 @@ public class ImageService {
 			throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
 		}
 	}
-
 }

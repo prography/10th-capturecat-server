@@ -21,6 +21,25 @@ public class ImageTaggingDomainService {
 	private final ImageTagFactory imageTagFactory;
 
 	@Transactional
+	public void registerNewImagesWithTags(Image image, List<String> tagNames) {
+		Image savedImage = imageRepository.save(image);
+		List<Tag> existingTags = tagRepository.findByNameIn(tagNames);
+
+		List<Tag> newTags = tagNames.stream()
+			.filter(tagName -> isNewTag(existingTags, tagName))
+			.map(Tag::new)
+			.toList();
+
+		List<Tag> savedNewTags = tagRepository.saveAll(newTags);
+
+		List<Tag> allTags = new ArrayList<>(existingTags);
+		allTags.addAll(savedNewTags);
+
+		List<ImageTag> imageTags = imageTagFactory.create(savedImage, allTags);
+		imageTagRepository.saveAll(imageTags);
+	}
+
+	@Transactional
 	public void registerNewImagesWithTags(List<Image> images, List<String> tagNames) {
 		List<Image> savedImages = imageRepository.saveAll(images);
 		List<Tag> existingTags = tagRepository.findByNameIn(tagNames);
