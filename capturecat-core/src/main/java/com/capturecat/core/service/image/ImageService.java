@@ -18,7 +18,6 @@ import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
 import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
-import com.capturecat.core.domain.tag.ImageTaggingDomainService;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagMaxCountValidator;
 import com.capturecat.core.domain.tag.TagRegister;
@@ -36,11 +35,11 @@ public class ImageService {
 	private final TagRepository tagRepository;
 	private final ImageTagFactory imageTagFactory;
 	private final TagMaxCountValidator tagMaxCountValidator;
-	private final ImageTaggingDomainService imageTaggingDomainService;
 	private final TagRegister tagRegister;
 	private final ImageMapper mapper;
 
 	@Transactional
+	// TODO: 태그 개수 검증 추가
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
