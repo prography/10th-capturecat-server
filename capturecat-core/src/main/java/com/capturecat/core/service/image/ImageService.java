@@ -1,5 +1,6 @@
 package com.capturecat.core.service.image;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.client.upload.FileUploader;
+import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -20,7 +22,6 @@ import com.capturecat.core.domain.tag.ImageTaggingDomainService;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagMaxCountValidator;
 import com.capturecat.core.domain.tag.TagRepository;
-import com.capturecat.core.service.image.dto.ImageUploadItem;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -37,19 +38,45 @@ public class ImageService {
 	private final ImageTaggingDomainService imageTaggingDomainService;
 	private final ImageMapper mapper;
 
-	public void save(List<ImageUploadItem> requests) {
-		for (ImageUploadItem request : requests) {
-			validate(request.getFile());
-
-			String fileUrl = fileUploader.upload(request.getFile());
+	@Transactional
+	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
+		List<Image> images = new ArrayList<>(files.size());
+		for (MultipartFile file : files) {
+			validate(file);
+			String fileUrl = fileUploader.upload(file);
 
 			Image image = Image.builder()
-				.fileName(request.getFile().getOriginalFilename())
+				.fileName(file.getOriginalFilename())
 				.fileUrl(fileUrl)
-				.size(request.getFile().getSize())
+				.size(file.getSize())
 				.build();
-			imageTaggingDomainService.registerNewImagesWithTags(image, request.getTagNames());
+			images.add(image);
 		}
+
+		List<Image> savedImages = imageRepository.saveAll(images);
+
+		List<ImageTag> allImageTags = new ArrayList<>();
+		for (Image savedImage : savedImages) {
+			List<String> tagNames = uploadItems.stream()
+				.filter(i -> i.fileName().equals(savedImage.getFileName()))
+				.map(UploadItemRequest::tagNames)
+				.findFirst()
+				.orElseThrow();
+
+			List<Tag> existingTags = tagRepository.findByNameIn(tagNames);
+			List<Tag> newTags = tagNames.stream()
+				.filter(tagName -> existingTags.stream().noneMatch(t -> t.isSameNameAs(tagName)))
+				.map(Tag::new)
+				.toList();
+			List<Tag> savedNewTags = tagRepository.saveAll(newTags);
+
+			List<Tag> result = new ArrayList<>();
+			result.addAll(existingTags);
+			result.addAll(savedNewTags);
+
+			allImageTags.addAll(imageTagFactory.create(savedImage, result));
+		}
+		imageTagRepository.saveAll(allImageTags);
 	}
 
 	@Transactional

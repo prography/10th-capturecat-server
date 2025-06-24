@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestPartFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
@@ -24,16 +25,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.restassured.http.ContentType;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
+import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.test.api.RestDocsTest;
 
 class ImageControllerTest extends RestDocsTest {
 
 	private static final String URL_PREFIX = "/v1/images";
+
+	private final ObjectMapper om = new ObjectMapper();
 
 	private ImageService imageService;
 
@@ -47,22 +54,31 @@ class ImageControllerTest extends RestDocsTest {
 	}
 
 	@Test
-	void 이미지_업로드_후_태그를_생성한다() {
+	void 이미지_업로드_후_태그를_생성한다() throws JsonProcessingException {
 		// given
-		willDoNothing().given(imageService).save(anyList());
+		willDoNothing().given(imageService).save(anyList(), anyList());
+
+		List<UploadItemRequest> requests = List.of(
+			new UploadItemRequest("cat.jpg", List.of("고양이", "cat")),
+			new UploadItemRequest("dog.jpg", List.of("강아지", "dog"))
+		);
 
 		// when & then
-		given().contentType(ContentType.MULTIPART)
-			.multiPart("uploadItems[0].file", "cat.jpg", "file-content-1".getBytes(), MediaType.IMAGE_JPEG_VALUE)
-			.param("uploadItems[0].tagNames", "고양이", "cat")
-			.multiPart("uploadItems[1].file", "dog.jpg", "file-content-2".getBytes(), MediaType.IMAGE_JPEG_VALUE)
-			.param("uploadItems[1].tagNames", "강아지", "dog")
+		given().contentType(ContentType.MULTIPART).log().all()
+			.accept(ContentType.JSON)
+			.multiPart("uploadItems", om.writeValueAsString(requests), MediaType.APPLICATION_JSON_VALUE)
+			.multiPart("files", "cat.jpg", "file-content-1".getBytes(), MediaType.IMAGE_JPEG_VALUE)
+			.multiPart("files", "dog.jpg", "file-content-2".getBytes(), MediaType.IMAGE_JPEG_VALUE)
 			.when().post(URL_PREFIX + "/upload")
 			.then().status(HttpStatus.OK)
 			.apply(document("upload", requestPreprocessor(), responsePreprocessor(),
 				requestParts(
-					partWithName("uploadItems[0].file").description("첫 번째 이미지 파일"),
-					partWithName("uploadItems[1].file").description("두 번째 이미지 파일")),
+					partWithName("files").description("업로드할 이미지 파일들"),
+					partWithName("uploadItems").description("업로드할 이미지와 태그 정보")),
+				requestPartFields("uploadItems",
+					fieldWithPath("[].fileName").description("이미지 파일 이름"),
+					fieldWithPath("[].tagNames").description("이미지에 등록할 태그 목록")
+				),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
 					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),

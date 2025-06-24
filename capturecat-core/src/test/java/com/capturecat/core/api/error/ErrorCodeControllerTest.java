@@ -52,6 +52,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/removeTagsToImage", errorCodeDescriptors);
 	}
 
+	// TODO: 수정
 	@Test
 	void 공통_태그_등록_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
