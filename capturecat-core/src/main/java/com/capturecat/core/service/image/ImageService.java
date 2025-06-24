@@ -62,7 +62,7 @@ public class ImageService {
 				.filter(i -> i.fileName().equals(savedImage.getFileName()))
 				.map(UploadItemRequest::tagNames)
 				.findFirst()
-				.orElseThrow();
+				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
 
 			List<Tag> result = tagRegister.registerTagsFor(tagNames);
 			allImageTags.addAll(imageTagFactory.create(savedImage, result));
