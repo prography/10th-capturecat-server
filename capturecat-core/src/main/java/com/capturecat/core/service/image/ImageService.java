@@ -21,6 +21,7 @@ import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.ImageTaggingDomainService;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagMaxCountValidator;
+import com.capturecat.core.domain.tag.TagRegister;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -36,6 +37,7 @@ public class ImageService {
 	private final ImageTagFactory imageTagFactory;
 	private final TagMaxCountValidator tagMaxCountValidator;
 	private final ImageTaggingDomainService imageTaggingDomainService;
+	private final TagRegister tagRegister;
 	private final ImageMapper mapper;
 
 	@Transactional
@@ -63,17 +65,7 @@ public class ImageService {
 				.findFirst()
 				.orElseThrow();
 
-			List<Tag> existingTags = tagRepository.findByNameIn(tagNames);
-			List<Tag> newTags = tagNames.stream()
-				.filter(tagName -> existingTags.stream().noneMatch(t -> t.isSameNameAs(tagName)))
-				.map(Tag::new)
-				.toList();
-			List<Tag> savedNewTags = tagRepository.saveAll(newTags);
-
-			List<Tag> result = new ArrayList<>();
-			result.addAll(existingTags);
-			result.addAll(savedNewTags);
-
+			List<Tag> result = tagRegister.registerTagsFor(tagNames);
 			allImageTags.addAll(imageTagFactory.create(savedImage, result));
 		}
 		imageTagRepository.saveAll(allImageTags);
