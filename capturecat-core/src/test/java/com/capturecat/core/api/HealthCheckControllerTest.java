@@ -11,7 +11,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import io.restassured.http.ContentType;
 
-import com.capturecat.core.support.handler.CoreExceptionHandler;
 import com.capturecat.test.api.RestDocsTest;
 
 class HealthCheckControllerTest extends RestDocsTest {
@@ -21,7 +20,7 @@ class HealthCheckControllerTest extends RestDocsTest {
 	@BeforeEach
 	void setUp() {
 		healthCheckController = new HealthCheckController();
-		mockMvc = mockController(healthCheckController, new CoreExceptionHandler());
+		mockMvc = mockController(healthCheckController);
 	}
 
 	@Test

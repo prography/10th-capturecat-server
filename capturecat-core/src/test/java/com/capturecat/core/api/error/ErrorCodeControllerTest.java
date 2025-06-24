@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import io.restassured.http.ContentType;
 
 import com.capturecat.core.support.error.ErrorType;
-import com.capturecat.core.support.handler.CoreExceptionHandler;
 import com.capturecat.test.api.RestDocsTest;
 import com.capturecat.test.snippet.ErrorCodeDescriptor;
 import com.capturecat.test.snippet.ErrorCodeSnippet;
@@ -31,7 +30,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@BeforeEach
 	void setUp() {
 		errorCodeController = new ErrorCodeController();
-		mockMvc = mockController(errorCodeController, new CoreExceptionHandler());
+		mockMvc = mockController(errorCodeController);
 	}
 
 	@Test
@@ -43,7 +42,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
-				IMAGE_UPLOAD_FAILED);
+			TAG_INFO_MISMATCH, IMAGE_UPLOAD_FAILED);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
 	}
 
@@ -55,10 +54,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
-			.when()
-			.get("/v1/error-codes")
-			.then()
-			.status(HttpStatus.OK)
+			.when().get("/v1/error-codes")
+			.then().status(HttpStatus.OK)
 			.apply(document(identifier, new ErrorCodeSnippet(errorCodeDescriptors)));
 	}
 

@@ -1,4 +1,4 @@
-package com.capturecat.core.api.image.dto;
+package com.capturecat.core.service.image;
 
 import java.util.List;
 

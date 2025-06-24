@@ -2,6 +2,7 @@ package com.capturecat.core.domain.image;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -18,7 +19,7 @@ import com.capturecat.core.domain.BaseTimeEntity;
 public class Image extends BaseTimeEntity {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	private String fileName;
@@ -28,7 +29,6 @@ public class Image extends BaseTimeEntity {
 	private Long size;
 
 	// todo : user 정보 매핑
-	// todo : createdby, modifiedby 설정
 
 	@Builder
 	public Image(Long id, String fileName, String fileUrl, long size) {

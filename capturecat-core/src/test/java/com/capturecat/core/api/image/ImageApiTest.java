@@ -61,16 +61,11 @@ class ImageApiTest {
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(List.of("tag1", "tag2"));
 
 		// when & then
-		RestAssured.given()
-			.log()
-			.all()
+		RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
-			.then()
-			.log()
-			.all()
+			.when().post("/v1/images/{imageId}/tags", imageId)
+			.then().log().all()
 			.statusCode(HttpStatus.OK.value());
 	}
 
@@ -82,23 +77,17 @@ class ImageApiTest {
 		RestAssured.given()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청1)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
+			.when().post("/v1/images/{imageId}/tags", imageId)
 			.then();
 
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청2 = new AddTagsToImageRequest(List.of("tag1", "tag2", "tag3"));
 
 		// when & then
-		RestAssured.given()
-			.log()
-			.all()
+		RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청2)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
-			.then()
-			.log()
-			.all()
+			.when().post("/v1/images/{imageId}/tags", imageId)
+			.then().log().all()
 			.statusCode(HttpStatus.OK.value());
 	}
 
@@ -110,23 +99,17 @@ class ImageApiTest {
 		RestAssured.given()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청1)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
+			.when().post("/v1/images/{imageId}/tags", imageId)
 			.then();
 
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청2 = new AddTagsToImageRequest(List.of("tag1", "tag3", "tag4", "tag5"));
 
 		// when & then
-		RestAssured.given()
-			.log()
-			.all()
+		RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청2)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
-			.then()
-			.log()
-			.all()
+			.when().post("/v1/images/{imageId}/tags", imageId)
+			.then().log().all()
 			.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
 
@@ -137,20 +120,13 @@ class ImageApiTest {
 				List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
 
 		// when
-		ErrorMessage error = RestAssured.given()
-			.log()
-			.all()
+		ErrorMessage error = RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
-			.then()
-			.log()
-			.all()
+			.when().post("/v1/images/{imageId}/tags", imageId)
+			.then().log().all()
 			.statusCode(HttpStatus.BAD_REQUEST.value())
-			.extract()
-			.jsonPath()
-			.getObject("error", ErrorMessage.class);
+			.extract().jsonPath().getObject("error", ErrorMessage.class);
 
 		// then
 		assertThat(error.code()).isEqualTo(ErrorCode.EXCEED_MAX_TAG_COUNT.name());
@@ -165,23 +141,17 @@ class ImageApiTest {
 		RestAssured.given()
 			.contentType(ContentType.JSON)
 			.body(단일_이미지_태그_등록_요청)
-			.when()
-			.post("/v1/images/{imageId}/tags", imageId)
+			.when().post("/v1/images/{imageId}/tags", imageId)
 			.then();
 
 		RemoveTagsToImageRequest 태그_삭제_요청 = new RemoveTagsToImageRequest(List.of(1L, 2L));
 
 		// when
-		RestAssured.given()
-			.log()
-			.all()
+		RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
 			.body(태그_삭제_요청)
-			.when()
-			.delete("/v1/images/{imageId}/tags", imageId)
-			.then()
-			.log()
-			.all()
+			.when().delete("/v1/images/{imageId}/tags", imageId)
+			.then().log().all()
 			.statusCode(HttpStatus.OK.value());
 
 		// then
@@ -195,16 +165,11 @@ class ImageApiTest {
 	@MethodSource("invalidTagIdsRequests")
 	void 이미지_태그_삭제_시_잘못된_요청인_경우_400을_반환한다(RemoveTagsToImageRequest 태그_삭제_요청) {
 		// when
-		ExtractableResponse<Response> 태그_삭제_응답 = RestAssured.given()
-			.log()
-			.all()
+		ExtractableResponse<Response> 태그_삭제_응답 = RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
 			.body(태그_삭제_요청)
-			.when()
-			.delete("/v1/images/{imageId}/tags", imageId)
-			.then()
-			.log()
-			.all()
+			.when().delete("/v1/images/{imageId}/tags", imageId)
+			.then().log().all()
 			.extract();
 
 		// then

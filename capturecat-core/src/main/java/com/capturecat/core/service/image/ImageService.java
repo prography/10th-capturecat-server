@@ -12,8 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.client.upload.FileUploader;
-import com.capturecat.core.api.image.dto.ImageMapper;
-import com.capturecat.core.api.image.dto.ImageRespDto.ImageListDto;
+import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -21,6 +20,7 @@ import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagMaxCountValidator;
+import com.capturecat.core.domain.tag.TagRegister;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -30,41 +30,44 @@ import com.capturecat.core.support.error.ErrorType;
 public class ImageService {
 
 	private final FileUploader fileUploader;
-
 	private final ImageRepository imageRepository;
-
 	private final ImageTagRepository imageTagRepository;
-
 	private final TagRepository tagRepository;
-
 	private final ImageTagFactory imageTagFactory;
-
 	private final TagMaxCountValidator tagMaxCountValidator;
-
+	private final TagRegister tagRegister;
 	private final ImageMapper mapper;
 
-	/**
-	 * 이미지를 저장하고 저장 위치를 DB에 저장한다. 저장 경로를 브라우저 주소창에 입력하면 이미지가 나타난다.
-	 */
 	@Transactional
-	public ImageListDto save(List<MultipartFile> files) {
-		List<Image> images = new ArrayList<>();
-
+	// TODO: 태그 개수 검증 추가
+	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
+		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
 			validate(file);
-
 			String fileUrl = fileUploader.upload(file);
 
-			Image savedImage = Image.builder()
+			Image image = Image.builder()
 				.fileName(file.getOriginalFilename())
 				.fileUrl(fileUrl)
 				.size(file.getSize())
 				.build();
-			images.add(savedImage);
+			images.add(image);
 		}
 
-		imageRepository.saveAll(images);
-		return mapper.toDto(images);
+		List<Image> savedImages = imageRepository.saveAll(images);
+
+		List<ImageTag> allImageTags = new ArrayList<>();
+		for (Image savedImage : savedImages) {
+			List<String> tagNames = uploadItems.stream()
+				.filter(i -> i.fileName().equals(savedImage.getFileName()))
+				.map(UploadItemRequest::tagNames)
+				.findFirst()
+				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
+
+			List<Tag> result = tagRegister.registerTagsFor(tagNames);
+			allImageTags.addAll(imageTagFactory.create(savedImage, result));
+		}
+		imageTagRepository.saveAll(allImageTags);
 	}
 
 	@Transactional
@@ -101,5 +104,4 @@ public class ImageService {
 			throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
 		}
 	}
-
 }
