@@ -52,7 +52,7 @@ class ImageApiTest {
 	void setUp() {
 		RestAssured.port = port;
 		// 임시 초기화 작업
-		imageId = imageRepository.save(new Image()).getId();
+		imageId = imageRepository.save(Image.builder().build()).getId();
 	}
 
 	@Test

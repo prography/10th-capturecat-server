@@ -1,20 +1,25 @@
 package com.capturecat.core.domain.image;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import com.capturecat.core.domain.BaseTimeEntity;
+import com.capturecat.core.domain.user.User;
 
 @Entity
 @Table(name = "images")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image extends BaseTimeEntity {
 
 	@Id
@@ -27,7 +32,9 @@ public class Image extends BaseTimeEntity {
 
 	private Long size;
 
-	// todo : user 정보 매핑
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private User user;
 	// todo : createdby, modifiedby 설정
 
 	@Builder
