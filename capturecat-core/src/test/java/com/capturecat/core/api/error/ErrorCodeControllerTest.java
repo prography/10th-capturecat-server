@@ -36,14 +36,14 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 단일_이미지_태그_등록_에러_코드_문서화() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INSUFFICIENT_TAG_COUNT,
-			TOO_MANY_TAGS, IMAGE_NOT_FOUND);
+			TOO_MANY_TAGS, DUPLICATE_TAG_NAMES, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/addTagsToImage", errorCodeDescriptors);
 	}
 
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
-			INSUFFICIENT_TAG_COUNT, TAG_INFO_MISMATCH, IMAGE_UPLOAD_FAILED);
+			INSUFFICIENT_TAG_COUNT, DUPLICATE_TAG_NAMES, TAG_INFO_MISMATCH, IMAGE_UPLOAD_FAILED);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
 	}
 

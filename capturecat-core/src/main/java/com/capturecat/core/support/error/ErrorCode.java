@@ -12,7 +12,8 @@ public enum ErrorCode {
 	INVALID_IMAGE_FORMAT("이미지 파일만 업로드할 수 있어요."),
 	INVALID_REQUEST("잘못된 요청입니다."),
 	TAG_INFO_MISMATCH("업로드된 이미지 파일에 대한 태그 정보를 찾거나 매칭할 수 없습니다."),
-	INSUFFICIENT_TAG_COUNT("태그는 최소 1개 이상 입력해야 합니다.");
+	INSUFFICIENT_TAG_COUNT("태그는 최소 1개 이상 입력해야 합니다."),
+	DUPLICATE_TAG_NAMES("중복된 태그는 허용되지 않습니다.");
 
 	private final String message;
 
