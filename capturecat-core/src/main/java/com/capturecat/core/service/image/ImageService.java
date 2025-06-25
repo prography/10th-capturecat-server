@@ -59,7 +59,7 @@ public class ImageService {
 		List<ImageTag> allImageTags = new ArrayList<>();
 		for (Image savedImage : savedImages) {
 			List<String> tagNames = uploadItems.stream()
-				.filter(i -> i.fileName().equals(savedImage.getFileName()))
+				.filter(i -> savedImage.isSameFileNameAs(i.fileName()))
 				.map(UploadItemRequest::tagNames)
 				.findFirst()
 				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
