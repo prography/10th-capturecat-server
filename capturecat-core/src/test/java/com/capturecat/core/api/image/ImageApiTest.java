@@ -70,7 +70,7 @@ class ImageApiTest {
 	}
 
 	@Test
-	void 단일_이미지_태그를_등록_시_이미_등록되어_있는_태그가_있는_경우() {
+	void 단일_이미지_태그_등록_시_이미_등록되어_있는_태그가_있는_경우_400을_반환한다() {
 		// given
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청1 = new AddTagsToImageRequest(List.of("tag1", "tag2"));
 
@@ -88,33 +88,11 @@ class ImageApiTest {
 			.body(단일_이미지_태그_등록_요청2)
 			.when().post("/v1/images/{imageId}/tags", imageId)
 			.then().log().all()
-			.statusCode(HttpStatus.OK.value());
-	}
-
-	@Test
-	void 단일_이미지_태그를_등록_시_이미_등록되어_있는_태그가_있는_경우2() {
-		// given
-		AddTagsToImageRequest 단일_이미지_태그_등록_요청1 = new AddTagsToImageRequest(List.of("tag1", "tag2"));
-
-		RestAssured.given()
-			.contentType(ContentType.JSON)
-			.body(단일_이미지_태그_등록_요청1)
-			.when().post("/v1/images/{imageId}/tags", imageId)
-			.then();
-
-		AddTagsToImageRequest 단일_이미지_태그_등록_요청2 = new AddTagsToImageRequest(List.of("tag1", "tag3", "tag4", "tag5"));
-
-		// when & then
-		RestAssured.given().log().all()
-			.contentType(ContentType.JSON)
-			.body(단일_이미지_태그_등록_요청2)
-			.when().post("/v1/images/{imageId}/tags", imageId)
-			.then().log().all()
 			.statusCode(HttpStatus.BAD_REQUEST.value());
 	}
 
 	@Test
-	void 단일_이미지_태그를_등록_시_태그_개수를_초과하면_400을_반환한다() {
+	void 단일_이미지_태그_등록_시_태그_개수를_초과하면_400을_반환한다() {
 		// given
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(
 				List.of("tag1", "tag2", "tag3", "tag4", "tag5"));

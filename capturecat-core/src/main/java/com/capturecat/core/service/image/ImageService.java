@@ -74,6 +74,7 @@ public class ImageService {
 	}
 
 	@Transactional
+	// TODO: 플로우 개선
 	public void addTagsToImage(Long imageId, List<String> tagNames) {
 		validateInsufficientTagCount(tagNames);
 		validateDuplicateTagNames(tagNames);
@@ -81,6 +82,10 @@ public class ImageService {
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
 		Set<String> existingTagNames = new HashSet<>(imageTagRepository.findTagNamesByImage(image));
+
+		if (imageTagRepository.existsByImageAndTagNames(image, tagNames)) {
+			throw new CoreException(ErrorType.ALREADY_REGISTERED_TAGS);
+		}
 
 		tagMaxCountValidator.validate(existingTagNames, tagNames);
 
