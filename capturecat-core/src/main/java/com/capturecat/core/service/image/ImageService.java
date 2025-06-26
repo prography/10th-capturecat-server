@@ -1,6 +1,7 @@
 package com.capturecat.core.service.image;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +40,6 @@ public class ImageService {
 	private final ImageMapper mapper;
 
 	@Transactional
-	// TODO: 태그 개수 검증 추가
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
@@ -59,10 +59,13 @@ public class ImageService {
 		List<ImageTag> allImageTags = new ArrayList<>();
 		for (Image savedImage : savedImages) {
 			List<String> tagNames = uploadItems.stream()
-				.filter(i -> i.fileName().equals(savedImage.getFileName()))
+				.filter(i -> savedImage.isSameFileNameAs(i.fileName()))
 				.map(UploadItemRequest::tagNames)
 				.findFirst()
 				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
+
+			validateDuplicateTagNames(tagNames);
+			tagMaxCountValidator.validate(Collections.emptySet(), tagNames);
 
 			List<Tag> result = tagRegister.registerTagsFor(tagNames);
 			allImageTags.addAll(imageTagFactory.create(savedImage, result));
@@ -71,10 +74,17 @@ public class ImageService {
 	}
 
 	@Transactional
+	// TODO: 플로우 개선
 	public void addTagsToImage(Long imageId, List<String> tagNames) {
-		Image image = imageRepository.findById(imageId).orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+		validateDuplicateTagNames(tagNames);
+		Image image = imageRepository.findById(imageId)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
 		Set<String> existingTagNames = new HashSet<>(imageTagRepository.findTagNamesByImage(image));
+
+		if (imageTagRepository.existsByImageAndTagNames(image, tagNames)) {
+			throw new CoreException(ErrorType.ALREADY_REGISTERED_TAGS);
+		}
 
 		tagMaxCountValidator.validate(existingTagNames, tagNames);
 
@@ -102,6 +112,13 @@ public class ImageService {
 		String contentType = file.getContentType();
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
+		}
+	}
+
+	private void validateDuplicateTagNames(List<String> tagNames) {
+		Set<String> uniqueTagNames = new HashSet<>(tagNames);
+		if (uniqueTagNames.size() < tagNames.size()) {
+			throw new CoreException(ErrorType.DUPLICATE_TAG_NAMES);
 		}
 	}
 }

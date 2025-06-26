@@ -38,4 +38,7 @@ public class Image extends BaseTimeEntity {
 		this.size = size;
 	}
 
+	public boolean isSameFileNameAs(String fileName) {
+		return this.fileName.equals(fileName);
+	}
 }
