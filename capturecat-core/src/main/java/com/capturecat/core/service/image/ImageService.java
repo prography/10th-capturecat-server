@@ -1,7 +1,6 @@
 package com.capturecat.core.service.image;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,7 +64,7 @@ public class ImageService {
 				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
 
 			validateDuplicateTagNames(tagNames);
-			tagMaxCountValidator.validate(Collections.emptySet(), tagNames);
+			tagMaxCountValidator.validateTagCount(savedImage, tagNames);
 
 			List<Tag> result = tagRegister.registerTagsFor(tagNames);
 			allImageTags.addAll(imageTagFactory.create(savedImage, result));
@@ -74,26 +73,18 @@ public class ImageService {
 	}
 
 	@Transactional
-	// TODO: 플로우 개선
 	public void addTagsToImage(Long imageId, List<String> tagNames) {
 		validateDuplicateTagNames(tagNames);
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
-		Set<String> existingTagNames = new HashSet<>(imageTagRepository.findTagNamesByImage(image));
-
 		if (imageTagRepository.existsByImageAndTagNames(image, tagNames)) {
 			throw new CoreException(ErrorType.ALREADY_REGISTERED_TAGS);
 		}
 
-		tagMaxCountValidator.validate(existingTagNames, tagNames);
+		tagMaxCountValidator.validateTagCount(image, tagNames);
 
-		List<Tag> newTags = tagNames.stream()
-			.filter(tagName -> !existingTagNames.contains(tagName))
-			.map(Tag::new)
-			.toList();
-
-		tagRepository.saveAll(newTags);
+		List<Tag> newTags = tagRegister.registerTagsFor(tagNames);
 		List<ImageTag> imageTags = imageTagFactory.create(image, newTags);
 		imageTagRepository.saveAll(imageTags);
 	}

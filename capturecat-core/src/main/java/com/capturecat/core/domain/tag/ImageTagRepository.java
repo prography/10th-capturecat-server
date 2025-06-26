@@ -17,4 +17,6 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
 	@Query("SELECT COUNT(it) > 0 FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.name IN :tagNames")
 	boolean existsByImageAndTagNames(Image image, List<String> tagNames);
+
+	long countByImage(Image image);
 }
