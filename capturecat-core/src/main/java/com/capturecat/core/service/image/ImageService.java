@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.client.upload.FileUploader;
@@ -39,7 +40,6 @@ public class ImageService {
 	private final ImageMapper mapper;
 
 	@Transactional
-	// TODO: 태그 개수 검증 추가
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
@@ -65,6 +65,7 @@ public class ImageService {
 				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
 
 			validateDuplicateTagNames(tagNames);
+			tagMaxCountValidator.validate(Collections.emptySet(), tagNames);
 
 			List<Tag> result = tagRegister.registerTagsFor(tagNames);
 			allImageTags.addAll(imageTagFactory.create(savedImage, result));

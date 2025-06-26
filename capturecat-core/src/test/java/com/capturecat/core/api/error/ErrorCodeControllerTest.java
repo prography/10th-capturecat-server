@@ -43,7 +43,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
-			DUPLICATE_TAG_NAMES, TAG_INFO_MISMATCH, IMAGE_UPLOAD_FAILED);
+			TOO_MANY_TAGS, DUPLICATE_TAG_NAMES, TAG_INFO_MISMATCH, IMAGE_UPLOAD_FAILED);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
 	}
 
