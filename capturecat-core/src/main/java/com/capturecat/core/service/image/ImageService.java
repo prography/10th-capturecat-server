@@ -64,7 +64,6 @@ public class ImageService {
 				.findFirst()
 				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
 
-			validateInsufficientTagCount(tagNames);
 			validateDuplicateTagNames(tagNames);
 
 			List<Tag> result = tagRegister.registerTagsFor(tagNames);
@@ -76,7 +75,6 @@ public class ImageService {
 	@Transactional
 	// TODO: 플로우 개선
 	public void addTagsToImage(Long imageId, List<String> tagNames) {
-		validateInsufficientTagCount(tagNames);
 		validateDuplicateTagNames(tagNames);
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
@@ -113,12 +111,6 @@ public class ImageService {
 		String contentType = file.getContentType();
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
-		}
-	}
-
-	private void validateInsufficientTagCount(List<String> tagNames) {
-		if (tagNames == null || tagNames.isEmpty()) {
-			throw new CoreException(ErrorType.INSUFFICIENT_TAG_COUNT);
 		}
 	}
 
