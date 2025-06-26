@@ -18,7 +18,6 @@ import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagRegister;
-import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.tag.TagValidator;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -30,11 +29,9 @@ public class ImageService {
 	private final FileUploader fileUploader;
 	private final ImageRepository imageRepository;
 	private final ImageTagRepository imageTagRepository;
-	private final TagRepository tagRepository;
 	private final ImageTagFactory imageTagFactory;
 	private final TagValidator tagValidator;
 	private final TagRegister tagRegister;
-	private final ImageMapper mapper;
 
 	@Transactional
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
