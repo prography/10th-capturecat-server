@@ -11,6 +11,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 @Component
@@ -49,17 +50,33 @@ public class JwtUtil {
 	}
 
 	/** 검증 */
-	public String getUsername(String token) {
-		return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getSubject();
-	}
-
-	public String getRole(String token) {
+	// 공통 Claims 추출
+	private Claims extractClaims(String token) {
 		return Jwts.parser()
 			.verifyWith(secretKey)
 			.build()
 			.parseSignedClaims(token)
-			.getPayload()
-			.get("role", String.class);
+			.getPayload();
+	}
+
+	// 만료 여부 검증 (예외 던짐)
+	public void isExpired(String token) {
+		extractClaims(token); // parseSignedClaims 호출 시 자동 만료 검증
+	}
+
+	// username(subject) 추출
+	public String getUsername(String token) {
+		return extractClaims(token).getSubject();
+	}
+
+	// role 추출
+	public String getRole(String token) {
+		return extractClaims(token).get("role", String.class);
+	}
+
+	//type 추출
+	public String getTokenType(String token) {
+		return extractClaims(token).get("type", String.class);
 	}
 
 	private long getExpirationForType(TokenType type) {

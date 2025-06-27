@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import com.capturecat.core.config.jwt.JwtFilter;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.LoginFilter;
 import com.capturecat.core.domain.user.RefreshTokenRepository;
@@ -44,12 +45,13 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
+			.addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
 			.addFilterAt(
 				new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository),
 				UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(
 				authorizeRequests -> authorizeRequests.requestMatchers("/health", "/docs/**", "/v1/**")
-					.permitAll()
+					.hasRole("USER")
 					.anyRequest()
 					.authenticated());
 

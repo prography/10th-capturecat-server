@@ -19,6 +19,7 @@ import com.capturecat.core.domain.BaseTimeEntity;
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Builder
 public class User extends BaseTimeEntity {
 
 	@Id
