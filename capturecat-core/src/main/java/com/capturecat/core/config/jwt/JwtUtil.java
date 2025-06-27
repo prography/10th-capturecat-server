@@ -60,8 +60,9 @@ public class JwtUtil {
 	}
 
 	// 만료 여부 검증 (예외 던짐)
-	public void isExpired(String token) {
+	public boolean isExpired(String token) {
 		extractClaims(token); // parseSignedClaims 호출 시 자동 만료 검증
+		return false;
 	}
 
 	// username(subject) 추출
