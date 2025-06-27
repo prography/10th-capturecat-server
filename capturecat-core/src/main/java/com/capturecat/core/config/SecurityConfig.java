@@ -23,12 +23,14 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(AbstractHttpConfigurer::disable)
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(
-						authorizeRequests -> authorizeRequests.requestMatchers("/health", "/docs/**", "/v1/**")
-								.permitAll()
-								.anyRequest()
-								.authenticated());
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.formLogin(AbstractHttpConfigurer::disable)
+			.httpBasic(AbstractHttpConfigurer::disable)
+			.authorizeHttpRequests(
+				authorizeRequests -> authorizeRequests.requestMatchers("/health", "/docs/**", "/v1/**")
+					.permitAll()
+					.anyRequest()
+					.authenticated());
 
 		return http.build();
 	}
