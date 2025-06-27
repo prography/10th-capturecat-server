@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,6 +19,7 @@ import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.support.error.ErrorCode;
 
+@Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class UserApiTest {
@@ -73,7 +75,7 @@ class UserApiTest {
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.result").value("ERROR"))
 			.andExpect(jsonPath("$.error.code").value(ErrorCode.ALREADY_EXISTS_USERNAME.name()))
-			.andExpect(jsonPath("$.error.message").value("이미 존재하는 회원 이름이에요."));
+			.andExpect(jsonPath("$.error.message").value(ErrorCode.ALREADY_EXISTS_USERNAME.getMessage()));
 	}
 
 	@Test
@@ -91,6 +93,6 @@ class UserApiTest {
 			.andDo(print())
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.error.code").value(ErrorCode.BEAN_VALIDATION_FAIL.name()))
-			.andExpect(jsonPath("$.error.message").value("입력 데이터 오류입니다."));
+			.andExpect(jsonPath("$.error.message").value(ErrorCode.BEAN_VALIDATION_FAIL.getMessage()));
 	}
 }

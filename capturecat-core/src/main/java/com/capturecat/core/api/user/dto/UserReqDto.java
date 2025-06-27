@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -53,5 +54,22 @@ public class UserReqDto {
 			this.id = user.getId();
 			this.username = user.getUsername();
 		}
+	}
+
+	/** 로그인 요청 DTO */
+	@Getter
+	@Setter
+	public static class LoginReqDto {
+		private String username;
+		private String password;
+	}
+
+	/** 로그인 응답 DTO */
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	public static class LoginRespDto {
+		private String accessToken;
+		private String refreshToken;
 	}
 }
