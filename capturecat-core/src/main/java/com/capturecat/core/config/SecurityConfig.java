@@ -51,7 +51,8 @@ public class SecurityConfig {
 				UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(
 				authorizeRequests -> authorizeRequests.requestMatchers("/health", "/docs/**", "/v1/**")
-					.hasRole("USER")
+					// .hasRole("USER")
+					.permitAll()
 					.anyRequest()
 					.authenticated());
 

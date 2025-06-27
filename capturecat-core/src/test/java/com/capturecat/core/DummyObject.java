@@ -15,8 +15,8 @@ import com.capturecat.core.domain.user.UserRole;
 
 public class DummyObject {
 
-	public static Image newMockImage(int id) {
-		return Image.builder().id((long)id).fileName("test1.jpg").fileUrl("testUrl1").build();
+	public static Image newMockImage(long id) {
+		return Image.builder().id(id).fileName("test1.jpg").fileUrl("testUrl1").build();
 	}
 
 	public static List<Image> newMockImages(int fromId, int toId) {
