@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.domain.user.UserRole;
 
 /** 회원 관련 요청 DTO */
 public class UserReqDto {
@@ -36,6 +37,7 @@ public class UserReqDto {
 				.username(username)
 				.password(passwordEncoder.encode(password))
 				.email(email)
+				.role(UserRole.USER)
 				.build();
 		}
 	}

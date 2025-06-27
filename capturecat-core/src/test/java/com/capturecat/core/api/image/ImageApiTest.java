@@ -22,6 +22,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 
+import com.capturecat.core.DummyObject;
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
@@ -31,7 +32,7 @@ import com.capturecat.core.support.error.ErrorCode;
 import com.capturecat.core.support.error.ErrorMessage;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class ImageApiTest {
+class ImageApiTest extends DummyObject {
 
 	@LocalServerPort
 	private int port;

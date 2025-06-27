@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.domain.user.UserRole;
 
 public class DummyObject {
 
@@ -25,7 +28,7 @@ public class DummyObject {
 		}).toList();
 	}
 
-	protected User newMockUser(Long id) {
+	public static User newMockUser(Long id) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 		return User.builder()
@@ -33,6 +36,18 @@ public class DummyObject {
 			.username("username")
 			.password(passwordEncoder.encode("password"))
 			.email("username@email.com")
+			.build();
+	}
+
+	public static User newUser(String username) {
+		PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		String encPassword = passwordEncoder.encode("password");
+
+		return User.builder()
+			.username(username)
+			.password(encPassword)
+			.email(username + "@email.com")
+			.role(UserRole.USER)
 			.build();
 	}
 
