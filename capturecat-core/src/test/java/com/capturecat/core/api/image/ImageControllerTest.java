@@ -15,12 +15,15 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -34,6 +37,9 @@ import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.service.image.ImageService;
+import com.capturecat.core.service.image.ImageWithTagsResponse;
+import com.capturecat.core.service.image.TagResponse;
+import com.capturecat.core.support.response.CursorResponse;
 import com.capturecat.test.api.RestDocsTest;
 
 class ImageControllerTest extends RestDocsTest {
@@ -104,6 +110,39 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
 					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+	}
+
+	@Test
+	void 태그와_이미지를_조회한다() {
+		// given
+		BDDMockito.given(imageService.getImagesWithTags(any(Pageable.class)))
+			.willReturn(new CursorResponse(false, 1L,
+				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
+					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
+
+		// when & then
+		given().contentType(ContentType.JSON).log().all()
+			.param("page", 0)
+			.param("size", 20)
+			.when().get(URL_PREFIX)
+			.then().status(HttpStatus.OK)
+			.apply(document("getImagesWithTagsByUser", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(
+					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+					parameterWithName("size").description("페이지 크기 (기본값: 20, 최대: 100)").optional()
+				),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("이미지 및 태그 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
+					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.items[].tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
+					fieldWithPath("data.items[].tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.items[].tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 
 	@Test

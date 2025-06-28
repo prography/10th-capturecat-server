@@ -21,7 +21,8 @@ public enum ErrorType {
 	LOGIN_FAIL(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_REQUEST, LogLevel.WARN),
 	VALIDATION_FAIL(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN),
 	INVALID_JWT(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN),
-	UNKNOWN_ROLE(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN);
+	UNKNOWN_ROLE(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN),
+	USER_NOT_FOUND(HttpStatus.BAD_REQUEST, ErrorCode.NOT_FOUND_USER, LogLevel.WARN);
 
 	private final HttpStatus status;
 

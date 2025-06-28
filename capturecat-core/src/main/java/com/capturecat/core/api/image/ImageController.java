@@ -4,9 +4,12 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +24,9 @@ import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.service.image.ImageService;
+import com.capturecat.core.service.image.ImageWithTagsResponse;
 import com.capturecat.core.support.response.ApiResponse;
+import com.capturecat.core.support.response.CursorResponse;
 
 @RestController
 @RequestMapping(("/v1/images"))
@@ -43,6 +48,12 @@ public class ImageController {
 	public ApiResponse<?> addTagsToImage(@PathVariable Long imageId, @RequestBody AddTagsToImageRequest request) {
 		imageService.addTagsToImage(imageId, request.tagNames());
 		return ApiResponse.success();
+	}
+
+	@GetMapping
+	public ApiResponse<CursorResponse<ImageWithTagsResponse>> getImagesByUser(
+			@PageableDefault(size = 20) Pageable pageable) {
+		return ApiResponse.success(imageService.getImagesWithTags(pageable));
 	}
 
 	@DeleteMapping("/{imageId}/tags")

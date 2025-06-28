@@ -9,7 +9,7 @@ public record ApiResponse<T>(ResultType result, T data, ErrorMessage error) {
 		return new ApiResponse<>(ResultType.SUCCESS, null, null);
 	}
 
-	public static <S> ApiResponse<S> success(S data) {
+	public static <T> ApiResponse<T> success(T data) {
 		return new ApiResponse<>(ResultType.SUCCESS, data, null);
 	}
 
