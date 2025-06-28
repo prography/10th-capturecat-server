@@ -53,6 +53,13 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/removeTagsToImage", errorCodeDescriptors);
 	}
 
+	@Test
+	void 토큰_재발행_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
+			REFRESH_TOKEN_EXPIRED);
+		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")

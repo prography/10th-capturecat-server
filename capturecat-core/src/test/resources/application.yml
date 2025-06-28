@@ -47,5 +47,5 @@ logging:
 
 jwt:
   secret: capture_cat_jwt_secret_key_capture_cat_jwt_secret_key
-  access-token-expiration: 3600000       # 1시간
-  refresh-token-expiration: 604800000    # 7일
+  access-token-expiration: 300000     # 5분
+  refresh-token-expiration: 3600000   # 1시간

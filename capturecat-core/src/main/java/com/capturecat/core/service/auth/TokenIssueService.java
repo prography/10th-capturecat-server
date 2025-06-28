@@ -29,11 +29,11 @@ public class TokenIssueService {
 	private final RefreshTokenRepository refreshTokenRepository;
 
 	/**
-	 * Access, Refresh 토큰을 발행하고,
-	 * Refresh 토큰은 DB에 저장한다.
+	 * Access 토큰 만료시, Access/Refresh 토큰을 발행하고,
+	 * 새로운 Refresh 토큰을 DB에 저장한다. (rotating)
 	 */
 	public Map<TokenType, String> issue(String username, String role) {
-		//토큰 생성
+		//Access token 생성, Refresh token rotating
 		String accessToken = jwtUtil.generateToken(username, role, TokenType.ACCESS);
 		String refreshToken = jwtUtil.generateToken(username, role, TokenType.REFRESH);
 
