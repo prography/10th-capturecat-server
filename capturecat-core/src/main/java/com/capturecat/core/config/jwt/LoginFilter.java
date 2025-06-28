@@ -1,6 +1,7 @@
 package com.capturecat.core.config.jwt;
 
 import java.io.IOException;
+import java.util.Map;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,8 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.LoginReqDto;
 import com.capturecat.core.config.auth.LoginUser;
-import com.capturecat.core.domain.user.RefreshToken;
-import com.capturecat.core.domain.user.RefreshTokenRepository;
+import com.capturecat.core.service.auth.TokenIssueService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.ApiResponse;
@@ -31,8 +31,7 @@ import com.capturecat.core.support.response.ApiResponse;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
-	private final JwtUtil jwtUtil;
-	private final RefreshTokenRepository refreshTokenRepository;
+	private final TokenIssueService tokenIssueService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override
@@ -56,17 +55,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		//JWT 발급
 		LoginUser loginUser = (LoginUser)authResult.getPrincipal();
 		String username = loginUser.getUsername();
-		String authority = loginUser.getAuthorities().iterator().next().getAuthority();
+		String role = loginUser.getAuthorities().iterator().next().getAuthority();
 
-		String accessToken = jwtUtil.generateToken(username, authority, TokenType.ACCESS);
-		String refreshToken = jwtUtil.generateToken(username, authority, TokenType.REFRESH);
-
-		//Refresh token 저장
-		saveRefreshToken(username, refreshToken);
+		//토큰 발급
+		Map<TokenType, String> tokenMap = tokenIssueService.issue(username, role);
 
 		//Header에 실어 응답
-		response.setHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + accessToken);
-		response.setHeader(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + refreshToken);
+		response.setHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + tokenMap.get(TokenType.ACCESS));
+		response.setHeader(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + tokenMap.get(TokenType.REFRESH));
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		objectMapper.writeValue(response.getWriter(), ApiResponse.success());
@@ -80,12 +76,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		objectMapper.writeValue(response.getWriter(), ApiResponse.error(ErrorType.LOGIN_FAIL));
 	}
 
-	private void saveRefreshToken(String username, String refreshToken) {
-		RefreshToken token = RefreshToken.builder()
-			.username(username)
-			.refreshToken(refreshToken)
-			.build();
-
-		refreshTokenRepository.save(token);
-	}
 }
