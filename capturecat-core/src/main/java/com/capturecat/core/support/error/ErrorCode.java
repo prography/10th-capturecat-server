@@ -18,6 +18,7 @@ public enum ErrorCode {
 	INVALID_TOKEN("유효하지 않은 토큰입니다."),
 	ALREADY_EXISTS_USERNAME("이미 등록된 회원 이름입니다."),
 	UNKNOWN_ROLE("존재하지 않는 권한입니다."),
+	NOT_FOUND_USER("사용자를 찾을 수 없습니다."),
 	ACCESS_TOKEN_EXPIRED("Access token이 만료됐습니다."),
 	REFRESH_TOKEN_EXPIRED("Refresh token이 만료됐습니다."),
 	INVALID_ACCESS_TOKEN("Access token이 유효하지 않습니다."),

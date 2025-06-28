@@ -21,12 +21,6 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	private ErrorCodeController errorCodeController;
 
-	private static List<ErrorCodeDescriptor> generateErrorCodeDescriptors(ErrorType... errorTypes) {
-		return Stream.of(errorTypes)
-			.map(e -> new ErrorCodeDescriptor(e.getStatus().value(), e.getCode().name(), e.getCode().getMessage()))
-			.toList();
-	}
-
 	@BeforeEach
 	void setUp() {
 		errorCodeController = new ErrorCodeController();
@@ -42,9 +36,14 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_IMAGE_FORMAT,
-			TOO_MANY_TAGS, DUPLICATE_TAG_NAMES, TAG_INFO_MISMATCH, IMAGE_UPLOAD_FAILED);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
+	}
+
+	@Test
+	void 태그를_포함한_이미지_목록_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_NOT_FOUND);
+		generateErrorDocs("errorCode/getImagesWithTagsByUser", errorCodeDescriptors);
 	}
 
 	@Test
@@ -67,4 +66,9 @@ class ErrorCodeControllerTest extends RestDocsTest {
 			.apply(document(identifier, new ErrorCodeSnippet(errorCodeDescriptors)));
 	}
 
+	private static List<ErrorCodeDescriptor> generateErrorCodeDescriptors(ErrorType... errorTypes) {
+		return Stream.of(errorTypes)
+			.map(e -> new ErrorCodeDescriptor(e.getStatus().value(), e.getCode().name(), e.getCode().getMessage()))
+			.toList();
+	}
 }

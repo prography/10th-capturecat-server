@@ -1,6 +1,7 @@
 dependencies {
     compileOnly 'org.springframework.boot:spring-boot-starter-test'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind'
+    compileOnly 'org.springframework.data:spring-data-commons'
     api 'org.springframework.restdocs:spring-restdocs-mockmvc'
     api 'org.springframework.restdocs:spring-restdocs-restassured'
     api 'io.rest-assured:spring-mock-mvc'
