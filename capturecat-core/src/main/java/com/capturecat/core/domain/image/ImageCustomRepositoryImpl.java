@@ -27,26 +27,26 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 
 	@Override
 	public Slice<ImageWithTagsResponse> searchByUser(User user, Pageable pageable) {
-		List<ImageWithTagsResponse> imageWithTagsResponses = queryFactory
+		List<ImageWithTagsResponse> responses = queryFactory
 			.selectFrom(image)
 			.where(image.user.eq(user))
-			.join(imageTag).on(image.id.eq(imageTag.image.id))
-			.join(tag).on(imageTag.tag.id.eq(tag.id))
+			.leftJoin(imageTag).on(image.id.eq(imageTag.image.id))
+			.leftJoin(tag).on(imageTag.tag.id.eq(tag.id))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.orderBy(image.id.desc())
 			.transform(GroupBy.groupBy(image.id).list(
-				Projections.fields(ImageWithTagsResponse.class,
+				Projections.constructor(ImageWithTagsResponse.class,
 					image.id,
 					image.fileName,
 					image.fileUrl,
-					Projections.list(Projections.fields(TagResponse.class,
+					GroupBy.list(Projections.constructor(TagResponse.class,
 							tag.id,
 							tag.name
-						)
+						).skipNulls()
 					)
-				).as("tags")));
+				)));
 
-		return SliceUtil.toSlice(imageWithTagsResponses, pageable);
+		return SliceUtil.toSlice(responses, pageable);
 	}
 }
