@@ -3,7 +3,6 @@ package com.capturecat.core.config.jwt;
 import java.io.IOException;
 
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -53,7 +52,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-		Authentication authResult) throws IOException, ServletException {
+		Authentication authResult) throws IOException {
 		//JWT 발급
 		LoginUser loginUser = (LoginUser)authResult.getPrincipal();
 		String username = loginUser.getUsername();
@@ -66,8 +65,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		saveRefreshToken(username, refreshToken);
 
 		//Header에 실어 응답
-		response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-		response.setHeader("Refresh-Token", "Bearer " + refreshToken);
+		response.setHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + accessToken);
+		response.setHeader(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + refreshToken);
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		objectMapper.writeValue(response.getWriter(), ApiResponse.success());

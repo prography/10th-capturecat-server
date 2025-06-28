@@ -31,9 +31,6 @@ import com.capturecat.core.support.response.ApiResponse;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-	private static final String BEARER_PREFIX = "Bearer ";
-	private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
-
 	private final JwtUtil jwtUtil;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -44,13 +41,13 @@ public class JwtFilter extends OncePerRequestFilter {
 		// Authorization 헤더에서 "Bearer <token>" 추출
 		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-		if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+		if (authHeader == null || !authHeader.startsWith(JwtUtil.BEARER_PREFIX)) {
 			log.info("Authorization header missing or malformed");
 			filterChain.doFilter(request, response); // 다음 필터로 넘김 (비인증 요청 허용할 수 있음)
 			return;
 		}
 
-		String accessToken = authHeader.substring(BEARER_PREFIX_LENGTH); // "Bearer " 이후 토큰
+		String accessToken = authHeader.substring(JwtUtil.BEARER_PREFIX.length()); // "Bearer " 이후 토큰
 
 		//토큰 만료 검증. 만료 시 client에 즉시 응답. client는 재발급 요청 수행.
 		try {
