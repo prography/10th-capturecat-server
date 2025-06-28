@@ -56,13 +56,13 @@ public class JwtFilter extends OncePerRequestFilter {
 		try {
 			jwtUtil.isExpired(accessToken);
 		} catch (ExpiredJwtException | SignatureException | MalformedJwtException | IllegalArgumentException e) {
-			rejectInvalidToken(response);
+			rejectInvalidToken(response, ErrorType.ACCESS_TOKEN_EXPIRED);
 			return;
 		}
 
 		// 토큰 유형 검사
 		if (!jwtUtil.isAccessToken(accessToken)) {
-			rejectInvalidToken(response);
+			rejectInvalidToken(response, ErrorType.INVALID_ACCESS_TOKEN);
 			return;
 		}
 
@@ -78,10 +78,10 @@ public class JwtFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	private void rejectInvalidToken(HttpServletResponse response) throws IOException {
+	private void rejectInvalidToken(HttpServletResponse response, ErrorType errorType) throws IOException {
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		objectMapper.writeValue(response.getWriter(), ApiResponse.error(ErrorType.INVALID_JWT));
+		objectMapper.writeValue(response.getWriter(), ApiResponse.error(errorType));
 	}
 
 }
