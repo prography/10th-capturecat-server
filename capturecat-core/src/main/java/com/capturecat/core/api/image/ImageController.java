@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,7 +47,7 @@ public class ImageController {
 
 	@DeleteMapping("/{imageId}/tags")
 	public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId,
-			@RequestBody @Valid RemoveTagsToImageRequest request) {
+			@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
 		imageService.removeTagsToImage(imageId, request.tagIds());
 		return ApiResponse.success();
 	}

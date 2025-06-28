@@ -22,7 +22,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 
-import com.capturecat.core.DummyObject;
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
@@ -32,7 +31,7 @@ import com.capturecat.core.support.error.ErrorCode;
 import com.capturecat.core.support.error.ErrorMessage;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class ImageApiTest extends DummyObject {
+class ImageApiTest {
 
 	@LocalServerPort
 	private int port;
@@ -96,7 +95,7 @@ class ImageApiTest extends DummyObject {
 	void 단일_이미지_태그_등록_시_태그_개수를_초과하면_400을_반환한다() {
 		// given
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(
-				List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
+			List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
 
 		// when
 		ErrorMessage error = RestAssured.given().log().all()

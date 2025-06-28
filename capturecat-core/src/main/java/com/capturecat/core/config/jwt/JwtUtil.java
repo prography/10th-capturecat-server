@@ -83,4 +83,8 @@ public class JwtUtil {
 	private long getExpirationForType(TokenType type) {
 		return (type == TokenType.ACCESS) ? accessTokenExpiration : refreshTokenExpiration;
 	}
+
+	public boolean isAccessToken(String accessToken) {
+		return getTokenType(accessToken).equals(TokenType.ACCESS.name());
+	}
 }

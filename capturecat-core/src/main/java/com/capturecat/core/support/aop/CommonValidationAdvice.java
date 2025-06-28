@@ -25,7 +25,10 @@ public class CommonValidationAdvice {
 	public void putMapping() {
 	}
 
-	@Around("(postMapping() || putMapping()) && within(com.capturecat.core.api.user..*)") //우선 user 패키지 하위에만 적용
+	/**
+	 * validation error 가 있으면 이곳에서 공통 예외 처리를 한다.
+	 */
+	@Around("postMapping() || putMapping()")
 	public Object validationAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
 		Object[] args = joinPoint.getArgs();
 		for (Object arg : args) {

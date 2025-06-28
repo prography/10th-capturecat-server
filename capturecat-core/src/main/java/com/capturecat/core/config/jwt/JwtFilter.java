@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +31,9 @@ import com.capturecat.core.support.response.ApiResponse;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+	private static final String BEARER_PREFIX = "Bearer ";
+	private static final int BEARER_PREFIX_LENGTH = BEARER_PREFIX.length();
+
 	private final JwtUtil jwtUtil;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -38,15 +42,15 @@ public class JwtFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws ServletException, IOException {
 
 		// Authorization 헤더에서 "Bearer <token>" 추출
-		String authHeader = request.getHeader("Authorization");
+		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+		if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
 			log.info("Authorization header missing or malformed");
 			filterChain.doFilter(request, response); // 다음 필터로 넘김 (비인증 요청 허용할 수 있음)
 			return;
 		}
 
-		String accessToken = authHeader.substring(7); // "Bearer " 이후 토큰
+		String accessToken = authHeader.substring(BEARER_PREFIX_LENGTH); // "Bearer " 이후 토큰
 
 		//토큰 만료 검증. 만료 시 client에 즉시 응답. client는 재발급 요청 수행.
 		try {
@@ -57,7 +61,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 
 		// 토큰 유형 검사
-		if (!TokenType.ACCESS.name().equals(jwtUtil.getTokenType(accessToken))) {
+		if (!jwtUtil.isAccessToken(accessToken)) {
 			rejectInvalidToken(response);
 			return;
 		}
