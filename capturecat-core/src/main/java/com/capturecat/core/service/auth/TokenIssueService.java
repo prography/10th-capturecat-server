@@ -65,17 +65,16 @@ public class TokenIssueService {
 		String refreshToken = authHeader.substring(JwtUtil.BEARER_PREFIX.length()).trim();
 		log.info("Refresh Token: {}", refreshToken);
 
-		if (refreshToken.isEmpty()
-			|| !jwtUtil.isRefreshToken(refreshToken)
-			|| !refreshTokenRepository.existsByRefreshToken(refreshToken)) {
-			throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
-		}
-
-		//토큰 만료 검사
 		try {
-			jwtUtil.isExpired(refreshToken);
-		} catch (ExpiredJwtException | SignatureException | MalformedJwtException | IllegalArgumentException e) {
+			if (refreshToken.isEmpty()
+				|| !jwtUtil.isRefreshToken(refreshToken) //토큰 만료 검사 포함
+				|| !refreshTokenRepository.existsByRefreshToken(refreshToken)) {
+				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
+			}
+		} catch (ExpiredJwtException e) {
 			throw new CoreException(ErrorType.REFRESH_TOKEN_EXPIRED);
+		} catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
+			throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
 		}
 
 		return refreshToken;

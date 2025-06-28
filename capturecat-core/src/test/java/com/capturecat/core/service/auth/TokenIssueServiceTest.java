@@ -111,13 +111,11 @@ class TokenIssueServiceTest {
 	}
 
 	@Test
-	@DisplayName("validateRefreshToken(): 토큰 만료 시 REFRESH_TOKEN_EXPIRED 예외 발생")
-	void validateRefreshToken_Expired_ThrowsExpired() {
+	@DisplayName("parseRefreshToken(): 토큰 만료 시 REFRESH_TOKEN_EXPIRED 예외 발생")
+	void parseRefreshToken_Expired_ThrowsExpired() {
 		String header = JwtUtil.BEARER_PREFIX + "expired-token";
-		given(jwtUtil.isRefreshToken("expired-token")).willReturn(true);
-		given(refreshTokenRepository.existsByRefreshToken("expired-token")).willReturn(true);
 		willThrow(new ExpiredJwtException(null, null, "expired"))
-			.given(jwtUtil).isExpired("expired-token");
+			.given(jwtUtil).isRefreshToken("expired-token");
 
 		assertThatThrownBy(() -> tokenIssueService.parseRefreshToken(header))
 			.isInstanceOf(CoreException.class)

@@ -22,7 +22,6 @@ import com.capturecat.core.support.response.ApiResponse;
 @RequiredArgsConstructor
 public class TokenIssueController {
 
-	private final JwtUtil jwtUtil;
 	private final TokenIssueService tokenIssueService;
 
 	@PostMapping("/reissue")
