@@ -18,6 +18,7 @@ import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
+import com.capturecat.core.support.util.CursorUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +37,6 @@ public class TagService {
 		Slice<Tag> tags = tagRepository.searchUserTagsByUser(user, pageable);
 		Slice<TagResponse> responses = tags.map(TagResponse::from);
 
-		if (responses.isEmpty()) {
-			return CursorResponse.empty();
-		} else {
-			Long lastCursor = responses.getContent().getLast().id();
-			return CursorResponse.of(responses, lastCursor);
-		}
+		return CursorUtil.toCursorResponse(responses, TagResponse::id);
 	}
 }

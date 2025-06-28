@@ -29,6 +29,7 @@ import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
+import com.capturecat.core.support.util.CursorUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -98,12 +99,7 @@ public class ImageService {
 		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, pageable)
 			.map(ImageWithTagsResponse::of);
 
-		if (responses.isEmpty()) {
-			return CursorResponse.empty();
-		} else {
-			Long lastCursor = responses.getContent().getLast().id();
-			return CursorResponse.of(responses, lastCursor);
-		}
+		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}
 
 	@Transactional
