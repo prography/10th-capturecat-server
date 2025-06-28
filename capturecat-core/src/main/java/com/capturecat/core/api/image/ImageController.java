@@ -29,7 +29,7 @@ import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.core.support.response.CursorResponse;
 
 @RestController
-@RequestMapping(("/v1/images"))
+@RequestMapping("/v1/images")
 @RequiredArgsConstructor
 public class ImageController {
 

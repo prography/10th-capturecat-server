@@ -94,7 +94,9 @@ public class ImageService {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
-		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, pageable);
+		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, pageable)
+			.map(ImageWithTagsResponse::of);
+
 		if (responses.isEmpty()) {
 			return CursorResponse.empty();
 		} else {
@@ -105,7 +107,8 @@ public class ImageService {
 
 	@Transactional
 	public void removeTagsToImage(Long imageId, List<Long> tagIds) {
-		Image image = imageRepository.findById(imageId).orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+		Image image = imageRepository.findById(imageId)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 		List<ImageTag> imageTags = imageTagRepository.findByImageAndTagIds(image, tagIds);
 		if (imageTags.isEmpty()) {
 			return;
