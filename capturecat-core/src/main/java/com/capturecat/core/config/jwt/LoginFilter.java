@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.LoginReqDto;
-import com.capturecat.core.api.user.dto.UserReqDto.LoginRespDto;
 import com.capturecat.core.config.auth.LoginUser;
 import com.capturecat.core.domain.user.RefreshToken;
 import com.capturecat.core.domain.user.RefreshTokenRepository;
@@ -65,10 +65,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		//Refresh token 저장
 		saveRefreshToken(username, refreshToken);
 
-		//발급 토큰 응답
-		response.setStatus(HttpStatus.OK.value());
+		//Header에 실어 응답
+		response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+		response.setHeader("Refresh-Token", "Bearer " + refreshToken);
+		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		objectMapper.writeValue(response.getWriter(), ApiResponse.success(new LoginRespDto(accessToken, refreshToken)));
+		objectMapper.writeValue(response.getWriter(), ApiResponse.success());
 	}
 
 	@Override
