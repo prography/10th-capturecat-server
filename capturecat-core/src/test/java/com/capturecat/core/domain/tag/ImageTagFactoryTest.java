@@ -15,7 +15,7 @@ class ImageTagFactoryTest {
 	@Test
 	void 이미지와_태그_리스트를_받아_ImageTag_리스트를_생성한다() {
 		// given
-		Image image = new Image();
+		Image image = Image.builder().build();
 		Tag tag1 = new Tag("java");
 		Tag tag2 = new Tag("spring");
 

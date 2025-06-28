@@ -1,10 +1,12 @@
 package com.capturecat.core.domain.tag;
 
+import static com.capturecat.core.DummyObject.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.capturecat.core.DummyObject;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -35,7 +36,7 @@ class TagValidatorTest {
 
 	@BeforeEach
 	void setUp() {
-		image = DummyObject.newMockImage(1L);
+		image = newMockImage(1L);
 	}
 
 	@Test

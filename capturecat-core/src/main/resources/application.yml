@@ -26,3 +26,8 @@ logging:
     org:
       hibernate.orm.jdbc.bind: TRACE  # sql 파라미터 바인딩
       springframework.security: DEBUG
+
+jwt:
+  secret: capture_cat_jwt_secret_key_capture_cat_jwt_secret_key
+  access-token-expiration: 3600000       # 1시간
+  refresh-token-expiration: 604800000    # 7일

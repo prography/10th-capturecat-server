@@ -13,7 +13,11 @@ public enum ErrorCode {
 	INVALID_REQUEST("잘못된 요청입니다."),
 	TAG_INFO_MISMATCH("업로드된 이미지 파일에 대한 태그 정보를 찾거나 매칭할 수 없습니다."),
 	DUPLICATE_TAG_NAMES("중복된 태그는 허용되지 않습니다."),
-	ALREADY_REGISTERED_TAGS("이미 등록된 태그입니다.");
+	ALREADY_REGISTERED_TAGS("이미 등록된 태그입니다."),
+	BEAN_VALIDATION_FAIL("입력 데이터 오류입니다."),
+	INVALID_TOKEN("유효하지 않은 토큰입니다."),
+	ALREADY_EXISTS_USERNAME("이미 등록된 회원 이름입니다."),
+	UNKNOWN_ROLE("존재하지 않는 권한입니다.");
 
 	private final String message;
 

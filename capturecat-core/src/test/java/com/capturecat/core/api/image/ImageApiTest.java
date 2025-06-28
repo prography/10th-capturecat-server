@@ -52,7 +52,7 @@ class ImageApiTest {
 	void setUp() {
 		RestAssured.port = port;
 		// 임시 초기화 작업
-		imageId = imageRepository.save(new Image()).getId();
+		imageId = imageRepository.save(Image.builder().build()).getId();
 	}
 
 	@Test
@@ -95,7 +95,7 @@ class ImageApiTest {
 	void 단일_이미지_태그_등록_시_태그_개수를_초과하면_400을_반환한다() {
 		// given
 		AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(
-				List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
+			List.of("tag1", "tag2", "tag3", "tag4", "tag5"));
 
 		// when
 		ErrorMessage error = RestAssured.given().log().all()
@@ -154,8 +154,8 @@ class ImageApiTest {
 		ErrorMessage 오류_메시지 = 태그_삭제_응답.jsonPath().getObject("error", ErrorMessage.class);
 		assertSoftly(softly -> {
 			softly.assertThat(태그_삭제_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-			softly.assertThat(오류_메시지.code()).isEqualTo(ErrorCode.INVALID_REQUEST.name());
-			softly.assertThat(오류_메시지.message()).isEqualTo(ErrorCode.INVALID_REQUEST.getMessage());
+			softly.assertThat(오류_메시지.code()).isEqualTo(ErrorCode.BEAN_VALIDATION_FAIL.name());
+			softly.assertThat(오류_메시지.message()).isEqualTo(ErrorCode.BEAN_VALIDATION_FAIL.getMessage());
 		});
 	}
 
