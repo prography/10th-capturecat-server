@@ -52,6 +52,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/removeTagsToImage", errorCodeDescriptors);
 	}
 
+	@Test
+	void 태그_목록_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getTags", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")

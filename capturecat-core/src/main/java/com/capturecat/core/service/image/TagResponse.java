@@ -8,7 +8,11 @@ public record TagResponse(Long id, String name) {
 
 	public static List<TagResponse> from(List<Tag> tags) {
 		return tags.stream()
-			.map(tag -> new TagResponse(tag.getId(), tag.getName()))
+			.map(TagResponse::from)
 			.toList();
+	}
+
+	public static TagResponse from(Tag tag) {
+		return new TagResponse(tag.getId(), tag.getName());
 	}
 }

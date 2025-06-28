@@ -43,6 +43,7 @@ public class ImageService {
 	private final UserRepository userRepository;
 
 	@Transactional
+	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
