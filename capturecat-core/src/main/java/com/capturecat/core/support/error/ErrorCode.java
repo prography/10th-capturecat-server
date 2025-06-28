@@ -16,7 +16,8 @@ public enum ErrorCode {
 	ALREADY_REGISTERED_TAGS("이미 등록된 태그입니다."),
 	BEAN_VALIDATION_FAIL("입력 데이터 오류입니다."),
 	INVALID_TOKEN("유효하지 않은 토큰입니다."),
-	ALREADY_EXISTS_USERNAME("이미 등록된 회원 이름입니다.");
+	ALREADY_EXISTS_USERNAME("이미 등록된 회원 이름입니다."),
+	UNKNOWN_ROLE("존재하지 않는 권한입니다.");
 
 	private final String message;
 

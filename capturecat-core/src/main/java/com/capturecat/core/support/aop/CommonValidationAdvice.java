@@ -9,6 +9,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -25,10 +26,14 @@ public class CommonValidationAdvice {
 	public void putMapping() {
 	}
 
+	@Pointcut("@annotation(org.springframework.web.bind.annotation.DeleteMapping)")
+	public void deleteMapping() {
+	}
+
 	/**
 	 * validation error 가 있으면 이곳에서 공통 예외 처리를 한다.
 	 */
-	@Around("postMapping() || putMapping()")
+	@Around("postMapping() || putMapping() || deleteMapping()")
 	public Object validationAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
 		Object[] args = joinPoint.getArgs();
 		for (Object arg : args) {

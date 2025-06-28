@@ -84,7 +84,7 @@ class JwtFilterTest {
 		request.addHeader("Authorization", "Bearer valid.token");
 
 		when(jwtUtil.isExpired("valid.token")).thenReturn(false);
-		when(jwtUtil.getTokenType("valid.token")).thenReturn("ACCESS");
+		when(jwtUtil.isAccessToken("valid.token")).thenReturn(true);
 		when(jwtUtil.getUsername("valid.token")).thenReturn("user1");
 		when(jwtUtil.getRole("valid.token")).thenReturn("ROLE_USER");
 

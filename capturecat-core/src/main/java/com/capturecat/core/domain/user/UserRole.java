@@ -3,6 +3,9 @@ package com.capturecat.core.domain.user;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import com.capturecat.core.support.error.CoreException;
+import com.capturecat.core.support.error.ErrorType;
+
 @Getter
 @AllArgsConstructor
 public enum UserRole {
@@ -17,7 +20,7 @@ public enum UserRole {
 			case "ROLE_ADMIN" -> ADMIN;
 			case "ROLE_PREMIUM_USER" -> PREMIUM_USER;
 			case "ROLE_USER" -> USER;
-			default -> throw new IllegalArgumentException("Unknown role: " + roleName);
+			default -> throw new CoreException(ErrorType.UNKNOWN_ROLE);
 		};
 	}
 }

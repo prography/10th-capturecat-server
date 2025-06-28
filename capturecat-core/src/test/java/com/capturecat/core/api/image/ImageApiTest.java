@@ -154,8 +154,8 @@ class ImageApiTest {
 		ErrorMessage 오류_메시지 = 태그_삭제_응답.jsonPath().getObject("error", ErrorMessage.class);
 		assertSoftly(softly -> {
 			softly.assertThat(태그_삭제_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-			softly.assertThat(오류_메시지.code()).isEqualTo(ErrorCode.INVALID_REQUEST.name());
-			softly.assertThat(오류_메시지.message()).isEqualTo(ErrorCode.INVALID_REQUEST.getMessage());
+			softly.assertThat(오류_메시지.code()).isEqualTo(ErrorCode.BEAN_VALIDATION_FAIL.name());
+			softly.assertThat(오류_메시지.message()).isEqualTo(ErrorCode.BEAN_VALIDATION_FAIL.getMessage());
 		});
 	}
 
