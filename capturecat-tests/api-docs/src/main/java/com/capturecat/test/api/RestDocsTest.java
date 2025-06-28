@@ -2,6 +2,7 @@ package com.capturecat.test.api;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -61,6 +62,7 @@ public abstract class RestDocsTest {
 		return MockMvcBuilders.standaloneSetup(controller)
 			.apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
 			.setMessageConverters(converter)
+			.setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
 			.build();
 	}
 
