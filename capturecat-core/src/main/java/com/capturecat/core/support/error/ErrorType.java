@@ -22,7 +22,7 @@ public enum ErrorType {
 	VALIDATION_FAIL(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN),
 	INVALID_JWT(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN),
 	UNKNOWN_ROLE(HttpStatus.BAD_REQUEST, ErrorCode.BEAN_VALIDATION_FAIL, LogLevel.WARN),
-	USER_NOT_FOUND(HttpStatus.BAD_REQUEST, ErrorCode.NOT_FOUND_USER, LogLevel.WARN);
+	USER_NOT_FOUND(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND_USER, LogLevel.WARN);
 
 	private final HttpStatus status;
 
