@@ -18,17 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
-import com.capturecat.core.service.auth.TokenIssueService;
+import com.capturecat.core.service.auth.TokenService;
 
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest
-class TokenIssueApiTest {
+class TokenApiTest {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
-	private TokenIssueService tokenIssueService;
+	private TokenService tokenIssueService;
 
 	private String refreshHeaderValue;
 

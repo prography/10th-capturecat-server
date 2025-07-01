@@ -31,7 +31,7 @@ import com.capturecat.core.support.error.ErrorType;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class LoginFilterTest {
+class JwtLoginFilterTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 

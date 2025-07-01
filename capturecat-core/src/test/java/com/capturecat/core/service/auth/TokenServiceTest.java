@@ -22,13 +22,13 @@ import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
 @ExtendWith(MockitoExtension.class)
-class TokenIssueServiceTest {
+class TokenServiceTest {
 
 	String username = "testUser";
 	String role = "ROLE_USER";
 
 	@InjectMocks
-	private TokenIssueService tokenIssueService;
+	private TokenService tokenService;
 
 	@Mock
 	private JwtUtil jwtUtil;
@@ -46,7 +46,7 @@ class TokenIssueServiceTest {
 			.willReturn("refreshToken");
 
 		// when
-		Map<TokenType, String> tokenMap = tokenIssueService.issue(username, role);
+		Map<TokenType, String> tokenMap = tokenService.issue(username, role);
 
 		// then
 		assertThat(tokenMap)
@@ -61,16 +61,16 @@ class TokenIssueServiceTest {
 	@DisplayName("reissue(): 기존 리프레시 토큰 삭제 후 새로운 토큰을 발급한다")
 	void reissue_ShouldDeleteOldAndIssueNewTokens() {
 		// given
-		String oldRefresh = "new-refresh";
+		String oldRefresh = "old-refresh";
 		given(jwtUtil.getUsername(oldRefresh)).willReturn(username);
 		given(jwtUtil.getRole(oldRefresh)).willReturn(role);
-		given(jwtUtil.generateToken(username, role, TokenType.ACCESS))
-			.willReturn("new-access");
-		given(jwtUtil.generateToken(username, role, TokenType.REFRESH))
-			.willReturn("new-refresh");
+		given(jwtUtil.generateToken(username, role, TokenType.ACCESS)).willReturn("new-access");
+		given(jwtUtil.generateToken(username, role, TokenType.REFRESH)).willReturn("new-refresh");
+		given(jwtUtil.isRefreshToken(oldRefresh)).willReturn(true);
+		given(refreshTokenRepository.existsByRefreshToken(oldRefresh)).willReturn(true);
 
 		// when
-		Map<TokenType, String> tokens = tokenIssueService.reissue(oldRefresh);
+		Map<TokenType, String> tokens = tokenService.reissue(JwtUtil.BEARER_PREFIX + oldRefresh);
 
 		// then
 		then(refreshTokenRepository).should().deleteByRefreshToken(oldRefresh);
@@ -84,7 +84,7 @@ class TokenIssueServiceTest {
 	@Test
 	@DisplayName("parseRefreshToken(): 헤더가 null이면 INVALID_REFRESH_TOKEN 예외 발생")
 	void parseRefreshToken_NullHeader_ThrowsInvalid() {
-		assertThatThrownBy(() -> tokenIssueService.parseRefreshToken(null))
+		assertThatThrownBy(() -> tokenService.parseRefreshToken(null))
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_REFRESH_TOKEN);
 	}
@@ -93,7 +93,7 @@ class TokenIssueServiceTest {
 	@DisplayName("parseRefreshToken(): 잘못된 프리픽스이면 INVALID_REFRESH_TOKEN 예외 발생")
 	void parseRefreshToken_InvalidPrefix_ThrowsInvalid() {
 		String badHeader = "Token abc";
-		assertThatThrownBy(() -> tokenIssueService.parseRefreshToken(badHeader))
+		assertThatThrownBy(() -> tokenService.parseRefreshToken(badHeader))
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_REFRESH_TOKEN);
 	}
@@ -105,7 +105,7 @@ class TokenIssueServiceTest {
 		given(jwtUtil.isRefreshToken("some-token")).willReturn(true);
 		given(refreshTokenRepository.existsByRefreshToken("some-token")).willReturn(false);
 
-		assertThatThrownBy(() -> tokenIssueService.parseRefreshToken(header))
+		assertThatThrownBy(() -> tokenService.parseRefreshToken(header))
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_REFRESH_TOKEN);
 	}
@@ -117,7 +117,7 @@ class TokenIssueServiceTest {
 		willThrow(new ExpiredJwtException(null, null, "expired"))
 			.given(jwtUtil).isRefreshToken("expired-token");
 
-		assertThatThrownBy(() -> tokenIssueService.parseRefreshToken(header))
+		assertThatThrownBy(() -> tokenService.parseRefreshToken(header))
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.REFRESH_TOKEN_EXPIRED);
 	}
@@ -130,7 +130,7 @@ class TokenIssueServiceTest {
 		given(refreshTokenRepository.existsByRefreshToken("valid-token")).willReturn(true);
 		// isExpired 호출 시 예외 없이 통과
 		// when
-		String result = tokenIssueService.parseRefreshToken(header);
+		String result = tokenService.parseRefreshToken(header);
 
 		// then
 		assertThat(result).isEqualTo("valid-token");
