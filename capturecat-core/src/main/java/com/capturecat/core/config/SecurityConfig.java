@@ -21,7 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import com.capturecat.core.config.jwt.JwtFilter;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.LoginFilter;
-import com.capturecat.core.domain.user.RefreshTokenRepository;
+import com.capturecat.core.domain.auth.RefreshTokenRepository;
+import com.capturecat.core.service.auth.TokenIssueService;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class SecurityConfig {
 
 	private final AuthenticationConfiguration authenticationConfiguration;
 	private final JwtUtil jwtUtil;
-	private final RefreshTokenRepository refreshTokenRepository;
+	private final TokenIssueService tokenIssueService;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -47,14 +48,13 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
 			.addFilterAt(
-				new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshTokenRepository),
+				new LoginFilter(authenticationManager(authenticationConfiguration), tokenIssueService),
 				UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(
-				authorizeRequests -> authorizeRequests.requestMatchers("/health", "/docs/**", "/v1/**")
-					// .hasRole("USER")
-					.permitAll()
-					.anyRequest()
-					.authenticated());
+				authorizeRequests -> authorizeRequests
+					.requestMatchers("/health", "/docs/**", "/v1/**").permitAll()// .hasRole("USER")
+					.requestMatchers("/token/reissue").permitAll()
+					.anyRequest().authenticated());
 
 		return http.build();
 	}

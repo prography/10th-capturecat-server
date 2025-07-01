@@ -1,4 +1,4 @@
-package com.capturecat.core.domain.user;
+package com.capturecat.core.domain.auth;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;

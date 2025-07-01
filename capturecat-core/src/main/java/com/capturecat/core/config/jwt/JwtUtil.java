@@ -17,6 +17,9 @@ import io.jsonwebtoken.Jwts;
 @Component
 public class JwtUtil {
 
+	public static final String BEARER_PREFIX = "Bearer ";
+	public static final String REFRESH_TOKEN_HEADER = "Refresh-Token";
+
 	@Value("${jwt.secret}")
 	private String secretKeyPlain;
 
@@ -80,11 +83,15 @@ public class JwtUtil {
 		return extractClaims(token).get("type", String.class);
 	}
 
-	private long getExpirationForType(TokenType type) {
-		return (type == TokenType.ACCESS) ? accessTokenExpiration : refreshTokenExpiration;
-	}
-
 	public boolean isAccessToken(String accessToken) {
 		return getTokenType(accessToken).equals(TokenType.ACCESS.name());
+	}
+
+	public boolean isRefreshToken(String refreshToken) {
+		return getTokenType(refreshToken).equals(TokenType.REFRESH.name());
+	}
+
+	private long getExpirationForType(TokenType type) {
+		return (type == TokenType.ACCESS) ? accessTokenExpiration : refreshTokenExpiration;
 	}
 }
