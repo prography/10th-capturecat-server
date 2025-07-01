@@ -14,15 +14,16 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.config.jwt.JwtFilter;
+import com.capturecat.core.config.jwt.JwtLoginFilter;
+import com.capturecat.core.config.jwt.JwtLogoutFilter;
 import com.capturecat.core.config.jwt.JwtUtil;
-import com.capturecat.core.config.jwt.LoginFilter;
-import com.capturecat.core.domain.auth.RefreshTokenRepository;
-import com.capturecat.core.service.auth.TokenIssueService;
+import com.capturecat.core.service.auth.TokenService;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class SecurityConfig {
 
 	private final AuthenticationConfiguration authenticationConfiguration;
 	private final JwtUtil jwtUtil;
-	private final TokenIssueService tokenIssueService;
+	private final TokenService tokenService;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -46,10 +47,11 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
-			.addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+			.addFilterBefore(new JwtFilter(jwtUtil), JwtLoginFilter.class)
 			.addFilterAt(
-				new LoginFilter(authenticationManager(authenticationConfiguration), tokenIssueService),
+				new JwtLoginFilter(authenticationManager(authenticationConfiguration), tokenService),
 				UsernamePasswordAuthenticationFilter.class)
+			.addFilterAt(new JwtLogoutFilter(tokenService), LogoutFilter.class)
 			.authorizeHttpRequests(
 				authorizeRequests -> authorizeRequests
 					.requestMatchers("/health", "/docs/**", "/v1/**").permitAll()// .hasRole("USER")
