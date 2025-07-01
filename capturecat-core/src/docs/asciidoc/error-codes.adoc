@@ -26,3 +26,6 @@ include::{snippets}/errorCode/removeTagsToImage/error-codes.adoc[]
 === 태그 포함 이미지 목록 조회
 include::{snippets}/errorCode/getImagesWithTagsByUser/error-codes.adoc[]
 
+[[태그-목록-조회]]
+=== 태그 목록 조회
+include::{snippets}/errorCode/getTags/error-codes.adoc[]

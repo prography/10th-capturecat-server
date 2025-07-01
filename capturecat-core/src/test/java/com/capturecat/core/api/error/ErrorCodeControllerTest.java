@@ -53,6 +53,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 태그_목록_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getTags", errorCodeDescriptors);
+	}
+
+	@Test
 	void 토큰_재발행_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
 			REFRESH_TOKEN_EXPIRED);
