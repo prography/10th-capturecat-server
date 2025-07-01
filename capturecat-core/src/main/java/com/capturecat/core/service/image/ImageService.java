@@ -113,6 +113,19 @@ public class ImageService {
 		imageTagRepository.deleteAll(imageTags);
 	}
 
+	@Transactional(readOnly = true)
+	public CursorResponse<ImageWithTagsResponse> searchImagesByTagNames(List<String> tagNames, Pageable pageable) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		Slice<ImageWithTagsResponse> responses = imageRepository.searchImagesByUserAndTagNames(user, tagNames, pageable)
+			.map(ImageWithTagsResponse::of);
+
+		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
+	}
+
 	private void validate(MultipartFile file) {
 		String contentType = file.getContentType();
 		if (contentType == null || !contentType.startsWith("image/")) {

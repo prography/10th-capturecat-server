@@ -116,7 +116,7 @@ class ImageControllerTest extends RestDocsTest {
 	void 태그와_이미지를_조회한다() {
 		// given
 		BDDMockito.given(imageService.getImagesWithTags(any(Pageable.class)))
-			.willReturn(new CursorResponse(false, 1L,
+			.willReturn(new CursorResponse<>(false, 1L,
 				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
 
@@ -131,6 +131,42 @@ class ImageControllerTest extends RestDocsTest {
 					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
 					parameterWithName("size").description("페이지 크기 (기본값: 20, 최대: 100)").optional()
 				),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("이미지 및 태그 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
+					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.items[].tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
+					fieldWithPath("data.items[].tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.items[].tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 태그로_이미지를_검색한다() {
+		// given
+		List<String> tagNames = List.of("tag1", "tag2");
+
+		BDDMockito.given(imageService.searchImagesByTagNames(any(), any(Pageable.class)))
+			.willReturn(new CursorResponse<>(false, 1L,
+				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
+					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.param("tagNames", tagNames)
+			.param("page", 0)
+			.param("size", 20)
+			.when().get(URL_PREFIX + "/search")
+			.then().status(HttpStatus.OK)
+			.apply(document("searchImagesByTag", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(
+					parameterWithName("tagNames").description("검색하는 태그 리스트").optional(),
+					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+					parameterWithName("size").description("페이지 크기 (기본값: 20, 최대: 100)").optional()),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
@@ -165,5 +201,4 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
 					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
 	}
-
 }

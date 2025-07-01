@@ -65,6 +65,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
 	}
 
+	@Test
+	void 태그로_이미지_검색_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/searchImagesByTags", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")
@@ -72,7 +78,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 			.apply(document(identifier, new ErrorCodeSnippet(errorCodeDescriptors)));
 	}
 
-	private static List<ErrorCodeDescriptor> generateErrorCodeDescriptors(ErrorType... errorTypes) {
+	private List<ErrorCodeDescriptor> generateErrorCodeDescriptors(ErrorType... errorTypes) {
 		return Stream.of(errorTypes)
 			.map(e -> new ErrorCodeDescriptor(e.getStatus().value(), e.getCode().name(), e.getCode().getMessage()))
 			.toList();
