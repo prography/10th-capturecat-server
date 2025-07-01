@@ -1,4 +1,4 @@
-package com.capturecat.core.domain.user;
+package com.capturecat.core.domain.auth;
 
 import java.util.Date;
 
@@ -27,6 +27,7 @@ public class RefreshToken {
 	private String username;
 	private String refreshToken;
 	private String expiration;
+
 	@Value("${jwt.refresh-token-expiration}")
 	private long refreshTokenExpiration;
 

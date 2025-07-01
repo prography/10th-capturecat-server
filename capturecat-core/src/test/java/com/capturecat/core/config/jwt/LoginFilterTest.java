@@ -1,6 +1,7 @@
 package com.capturecat.core.config.jwt;
 
 import static com.capturecat.core.DummyObject.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -57,9 +59,13 @@ class LoginFilterTest {
 			.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isOk())
+			// Authorization 헤더 검사
+			.andExpect(header().exists(HttpHeaders.AUTHORIZATION))
+			.andExpect(header().string(HttpHeaders.AUTHORIZATION, startsWith("Bearer ")))
+			// Refresh-Token 헤더 검사
+			.andExpect(header().exists("Refresh-Token"))
+			.andExpect(header().string("Refresh-Token", startsWith("Bearer ")))
 			.andExpect(jsonPath("$.result").value("SUCCESS"))
-			.andExpect(jsonPath("$.data.accessToken").isNotEmpty())
-			.andExpect(jsonPath("$.data.refreshToken").isNotEmpty())
 			.andExpect(jsonPath("$.error").doesNotExist());
 	}
 
