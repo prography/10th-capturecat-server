@@ -29,6 +29,7 @@ import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
+import com.capturecat.core.support.util.CursorUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ public class ImageService {
 	private final UserRepository userRepository;
 
 	@Transactional
+	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
@@ -97,12 +99,7 @@ public class ImageService {
 		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, pageable)
 			.map(ImageWithTagsResponse::of);
 
-		if (responses.isEmpty()) {
-			return CursorResponse.empty();
-		} else {
-			Long lastCursor = responses.getContent().getLast().id();
-			return CursorResponse.of(responses, lastCursor);
-		}
+		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}
 
 	@Transactional
@@ -114,6 +111,19 @@ public class ImageService {
 			return;
 		}
 		imageTagRepository.deleteAll(imageTags);
+	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<ImageWithTagsResponse> searchImagesByTagNames(List<String> tagNames, Pageable pageable) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		Slice<ImageWithTagsResponse> responses = imageRepository.searchImagesByUserAndTagNames(user, tagNames, pageable)
+			.map(ImageWithTagsResponse::of);
+
+		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}
 
 	private void validate(MultipartFile file) {

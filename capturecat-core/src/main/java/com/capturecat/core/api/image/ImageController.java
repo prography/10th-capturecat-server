@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +55,13 @@ public class ImageController {
 	public ApiResponse<CursorResponse<ImageWithTagsResponse>> getImagesByUser(
 			@PageableDefault(size = 20) Pageable pageable) {
 		return ApiResponse.success(imageService.getImagesWithTags(pageable));
+	}
+
+	@GetMapping("/search")
+	public ApiResponse<CursorResponse<ImageWithTagsResponse>> searchImagesByTags(@RequestParam List<String> tagNames,
+		@PageableDefault(size = 20) Pageable pageable) {
+		CursorResponse<ImageWithTagsResponse> responses = imageService.searchImagesByTagNames(tagNames, pageable);
+		return ApiResponse.success(responses);
 	}
 
 	@DeleteMapping("/{imageId}/tags")

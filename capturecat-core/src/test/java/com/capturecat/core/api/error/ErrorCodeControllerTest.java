@@ -53,10 +53,22 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 태그_목록_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getTags", errorCodeDescriptors);
+	}
+
+	@Test
 	void 토큰_재발행_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
 			REFRESH_TOKEN_EXPIRED);
 		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
+	}
+
+	@Test
+	void 태그로_이미지_검색_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/searchImagesByTags", errorCodeDescriptors);
 	}
 
 	@Test
@@ -73,7 +85,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 			.apply(document(identifier, new ErrorCodeSnippet(errorCodeDescriptors)));
 	}
 
-	private static List<ErrorCodeDescriptor> generateErrorCodeDescriptors(ErrorType... errorTypes) {
+	private List<ErrorCodeDescriptor> generateErrorCodeDescriptors(ErrorType... errorTypes) {
 		return Stream.of(errorTypes)
 			.map(e -> new ErrorCodeDescriptor(e.getStatus().value(), e.getCode().name(), e.getCode().getMessage()))
 			.toList();
