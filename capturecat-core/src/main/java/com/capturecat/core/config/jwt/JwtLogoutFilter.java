@@ -48,22 +48,23 @@ public class JwtLogoutFilter extends GenericFilterBean {
 			return;
 		}
 
+		String refreshHeader = request.getHeader(JwtUtil.REFRESH_TOKEN_HEADER);
 		// 로그아웃
 		try {
-			String refreshHeader = request.getHeader(JwtUtil.REFRESH_TOKEN_HEADER);
+			if (refreshHeader == null || refreshHeader.isEmpty()) {
+				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
+			}
 			tokenService.deleteRefreshToken(refreshHeader);
 		} catch (CoreException e) {
-			rejectInvalidToken(response, ErrorType.INVALID_REFRESH_TOKEN);
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+			objectMapper.writeValue(response.getWriter(), ApiResponse.error(ErrorType.INVALID_REFRESH_TOKEN));
 			return;
 		}
 
 		// 성공 응답
 		response.setStatus(HttpStatus.OK.value());
-	}
-
-	private void rejectInvalidToken(HttpServletResponse response, ErrorType errorType) throws IOException {
-		response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		objectMapper.writeValue(response.getWriter(), ApiResponse.error(errorType));
+		objectMapper.writeValue(response.getWriter(), ApiResponse.success());
 	}
 }
