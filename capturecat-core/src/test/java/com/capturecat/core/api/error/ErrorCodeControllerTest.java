@@ -59,6 +59,13 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
 	}
 
+	@Test
+	void 로그아웃_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
+			REFRESH_TOKEN_EXPIRED);
+		generateErrorDocs("errorCode/logout", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")

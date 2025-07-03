@@ -58,7 +58,7 @@ public class JwtLogoutFilter extends GenericFilterBean {
 		} catch (CoreException e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-			objectMapper.writeValue(response.getWriter(), ApiResponse.error(ErrorType.INVALID_REFRESH_TOKEN));
+			objectMapper.writeValue(response.getWriter(), ApiResponse.error(e.getErrorType()));
 			return;
 		}
 

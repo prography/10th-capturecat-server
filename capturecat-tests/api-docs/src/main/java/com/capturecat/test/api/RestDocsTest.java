@@ -24,7 +24,7 @@ public abstract class RestDocsTest {
 
 	protected MockMvcRequestSpecification mockMvc;
 
-	private RestDocumentationContextProvider restDocumentation;
+	protected RestDocumentationContextProvider restDocumentation;
 
 	@BeforeEach
 	public void setUp(RestDocumentationContextProvider restDocumentation) {
