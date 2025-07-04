@@ -54,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			jwtUtil.isExpired(accessToken);
 		} catch (ExpiredJwtException | SignatureException | MalformedJwtException | IllegalArgumentException e) {
 			rejectInvalidToken(response, ErrorType.ACCESS_TOKEN_EXPIRED);
-			return;
+
 		}
 
 		// 토큰 유형 검사

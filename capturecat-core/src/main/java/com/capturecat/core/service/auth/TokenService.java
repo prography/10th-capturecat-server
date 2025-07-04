@@ -23,7 +23,7 @@ import com.capturecat.core.support.error.ErrorType;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TokenIssueService {
+public class TokenService {
 
 	private final JwtUtil jwtUtil;
 	private final RefreshTokenRepository refreshTokenRepository;
@@ -47,10 +47,8 @@ public class TokenIssueService {
 		return tokenMap;
 	}
 
-	public Map<TokenType, String> reissue(String refreshToken) {
-		//기존 Refresh 토큰 삭제
-		refreshTokenRepository.deleteByRefreshToken(refreshToken);
-
+	public Map<TokenType, String> reissue(String authHeader) {
+		String refreshToken = deleteRefreshToken(authHeader);
 		//새 토큰 발급 후 Refresh 토큰 저장
 		return issue(jwtUtil.getUsername(refreshToken), jwtUtil.getRole(refreshToken));
 	}
@@ -77,6 +75,14 @@ public class TokenIssueService {
 			throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
 		}
 
+		return refreshToken;
+	}
+
+	public String deleteRefreshToken(String authHeader) {
+		//Refresh token parsing 및 유효성 검사
+		String refreshToken = parseRefreshToken(authHeader);
+		//기존 Refresh 토큰 삭제
+		refreshTokenRepository.deleteByRefreshToken(refreshToken);
 		return refreshToken;
 	}
 

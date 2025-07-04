@@ -14,24 +14,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import io.restassured.http.ContentType;
-
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
-import com.capturecat.core.service.auth.TokenIssueService;
+import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.test.api.RestDocsTest;
 
-public class TokenIssueControllerTest extends RestDocsTest {
+public class TokenControllerTest extends RestDocsTest {
 
-	private TokenIssueController tokenIssueController;
+	private TokenController tokenController;
 
-	private TokenIssueService tokenIssueService;
+	private TokenService tokenService;
 
 	@BeforeEach
 	void setUp() {
-		tokenIssueService = mock(TokenIssueService.class);
-		tokenIssueController = new TokenIssueController(tokenIssueService);
-		mockMvc = mockController(tokenIssueController);
+		tokenService = mock(TokenService.class);
+		tokenController = new TokenController(tokenService);
+		mockMvc = mockController(tokenController);
 	}
 
 	@Test
@@ -44,8 +42,8 @@ public class TokenIssueControllerTest extends RestDocsTest {
 			TokenType.ACCESS, newAccess,
 			TokenType.REFRESH, newRefresh
 		);
-		willReturn(oldRefresh).given(tokenIssueService).parseRefreshToken(anyString());
-		willReturn(newTokens).given(tokenIssueService).reissue(anyString());
+		willReturn(oldRefresh).given(tokenService).parseRefreshToken(anyString());
+		willReturn(newTokens).given(tokenService).reissue(anyString());
 
 		// when & then
 		given().header(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + oldRefresh)

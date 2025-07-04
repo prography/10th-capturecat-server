@@ -13,16 +13,16 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
-import com.capturecat.core.service.auth.TokenIssueService;
+import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.response.ApiResponse;
 
 @RestController
 @RequestMapping("/token")
 @RequiredArgsConstructor
-public class TokenIssueController {
+public class TokenController {
 
-	private final TokenIssueService tokenIssueService;
+	private final TokenService tokenIssueService;
 
 	@PostMapping("/reissue")
 	public ResponseEntity<?> reissue(
@@ -30,11 +30,8 @@ public class TokenIssueController {
 
 		Map<TokenType, String> newTokenMap;
 		try {
-			//Refresh token 유효성 검사
-			String refreshToken = tokenIssueService.parseRefreshToken(authHeader);
-
 			//Access, Refresh token 재발행
-			newTokenMap = tokenIssueService.reissue(refreshToken);
+			newTokenMap = tokenIssueService.reissue(authHeader);
 		} catch (CoreException e) {
 			return ResponseEntity
 				.badRequest()

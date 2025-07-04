@@ -22,16 +22,16 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.LoginReqDto;
 import com.capturecat.core.config.auth.LoginUser;
-import com.capturecat.core.service.auth.TokenIssueService;
+import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.ApiResponse;
 
 @RequiredArgsConstructor
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
-	private final TokenIssueService tokenIssueService;
+	private final TokenService tokenIssueService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override
