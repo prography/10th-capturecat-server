@@ -14,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 import com.capturecat.core.api.auth.dto.OauthLoginRequest;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
-import com.capturecat.core.domain.user.User;
 import com.capturecat.core.service.auth.IdTokenVerifierService;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.core.support.response.ApiResponse;
@@ -35,7 +35,7 @@ public class Oauth2AuthController {
 			request.provider(), request.idToken());
 
 		// 2. 유저 정보 추출/회원 처리
-		User user = userService.upsertSocialUser(payload);
+		LoginUser user = userService.upsertSocialUser(payload);
 
 		//3. JWT 발급
 		Map<TokenType, String> tokenMap = tokenService.issue(user.getUsername(), user.getRole().getValue());

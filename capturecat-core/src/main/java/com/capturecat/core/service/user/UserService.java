@@ -11,6 +11,8 @@ import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.service.auth.IdTokenVerifierService;
+import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -39,17 +41,19 @@ public class UserService {
 	/**
 	 * 소셜 로그인 시 회원가입 처리
 	 */
-	public User upsertSocialUser(IdTokenVerifierService.OidcUserPayload payload) {
-		return userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
-			.orElseGet(() -> {
-				User user = User.builder()
-					.email(payload.email())
-					.provider(payload.provider())
-					.socialId(payload.sub())
-					.role(UserRole.USER)
-					.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
-					.build();
-				return userRepository.save(user);
-			});
+	public LoginUser upsertSocialUser(OidcUserPayload payload) {
+		User user = userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
+			.orElseGet(() -> userRepository.save(buildUser(payload)));
+		return new LoginUser(user);
+	}
+
+	private User buildUser(OidcUserPayload payload) {
+		return User.builder()
+			.email(payload.email())
+			.provider(payload.provider())
+			.socialId(payload.sub())
+			.role(UserRole.USER)
+			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.build();
 	}
 }
