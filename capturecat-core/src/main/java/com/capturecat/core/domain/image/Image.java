@@ -1,5 +1,7 @@
 package com.capturecat.core.domain.image;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,17 +37,20 @@ public class Image extends BaseTimeEntity {
 
 	private Long size;
 
+	private LocalDate captureDate;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 	// todo : createdby, modifiedby 설정
 
 	@Builder
-	public Image(Long id, String fileName, String fileUrl, long size, User user) {
+	public Image(Long id, String fileName, String fileUrl, long size, LocalDate captureDate, User user) {
 		this.id = id;
 		this.fileName = fileName;
 		this.fileUrl = fileUrl;
 		this.size = size;
+		this.captureDate = captureDate;
 		this.user = user;
 	}
 
