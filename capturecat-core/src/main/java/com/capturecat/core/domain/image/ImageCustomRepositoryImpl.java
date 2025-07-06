@@ -41,6 +41,7 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 					image.id,
 					image.fileName,
 					image.fileUrl,
+					image.captureDate,
 					GroupBy.list(tag))
 				));
 
@@ -58,10 +59,11 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 			.limit(pageable.getPageSize() + 1)
 			.orderBy(image.id.desc())
 			.transform(GroupBy.groupBy(image.id).list(Projections.constructor(ImageInfo.class,
-					image.id,
-					image.fileName,
-					image.fileUrl,
-					GroupBy.list(tag))
+				image.id,
+				image.fileName,
+				image.fileUrl,
+				image.captureDate,
+				GroupBy.list(tag))
 			));
 
 		return SliceUtil.toSlice(responses, pageable);

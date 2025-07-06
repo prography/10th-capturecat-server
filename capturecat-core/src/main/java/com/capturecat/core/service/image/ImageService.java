@@ -30,6 +30,7 @@ import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
 import com.capturecat.core.support.util.CursorUtil;
+import com.capturecat.core.support.util.DateTimeConverter;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +63,7 @@ public class ImageService {
 				.fileName(file.getOriginalFilename())
 				.fileUrl(fileUrl)
 				.size(file.getSize())
-				.captureDate(uploadItemRequest.captureDate())
+				.captureDate(DateTimeConverter.convert(uploadItemRequest.captureDate()))
 				.user(user)
 				.build();
 			images.add(image);
@@ -146,9 +147,10 @@ public class ImageService {
 
 		List<ImageTag> imageTags = imageTagRepository.findByImage(image);
 
-		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(), imageTags.stream()
-			.map(it -> TagResponse.from(it.getTag()))
-			.toList());
+		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(), image.getCaptureDate(),
+			imageTags.stream()
+				.map(it -> TagResponse.from(it.getTag()))
+				.toList());
 	}
 
 	private void validate(MultipartFile file) {
