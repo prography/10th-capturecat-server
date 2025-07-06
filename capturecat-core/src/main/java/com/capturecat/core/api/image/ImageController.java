@@ -64,11 +64,16 @@ public class ImageController {
 		return ApiResponse.success(responses);
 	}
 
+	@GetMapping("/{imageId}")
+	public ApiResponse<ImageWithTagsResponse> getImageByUser(@PathVariable Long imageId) {
+		ImageWithTagsResponse response = imageService.getImageWithTags(imageId);
+		return ApiResponse.success(response);
+	}
+
 	@DeleteMapping("/{imageId}/tags")
 	public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId,
 			@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
 		imageService.removeTagsToImage(imageId, request.tagIds());
 		return ApiResponse.success();
 	}
-
 }

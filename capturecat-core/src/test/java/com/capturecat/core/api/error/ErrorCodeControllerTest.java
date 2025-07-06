@@ -78,6 +78,13 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/logout", errorCodeDescriptors);
 	}
 
+	@Test
+	void 이미지_단건_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_ACCESS_DENIED,
+			USER_NOT_FOUND, IMAGE_NOT_FOUND);
+		generateErrorDocs("errorCode/getImageWithTags", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")

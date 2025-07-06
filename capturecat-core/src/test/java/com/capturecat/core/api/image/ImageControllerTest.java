@@ -107,9 +107,7 @@ class ImageControllerTest extends RestDocsTest {
 				pathParameters(parameterWithName("imageId").description("태그를 등록할 이미지 ID")),
 				requestFields(fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 
 	@Test
@@ -182,6 +180,32 @@ class ImageControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 단건_이미지를_조회한다() {
+		// given
+		Long imageId = 1L;
+
+		BDDMockito.given(imageService.getImageWithTags(anyLong()))
+			.willReturn(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
+				List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.when().get(URL_PREFIX + "/{imageId}", imageId)
+			.then().status(HttpStatus.OK)
+			.apply(document("getImageWithTags", requestPreprocessor(), responsePreprocessor(),
+				pathParameters(parameterWithName("imageId").description("조회할 이미지 ID")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("이미지 ID"),
+					fieldWithPath("data.name").type(JsonFieldType.STRING).description("이미지 이름"),
+					fieldWithPath("data.url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
+					fieldWithPath("data.tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
 	void 태그를_삭제한다() {
 		// given
 		Long imageId = 1L;
@@ -197,8 +221,6 @@ class ImageControllerTest extends RestDocsTest {
 				pathParameters(parameterWithName("imageId").description("태그를 삭제할 이미지 ID")),
 				requestFields(fieldWithPath("tagIds").type(JsonFieldType.ARRAY).description("삭제할 태그 ID 목록")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 }

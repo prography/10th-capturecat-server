@@ -126,6 +126,25 @@ public class ImageService {
 		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}
 
+	@Transactional(readOnly = true)
+	public ImageWithTagsResponse getImageWithTags(Long imageId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Image image = imageRepository.findById(imageId)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+		image.validateOwnership(user);
+
+		List<ImageTag> imageTags = imageTagRepository.findByImage(image);
+
+		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(), imageTags.stream()
+			.map(it -> TagResponse.from(it.getTag()))
+			.toList());
+	}
+
 	private void validate(MultipartFile file) {
 		String contentType = file.getContentType();
 		if (contentType == null || !contentType.startsWith("image/")) {

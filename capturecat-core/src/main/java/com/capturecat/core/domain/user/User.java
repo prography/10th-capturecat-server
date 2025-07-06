@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,7 @@ import com.capturecat.core.domain.BaseTimeEntity;
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
+@EqualsAndHashCode(of = "id", callSuper = false)
 public class User extends BaseTimeEntity {
 
 	@Id
