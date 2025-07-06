@@ -21,7 +21,7 @@ import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.test.api.RestDocsTest;
 
-public class LogInOutTest extends RestDocsTest {
+class LogInOutTest extends RestDocsTest {
 
 	private TokenService tokenService;
 
@@ -50,8 +50,6 @@ public class LogInOutTest extends RestDocsTest {
 					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
 						.description("삭제할 리프레시 토큰 (Bearer prefix 포함)")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 }

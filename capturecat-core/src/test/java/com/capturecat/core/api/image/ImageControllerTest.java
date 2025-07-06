@@ -107,9 +107,7 @@ class ImageControllerTest extends RestDocsTest {
 				pathParameters(parameterWithName("imageId").description("태그를 등록할 이미지 ID")),
 				requestFields(fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 
 	@Test
@@ -223,8 +221,6 @@ class ImageControllerTest extends RestDocsTest {
 				pathParameters(parameterWithName("imageId").description("태그를 삭제할 이미지 ID")),
 				requestFields(fieldWithPath("tagIds").type(JsonFieldType.ARRAY).description("삭제할 태그 ID 목록")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 }

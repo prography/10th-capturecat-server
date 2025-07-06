@@ -61,8 +61,6 @@ public class TokenControllerTest extends RestDocsTest {
 					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
 						.description("재발급된 리프레시 토큰 (Bearer prefix 포함)")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
-					fieldWithPath("data").type(JsonFieldType.NULL).ignored(),
-					fieldWithPath("error").type(JsonFieldType.OBJECT).ignored())));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 }
