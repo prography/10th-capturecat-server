@@ -44,17 +44,26 @@ public class ImageService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기
+	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
 			validate(file);
 			String fileUrl = fileUploader.upload(file);
 
+			UploadItemRequest uploadItemRequest = getMatchingUploadRequest(uploadItems, file.getOriginalFilename());
+
 			Image image = Image.builder()
 				.fileName(file.getOriginalFilename())
 				.fileUrl(fileUrl)
 				.size(file.getSize())
+				.captureDate(uploadItemRequest.captureDate())
+				.user(user)
 				.build();
 			images.add(image);
 		}
@@ -63,11 +72,8 @@ public class ImageService {
 
 		List<ImageTag> allImageTags = new ArrayList<>();
 		for (Image savedImage : savedImages) {
-			List<String> tagNames = uploadItems.stream()
-				.filter(i -> savedImage.isSameFileNameAs(i.fileName()))
-				.map(UploadItemRequest::tagNames)
-				.findFirst()
-				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
+			UploadItemRequest uploadItemRequest = getMatchingUploadRequest(uploadItems, savedImage.getFileName());
+			List<String> tagNames = uploadItemRequest.tagNames();
 
 			tagValidator.validateTagNames(savedImage, tagNames);
 
@@ -150,5 +156,12 @@ public class ImageService {
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
 		}
+	}
+
+	private UploadItemRequest getMatchingUploadRequest(List<UploadItemRequest> uploadItems, String fileName) {
+		return uploadItems.stream()
+			.filter(i -> i.fileName().equals(fileName))
+			.findFirst()
+			.orElseThrow(() -> new CoreException(ErrorType.UPLOAD_METADATA_MISMATCH));
 	}
 }

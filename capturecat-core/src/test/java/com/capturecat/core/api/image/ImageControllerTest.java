@@ -18,6 +18,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,8 +66,8 @@ class ImageControllerTest extends RestDocsTest {
 		willDoNothing().given(imageService).save(anyList(), anyList());
 
 		List<UploadItemRequest> requests = List.of(
-			new UploadItemRequest("cat.jpg", List.of("고양이", "cat")),
-			new UploadItemRequest("dog.jpg", List.of("강아지", "dog"))
+			new UploadItemRequest("cat.jpg", LocalDate.now(), List.of("고양이", "cat")),
+			new UploadItemRequest("dog.jpg", LocalDate.now(), List.of("강아지", "dog"))
 		);
 
 		// when & then
@@ -83,6 +84,7 @@ class ImageControllerTest extends RestDocsTest {
 					partWithName("uploadItems").description("업로드할 이미지와 태그 정보")),
 				requestPartFields("uploadItems",
 					fieldWithPath("[].fileName").description("이미지 파일 이름"),
+					fieldWithPath("[].captureDate").description("이미지를 캡처한 날짜"),
 					fieldWithPath("[].tagNames").description("이미지에 등록할 태그 목록")
 				),
 				responseFields(

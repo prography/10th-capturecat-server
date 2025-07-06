@@ -36,7 +36,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
+			UPLOAD_METADATA_MISMATCH, IMAGE_UPLOAD_FAILED);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
 	}
 
