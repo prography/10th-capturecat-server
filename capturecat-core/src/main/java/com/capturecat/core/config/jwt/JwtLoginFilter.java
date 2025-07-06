@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.LoginReqDto;
-import com.capturecat.core.config.auth.LoginUser;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;

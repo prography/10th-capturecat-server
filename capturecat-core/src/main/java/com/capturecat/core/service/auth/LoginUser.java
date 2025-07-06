@@ -1,4 +1,4 @@
-package com.capturecat.core.config.auth;
+package com.capturecat.core.service.auth;
 
 import java.util.ArrayList;
 import java.util.Collection;

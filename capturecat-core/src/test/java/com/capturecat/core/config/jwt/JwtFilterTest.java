@@ -20,7 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
-import com.capturecat.core.config.auth.LoginUser;
+import com.capturecat.core.service.auth.LoginUser;
 
 @ExtendWith(MockitoExtension.class)
 class JwtFilterTest {

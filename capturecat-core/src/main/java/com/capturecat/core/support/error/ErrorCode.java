@@ -23,7 +23,8 @@ public enum ErrorCode {
 	REFRESH_TOKEN_EXPIRED("Refresh token이 만료됐습니다."),
 	INVALID_ACCESS_TOKEN("Access token이 유효하지 않습니다."),
 	INVALID_REFRESH_TOKEN("Refresh token이 유효하지 않습니다."),
-	IMAGE_ACCESS_DENIED("요청하신 이미지에 접근할 권한이 없습니다. 본인 소유가 아니면 접근이 제한됩니다.");
+	IMAGE_ACCESS_DENIED("요청하신 이미지에 접근할 권한이 없습니다. 본인 소유가 아니면 접근이 제한됩니다."),
+	INVALID_ID_TOKEN("유효하지 않는 ID_TOKEN 입니다.");
 
 	private final String message;
 

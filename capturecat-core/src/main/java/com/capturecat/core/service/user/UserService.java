@@ -9,6 +9,7 @@ import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.service.auth.IdTokenVerifierService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -29,5 +30,17 @@ public class UserService {
 		User savedUser = userRepository.save(joinReqDto.toEntity(passwordEncoder));
 
 		return new JoinRespDto(savedUser);
+	}
+
+	public User upsertSocialUser(IdTokenVerifierService.OidcUserPayload payload) {
+		return userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
+			.orElseGet(() -> {
+				User user = User.builder()
+					.email(payload.email())
+					.provider(payload.provider())
+					.socialId(payload.sub())
+					.build();
+				return userRepository.save(user);
+			});
 	}
 }

@@ -1,0 +1,53 @@
+package com.capturecat.core.api.auth;
+
+import java.util.Map;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.RequiredArgsConstructor;
+
+import com.capturecat.core.api.auth.dto.OauthLoginRequest;
+import com.capturecat.core.config.jwt.JwtUtil;
+import com.capturecat.core.config.jwt.TokenType;
+import com.capturecat.core.domain.user.User;
+import com.capturecat.core.service.auth.IdTokenVerifierService;
+import com.capturecat.core.service.auth.TokenService;
+import com.capturecat.core.service.user.UserService;
+import com.capturecat.core.support.response.ApiResponse;
+
+@RestController
+@RequestMapping("/v1/auth/oauth2")
+@RequiredArgsConstructor
+public class Oauth2AuthController {
+	private final IdTokenVerifierService idTokenVerifierService;
+	private final UserService userService;
+	private final TokenService tokenService;
+
+	@PostMapping("/login")
+	public ResponseEntity<?> oauthLogin(@RequestBody OauthLoginRequest request) {
+		// 1. provider별 id_token 검증(JWK, iss, aud 등)
+		IdTokenVerifierService.OidcUserPayload payload = idTokenVerifierService.verifyAndExtract(
+			request.provider(), request.idToken());
+
+		// 2. 유저 정보 추출/회원 처리
+		User user = userService.upsertSocialUser(payload);
+
+		//3. JWT 발급
+		Map<TokenType, String> tokenMap = tokenService.issue(user.getUsername(), user.getRole().getValue());
+
+		//Header에 실어 응답
+		HttpHeaders headers = new HttpHeaders();
+		headers.set(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + tokenMap.get(TokenType.ACCESS));
+		headers.set(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + tokenMap.get(TokenType.REFRESH));
+
+		return ResponseEntity
+			.ok()
+			.headers(headers)
+			.body(ApiResponse.success());
+	}
+}
