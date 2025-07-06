@@ -9,6 +9,7 @@ import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.service.auth.IdTokenVerifierService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -20,6 +21,9 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
+	/**
+	 * 일반 회원 가입
+	 */
 	public JoinRespDto join(JoinReqDto joinReqDto) {
 		// 기 가입 여부 검사
 		if (userRepository.existsByUsername(joinReqDto.getUsername())) {
@@ -32,6 +36,9 @@ public class UserService {
 		return new JoinRespDto(savedUser);
 	}
 
+	/**
+	 * 소셜 로그인 시 회원가입 처리
+	 */
 	public User upsertSocialUser(IdTokenVerifierService.OidcUserPayload payload) {
 		return userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
 			.orElseGet(() -> {
@@ -39,6 +46,8 @@ public class UserService {
 					.email(payload.email())
 					.provider(payload.provider())
 					.socialId(payload.sub())
+					.role(UserRole.USER)
+					.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
 					.build();
 				return userRepository.save(user);
 			});
