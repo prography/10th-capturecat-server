@@ -60,10 +60,6 @@ public class Image extends BaseTimeEntity {
 		}
 	}
 
-	public boolean isSameFileNameAs(String fileName) {
-		return this.fileName.equals(fileName);
-	}
-
 	private boolean isNotOwnedBy(User user) {
 		return !this.user.equals(user);
 	}
