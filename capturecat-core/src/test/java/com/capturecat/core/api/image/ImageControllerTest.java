@@ -18,6 +18,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,8 +66,8 @@ class ImageControllerTest extends RestDocsTest {
 		willDoNothing().given(imageService).save(anyList(), anyList());
 
 		List<UploadItemRequest> requests = List.of(
-			new UploadItemRequest("cat.jpg", List.of("고양이", "cat")),
-			new UploadItemRequest("dog.jpg", List.of("강아지", "dog"))
+			new UploadItemRequest("cat.jpg", LocalDate.now().toString(), List.of("고양이", "cat")),
+			new UploadItemRequest("dog.jpg", LocalDate.now().toString(), List.of("강아지", "dog"))
 		);
 
 		// when & then
@@ -83,6 +84,7 @@ class ImageControllerTest extends RestDocsTest {
 					partWithName("uploadItems").description("업로드할 이미지와 태그 정보")),
 				requestPartFields("uploadItems",
 					fieldWithPath("[].fileName").description("이미지 파일 이름"),
+					fieldWithPath("[].captureDate").description("이미지를 캡처한 날짜"),
 					fieldWithPath("[].tagNames").description("이미지에 등록할 태그 목록")
 				),
 				responseFields(
@@ -115,7 +117,7 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		BDDMockito.given(imageService.getImagesWithTags(any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
-				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
+				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
 
 		// when & then
@@ -137,6 +139,7 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
 					fieldWithPath("data.items[].tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
 					fieldWithPath("data.items[].tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
@@ -150,7 +153,7 @@ class ImageControllerTest extends RestDocsTest {
 
 		BDDMockito.given(imageService.searchImagesByTagNames(any(), any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
-				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
+				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
 
 		// when & then
@@ -173,6 +176,7 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
 					fieldWithPath("data.items[].tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
 					fieldWithPath("data.items[].tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
@@ -185,7 +189,7 @@ class ImageControllerTest extends RestDocsTest {
 		Long imageId = 1L;
 
 		BDDMockito.given(imageService.getImageWithTags(anyLong()))
-			.willReturn(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg",
+			.willReturn(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
 				List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))));
 
 		// when & then
@@ -199,6 +203,7 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("이미지 ID"),
 					fieldWithPath("data.name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
 					fieldWithPath("data.tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
 					fieldWithPath("data.tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
