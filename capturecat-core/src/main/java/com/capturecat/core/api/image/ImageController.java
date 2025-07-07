@@ -70,6 +70,11 @@ public class ImageController {
 		return ApiResponse.success(response);
 	}
 
+	@DeleteMapping("/{imageId}")
+	public void removeImageByUser(@PathVariable Long imageId) {
+		imageService.removeImages(imageId);
+	}
+
 	@DeleteMapping("/{imageId}/tags")
 	public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId,
 			@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
