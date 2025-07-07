@@ -25,6 +25,7 @@ import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagRegister;
+import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.tag.TagValidator;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
@@ -44,6 +45,7 @@ public class ImageService {
 	private final ImageTagFactory imageTagFactory;
 	private final TagValidator tagValidator;
 	private final TagRegister tagRegister;
+	private final TagRepository tagRepository;
 	private final UserRepository userRepository;
 
 	@Transactional
@@ -120,6 +122,18 @@ public class ImageService {
 			return;
 		}
 		imageTagRepository.deleteAll(imageTags);
+	}
+
+	@Transactional
+	public void removeTagToImage(Long imageId, Long tagId) {
+		Image image = imageRepository.findById(imageId)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+		Tag tag = tagRepository.findById(tagId)
+			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
+		ImageTag imageTag = imageTagRepository.findByImageAndTag(image, tag)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_TAG_NOT_FOUND));
+
+		imageTagRepository.delete(imageTag);
 	}
 
 	@Transactional(readOnly = true)

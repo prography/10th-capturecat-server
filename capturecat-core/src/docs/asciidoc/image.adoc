@@ -49,7 +49,7 @@ operation::getImageWithTags[snippets='curl-request,path-parameters,http-response
 [[이미지-태그-삭제]]
 === 이미지 태그 삭제
 ==== 성공
-operation::removeTagsToImage[snippets='curl-request,path-parameters,request-fields,http-response,response-fields']
+operation::removeTagToImage[snippets='curl-request,path-parameters,request-fields,http-response,response-fields']
 
 ==== 실패
 이미지 태그 삭제가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
