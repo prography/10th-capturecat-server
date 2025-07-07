@@ -72,6 +72,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 소셜_로그인_회원가입_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_ID_TOKEN);
+		generateErrorDocs("errorCode/oauthLogin", errorCodeDescriptors);
+	}
+
+	@Test
 	void 로그아웃_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
 			REFRESH_TOKEN_EXPIRED);

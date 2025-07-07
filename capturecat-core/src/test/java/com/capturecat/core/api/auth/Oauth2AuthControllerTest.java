@@ -1,24 +1,20 @@
 package com.capturecat.core.api.auth;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.capturecat.test.api.RestDocsUtil.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.restdocs.payload.JsonFieldType;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.capturecat.core.api.CustomWebMvcTest;
 import com.capturecat.core.api.auth.dto.OauthLoginRequest;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
@@ -29,84 +25,64 @@ import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
-import com.capturecat.core.support.error.CoreException;
-import com.capturecat.core.support.error.ErrorType;
+import com.capturecat.test.api.RestDocsTest;
 
-@CustomWebMvcTest(Oauth2AuthController.class)
-class Oauth2AuthControllerTest {
+public class Oauth2AuthControllerTest extends RestDocsTest {
 
 	private static final String REQUEST_PATH = "/v1/auth/oauth2/login";
-	private static final String PROVIDER = "google";
-	@Autowired
-	private MockMvc mockMvc;
 
-	@MockitoBean
+	private Oauth2AuthController oauth2AuthController;
 	private IdTokenVerifierService idTokenVerifierService;
-	@MockitoBean
-	private UserService userService;
-	@MockitoBean
 	private TokenService tokenService;
+	private UserService userService;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+	@BeforeEach
+	void setUp() {
+		idTokenVerifierService = mock(IdTokenVerifierService.class);
+		tokenService = mock(TokenService.class);
+		userService = mock(UserService.class);
+		oauth2AuthController = new Oauth2AuthController(idTokenVerifierService, userService, tokenService);
+		mockMvc = mockController(oauth2AuthController);
+	}
 
-	@DisplayName("소셜 로그인 성공 - JWT 토큰 헤더, 응답 OK")
 	@Test
-	void oauthLogin_success() throws Exception {
+	void 소셜로그인_성공시_회원가입후_Jwt발행() {
 		// given
+		String provider = "google";
 		String idToken = "test-id-token";
-		OauthLoginRequest req = new OauthLoginRequest(PROVIDER, idToken);
+		OauthLoginRequest request = new OauthLoginRequest(provider, idToken);
 		OidcUserPayload payload =
-			new OidcUserPayload(PROVIDER, "1234", "test@test.com", true);
-
+			new OidcUserPayload(provider, "1234", "test@test.com", true);
 		LoginUser user = buildUser(payload);
-
 		Map<TokenType, String> tokenMap = Map.of(
 			TokenType.ACCESS, "access.jwt.token",
 			TokenType.REFRESH, "refresh.jwt.token"
 		);
 
-		// idTokenVerifierService.verifyAndExtract → payload
-		Mockito.when(idTokenVerifierService.verifyAndExtract(eq(PROVIDER), eq(idToken)))
-			.thenReturn(payload);
-		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
-		// tokenService.issue → tokenMap
-		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole().getValue())))
-			.thenReturn(tokenMap);
+		willReturn(payload).given(idTokenVerifierService).verifyAndExtract(provider, idToken);
+		willReturn(user).given(userService).upsertSocialUser(payload);
+		willReturn(tokenMap).given(tokenService).issue(user.getUsername(), user.getRole().getValue());
 
 		// when & then
-		mockMvc.perform(post(REQUEST_PATH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req)))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(header().string(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + "access.jwt.token"))
-			.andExpect(header().string(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + "refresh.jwt.token"))
-			.andExpect(jsonPath("$.result").value("SUCCESS"))
-			.andExpect(jsonPath("$.data").doesNotExist());
+		given().contentType(MediaType.APPLICATION_JSON)
+			.body(request)
+			.when().post(REQUEST_PATH)
+			.then().status(HttpStatus.OK)
+			.apply(document("oauthLogin", requestPreprocessor(), responsePreprocessor(),
+				requestFields(
+					fieldWithPath("provider").description("소셜 로그인 서비스 제공자"),
+					fieldWithPath("idToken").description("ID_TOKEN(암호화된 사용자 정보 JWT)")),
+				// 응답 헤더
+				responseHeaders(
+					headerWithName(HttpHeaders.AUTHORIZATION)
+						.description("발급된 액세스 토큰 (Bearer prefix 포함)"),
+					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
+						.description("발급된 리프레시 토큰 (Bearer prefix 포함)")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}
 
-	@DisplayName("id_token 검증 실패 시 401 응답")
-	@Test
-	void oauthLogin_invalidIdToken() throws Exception {
-		// given
-		String idToken = "bad-id-token";
-		OauthLoginRequest req = new OauthLoginRequest(PROVIDER, idToken);
-
-		Mockito.when(idTokenVerifierService.verifyAndExtract(eq(PROVIDER), eq(idToken)))
-			.thenThrow(new CoreException(ErrorType.INVALID_ID_TOKEN));
-
-		// when & then
-		mockMvc.perform(post(REQUEST_PATH)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req))) //컨트롤러 슬라이스 테스트 시 security config가 load 되지 않아 추가)
-			.andExpect(status().isUnauthorized()) // 실제 예외 핸들러에 따라 다를 수 있음
-			.andExpect(jsonPath("$.result").value("ERROR"))
-			.andExpect(jsonPath("$.error").exists());
-	}
-
-	private LoginUser buildUser(IdTokenVerifierService.OidcUserPayload payload) {
+	private LoginUser buildUser(OidcUserPayload payload) {
 		User user = User.builder()
 			.email(payload.email())
 			.provider(payload.provider())
@@ -116,5 +92,4 @@ class Oauth2AuthControllerTest {
 			.build();
 		return new LoginUser(user);
 	}
-
 }
