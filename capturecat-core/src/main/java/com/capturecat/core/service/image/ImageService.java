@@ -13,7 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
+import com.capturecat.client.upload.DeleteException;
 import com.capturecat.client.upload.FileUploader;
+import com.capturecat.client.upload.UploadException;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.config.auth.LoginUser;
 import com.capturecat.core.domain.image.Image;
@@ -55,7 +57,7 @@ public class ImageService {
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
 			validate(file);
-			String fileUrl = fileUploader.upload(file);
+			String fileUrl = upload(file);
 
 			UploadItemRequest uploadItemRequest = getMatchingUploadRequest(uploadItems, file.getOriginalFilename());
 
@@ -165,7 +167,7 @@ public class ImageService {
 
 		image.validateOwnership(user);
 
-		fileUploader.delete(image.getFileName());
+		delete(image.getFileName());
 		imageRepository.delete(image);
 		imageTagRepository.deleteAllByImage(image);
 	}
@@ -182,5 +184,21 @@ public class ImageService {
 			.filter(i -> i.fileName().equals(fileName))
 			.findFirst()
 			.orElseThrow(() -> new CoreException(ErrorType.UPLOAD_METADATA_MISMATCH));
+	}
+
+	private String upload(MultipartFile file) {
+		try {
+			return fileUploader.upload(file);
+		} catch (UploadException e) {
+			throw new CoreException(ErrorType.IMAGE_UPLOAD_FAILED);
+		}
+	}
+
+	private void delete(String name) {
+		try {
+			fileUploader.delete(name);
+		} catch (DeleteException e) {
+			throw new CoreException(ErrorType.IMAGE_DELETE_FAILED);
+		}
 	}
 }
