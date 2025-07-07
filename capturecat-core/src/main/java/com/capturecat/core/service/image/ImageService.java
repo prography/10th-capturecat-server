@@ -155,25 +155,18 @@ public class ImageService {
 
 	@Transactional
 	public void removeImages(Long imageId) {
-		// 유저 조회
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
 
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
-
-		// 이미지 조회
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
 		image.validateOwnership(user);
 
-		// S3 삭제
-
-		// DB 삭제
+		fileUploader.delete(image.getFileName());
 		imageRepository.delete(image);
-
-		// 이미지 태그 삭제
 		imageTagRepository.deleteAllByImage(image);
 	}
 
