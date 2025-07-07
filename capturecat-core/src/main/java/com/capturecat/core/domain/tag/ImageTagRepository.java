@@ -13,9 +13,6 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 	@Query("SELECT t.name FROM ImageTag it JOIN it.tag t WHERE it.image = :image")
 	List<String> findTagNamesByImage(Image image);
 
-	@Query("SELECT it FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.id IN :tagIds")
-	List<ImageTag> findByImageAndTagIds(Image image, List<Long> tagIds);
-
 	Optional<ImageTag> findByImageAndTag(Image image, Tag tag);
 
 	@Query("SELECT it FROM ImageTag it JOIN FETCH it.tag t WHERE it.image = :image")

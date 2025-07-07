@@ -114,17 +114,6 @@ public class ImageService {
 	}
 
 	@Transactional
-	public void removeTagsToImage(Long imageId, List<Long> tagIds) {
-		Image image = imageRepository.findById(imageId)
-			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
-		List<ImageTag> imageTags = imageTagRepository.findByImageAndTagIds(image, tagIds);
-		if (imageTags.isEmpty()) {
-			return;
-		}
-		imageTagRepository.deleteAll(imageTags);
-	}
-
-	@Transactional
 	public void removeTagToImage(Long imageId, Long tagId) {
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
