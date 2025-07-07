@@ -71,8 +71,9 @@ public class ImageController {
 	}
 
 	@DeleteMapping("/{imageId}")
-	public void removeImageByUser(@PathVariable Long imageId) {
+	public ApiResponse<?> removeImageByUser(@PathVariable Long imageId) {
 		imageService.removeImages(imageId);
+		return ApiResponse.success();
 	}
 
 	@DeleteMapping("/{imageId}/tags")
