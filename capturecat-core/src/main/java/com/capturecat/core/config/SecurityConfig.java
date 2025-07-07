@@ -54,7 +54,7 @@ public class SecurityConfig {
 			.addFilterAt(new JwtLogoutFilter(tokenService), LogoutFilter.class)
 			.authorizeHttpRequests(
 				authorizeRequests -> authorizeRequests
-					.requestMatchers("/health", "/docs/**", "/token/reissue", "v1/auth/**", "v1/**").permitAll()
+					.requestMatchers("/health", "/docs/**", "/token/reissue", "/v1/auth/**", "/v1/**").permitAll()
 					.anyRequest().hasRole("USER"));
 
 		return http.build();
