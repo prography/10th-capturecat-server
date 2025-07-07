@@ -211,6 +211,22 @@ class ImageControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 이미지를_삭제한다() {
+		// given
+		Long imageId = 1L;
+		willDoNothing().given(imageService).removeImages(anyLong());
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.when().delete(URL_PREFIX + "/{imageId}", imageId)
+			.then().status(HttpStatus.OK)
+			.apply(document("removeImage", requestPreprocessor(), responsePreprocessor(),
+				pathParameters(parameterWithName("imageId").description("삭제할 이미지 ID")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
+	}
+
+	@Test
 	void 태그를_삭제한다() {
 		// given
 		Long imageId = 1L;
