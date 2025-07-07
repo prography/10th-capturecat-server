@@ -18,8 +18,8 @@ include::{snippets}/errorCode/upload/error-codes.adoc[]
 === 단일 이미지 태그 등록
 include::{snippets}/errorCode/addTagsToImage/error-codes.adoc[]
 
-[[이미지-태그-삭제]]
-=== 이미지 태그 삭제
+[[이미지의-태그-삭제]]
+=== 이미지의 태그 삭제
 include::{snippets}/errorCode/removeTagToImage/error-codes.adoc[]
 
 [[태그-포함-이미지-목록-조회]]
