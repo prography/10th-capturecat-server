@@ -39,12 +39,22 @@ operation::searchImagesByTag[snippets='curl-request,query-parameters,http-respon
 ==== 실패
 태그로 이미지 검색이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
-<<error-codes#태그로-이미지-검색, 태그로-이미지-검색 API에서 발생할 수 있는 에러>>를 살펴보세요.
+<<error-codes#태그로-이미지-검색, 태그로 이미지 검색 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
 [[이미지-단건-조회]]
 === 이미지 단건 조회
 ==== 성공
 operation::getImageWithTags[snippets='curl-request,path-parameters,http-response,response-fields']
+
+[[이미지-삭제]]
+=== 이미지 삭제
+==== 성공
+operation::removeImage[snippets='curl-request,path-parameters,http-response,response-fields']
+
+==== 실패
+이미지 삭제가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#이미지-삭제, 이미지 삭제 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
 [[이미지의-태그-삭제]]
 === 이미지의 태그 삭제

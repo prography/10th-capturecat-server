@@ -33,3 +33,7 @@ include::{snippets}/errorCode/getTags/error-codes.adoc[]
 [[태그로-이미지-검색]]
 === 태그로 이미지 검색
 include::{snippets}/errorCode/searchImagesByTags/error-codes.adoc[]
+
+[[이미지-삭제]]
+=== 이미지 삭제
+include::{snippets}/errorCode/removeImage/error-codes.adoc[]
