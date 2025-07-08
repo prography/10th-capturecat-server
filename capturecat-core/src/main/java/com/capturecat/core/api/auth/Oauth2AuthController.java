@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,17 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.capturecat.core.api.auth.dto.OauthLoginRequest;
+import com.capturecat.core.api.auth.dto.SocialLoginRequest;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.service.auth.IdTokenVerifierService;
+import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.core.support.response.ApiResponse;
 
 @RestController
-@RequestMapping("/v1/auth/oauth2")
+@RequestMapping("/v1/auth/{provider}")
 @RequiredArgsConstructor
 public class Oauth2AuthController {
 	private final IdTokenVerifierService idTokenVerifierService;
@@ -29,10 +31,9 @@ public class Oauth2AuthController {
 	private final TokenService tokenService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> oauthLogin(@RequestBody OauthLoginRequest request) {
+	public ResponseEntity<?> socialLogin(@PathVariable String provider, @RequestBody SocialLoginRequest request) {
 		// 1. provider별 id_token 검증(JWK, iss, aud 등)
-		IdTokenVerifierService.OidcUserPayload payload = idTokenVerifierService.verifyAndExtract(
-			request.provider(), request.idToken());
+		OidcUserPayload payload = idTokenVerifierService.verifyAndExtract(provider, request.idToken());
 
 		// 2. 유저 정보 추출/회원 처리
 		LoginUser user = userService.upsertSocialUser(payload);

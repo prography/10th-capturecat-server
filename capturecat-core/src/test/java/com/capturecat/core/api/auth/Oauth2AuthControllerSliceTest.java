@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.capturecat.core.api.CustomWebMvcTest;
-import com.capturecat.core.api.auth.dto.OauthLoginRequest;
+import com.capturecat.core.api.auth.dto.SocialLoginRequest;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.domain.user.User;
@@ -35,7 +35,7 @@ import com.capturecat.core.support.error.ErrorType;
 @CustomWebMvcTest(Oauth2AuthController.class)
 class Oauth2AuthControllerSliceTest {
 
-	private static final String REQUEST_PATH = "/v1/auth/oauth2/login";
+	private static final String REQUEST_PATH = "/v1/auth/{provider}/login";
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -54,11 +54,11 @@ class Oauth2AuthControllerSliceTest {
 
 	@DisplayName("소셜 로그인 성공 - JWT 토큰 헤더, 응답 OK")
 	@Test
-	void oauthLogin_success() throws Exception {
+	void socialLogin_success() throws Exception {
 		// given
 		String provider = "google";
 		String idToken = "test-id-token";
-		OauthLoginRequest req = new OauthLoginRequest(provider, idToken);
+		SocialLoginRequest req = new SocialLoginRequest(idToken);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", true);
 
@@ -79,7 +79,7 @@ class Oauth2AuthControllerSliceTest {
 			.thenReturn(tokenMap);
 
 		// when & then
-		mockMvc.perform(post(REQUEST_PATH)
+		mockMvc.perform(post(REQUEST_PATH, provider)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(req)))
 			.andDo(print())
@@ -92,17 +92,17 @@ class Oauth2AuthControllerSliceTest {
 
 	@DisplayName("id_token 검증 실패 시 401 응답")
 	@Test
-	void oauthLogin_invalidIdToken() throws Exception {
+	void socialLogin_invalidIdToken() throws Exception {
 		// given
 		String provider = "google";
 		String idToken = "bad-id-token";
-		OauthLoginRequest req = new OauthLoginRequest(provider, idToken);
+		SocialLoginRequest req = new SocialLoginRequest(idToken);
 
 		Mockito.when(idTokenVerifierService.verifyAndExtract(eq(provider), eq(idToken)))
 			.thenThrow(new CoreException(ErrorType.INVALID_ID_TOKEN));
 
 		// when & then
-		mockMvc.perform(post(REQUEST_PATH)
+		mockMvc.perform(post(REQUEST_PATH, provider)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(req))) //컨트롤러 슬라이스 테스트 시 security config가 load 되지 않아 추가)
 			.andExpect(status().isUnauthorized()) // 실제 예외 핸들러에 따라 다를 수 있음

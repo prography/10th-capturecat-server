@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import com.capturecat.core.api.auth.dto.OauthLoginRequest;
+import com.capturecat.core.api.auth.dto.SocialLoginRequest;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.domain.user.User;
@@ -29,7 +30,7 @@ import com.capturecat.test.api.RestDocsTest;
 
 public class Oauth2AuthControllerTest extends RestDocsTest {
 
-	private static final String REQUEST_PATH = "/v1/auth/oauth2/login";
+	private static final String REQUEST_PATH = "/v1/auth/{provider}/login";
 
 	private Oauth2AuthController oauth2AuthController;
 	private IdTokenVerifierService idTokenVerifierService;
@@ -50,7 +51,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 		// given
 		String provider = "google";
 		String idToken = "test-id-token";
-		OauthLoginRequest request = new OauthLoginRequest(provider, idToken);
+		SocialLoginRequest request = new SocialLoginRequest(idToken);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", true);
 		LoginUser user = buildUser(payload);
@@ -66,13 +67,11 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 		// when & then
 		given().contentType(MediaType.APPLICATION_JSON)
 			.body(request)
-			.when().post(REQUEST_PATH)
+			.when().post(REQUEST_PATH, provider)
 			.then().status(HttpStatus.OK)
-			.apply(document("oauthLogin", requestPreprocessor(), responsePreprocessor(),
-				requestFields(
-					fieldWithPath("provider").description("소셜 로그인 서비스 제공자"),
-					fieldWithPath("idToken").description("ID_TOKEN(암호화된 사용자 정보 JWT)")),
-				// 응답 헤더
+			.apply(document("socialLogin", requestPreprocessor(), responsePreprocessor(),
+				pathParameters(parameterWithName("provider").description("소셜 로그인 서비스 제공자")),
+				requestFields(fieldWithPath("idToken").description("ID_TOKEN(암호화된 사용자 정보 JWT)")),
 				responseHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION)
 						.description("발급된 액세스 토큰"),
