@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,15 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
 import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.core.support.response.CursorResponse;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/images")
 @RequiredArgsConstructor
@@ -36,11 +40,11 @@ public class ImageController {
 
 	private final ImageService imageService;
 
+
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<?> upload(
-		@RequestPart List<UploadItemRequest> uploadItems,
-		@RequestPart List<MultipartFile> files
-	) {
+		@RequestPart List<UploadItemRequest> uploadItems, @RequestPart List<MultipartFile> files,
+		@AuthenticationPrincipal LoginUser loginUser) { //접근 권한 permitAll 설정일 경우는 null
 		imageService.save(uploadItems, files);
 		return ApiResponse.success();
 	}
@@ -53,7 +57,7 @@ public class ImageController {
 
 	@GetMapping
 	public ApiResponse<CursorResponse<ImageWithTagsResponse>> getImagesByUser(
-			@PageableDefault(size = 20) Pageable pageable) {
+		@PageableDefault(size = 20) Pageable pageable) {
 		return ApiResponse.success(imageService.getImagesWithTags(pageable));
 	}
 
@@ -72,7 +76,7 @@ public class ImageController {
 
 	@DeleteMapping("/{imageId}/tags")
 	public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId,
-			@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
+		@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
 		imageService.removeTagsToImage(imageId, request.tagIds());
 		return ApiResponse.success();
 	}
