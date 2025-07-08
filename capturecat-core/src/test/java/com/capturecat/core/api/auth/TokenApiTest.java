@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
+import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.service.auth.TokenService;
 
 @Transactional
@@ -35,7 +36,7 @@ class TokenApiTest {
 	@BeforeEach
 	void setUp() {
 		// 실제 서비스로 토큰 발급 (DB에 RefreshToken도 저장됨)
-		Map<TokenType, String> issued = tokenIssueService.issue("testuser", "ROLE_USER");
+		Map<TokenType, String> issued = tokenIssueService.issue("testuser", UserRole.USER);
 		String refreshToken = issued.get(TokenType.REFRESH);
 		refreshHeaderValue = JwtUtil.BEARER_PREFIX + refreshToken;
 	}

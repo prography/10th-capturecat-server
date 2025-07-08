@@ -38,7 +38,7 @@ public class Oauth2AuthController {
 		LoginUser user = userService.upsertSocialUser(payload);
 
 		//3. JWT 발급
-		Map<TokenType, String> tokenMap = tokenService.issue(user.getUsername(), user.getRole().getValue());
+		Map<TokenType, String> tokenMap = tokenService.issue(user.getUsername(), user.getRole());
 
 		//Header에 실어 응답
 		HttpHeaders headers = new HttpHeaders();

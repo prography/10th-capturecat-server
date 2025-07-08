@@ -27,13 +27,13 @@ public class User extends BaseTimeEntity {
 	@GeneratedValue
 	private Long id;
 
-	@Column(unique = true, nullable = false, length = 30)
+	@Column(unique = true, nullable = false, length = 50)
 	private String username; //nickname
 
 	@Column(length = 70) //패스워드 인코딩(BCrypt)
 	private String password;
 
-	@Column(nullable = false, length = 30)
+	@Column(nullable = false, length = 50)
 	private String email;
 
 	@Column(nullable = false)

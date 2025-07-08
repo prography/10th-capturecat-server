@@ -68,7 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		String role = jwtUtil.getRole(accessToken);
 		LoginUser loginUser = new LoginUser(username, role);
 		Authentication authToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-
+		log.info("loginUser.getAuthorities() = {}", loginUser.getAuthorities().stream().findFirst());
 		// SecurityContext에 등록
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 

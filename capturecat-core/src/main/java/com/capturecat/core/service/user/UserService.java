@@ -40,6 +40,7 @@ public class UserService {
 
 	/**
 	 * 소셜 로그인 시 회원가입 처리
+	 * TODO: PROVIDER와 SUBJECT를 기준으로 '소셜서비스'+'소셜ID' 형태로 찾는다. 각기 다른 소셜로그인으로 로그인했을 때 문제가 될 것 같다.
 	 */
 	public LoginUser upsertSocialUser(OidcUserPayload payload) {
 		User user = userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
@@ -49,11 +50,11 @@ public class UserService {
 
 	private User buildUser(OidcUserPayload payload) {
 		return User.builder()
+			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
 			.email(payload.email())
 			.provider(payload.provider())
 			.socialId(payload.sub())
 			.role(UserRole.USER)
-			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
 			.build();
 	}
 }

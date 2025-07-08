@@ -61,7 +61,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 
 		willReturn(payload).given(idTokenVerifierService).verifyAndExtract(provider, idToken);
 		willReturn(user).given(userService).upsertSocialUser(payload);
-		willReturn(tokenMap).given(tokenService).issue(user.getUsername(), user.getRole().getValue());
+		willReturn(tokenMap).given(tokenService).issue(user.getUsername(), user.getRole());
 
 		// when & then
 		given().contentType(MediaType.APPLICATION_JSON)
@@ -75,9 +75,9 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 				// 응답 헤더
 				responseHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION)
-						.description("발급된 액세스 토큰 (Bearer prefix 포함)"),
+						.description("발급된 액세스 토큰"),
 					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
-						.description("발급된 리프레시 토큰 (Bearer prefix 포함)")),
+						.description("발급된 리프레시 토큰")),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}

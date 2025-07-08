@@ -75,7 +75,7 @@ class Oauth2AuthControllerSliceTest {
 		// userService.upsertSocialUser → user
 		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
 		// tokenService.issue → tokenMap
-		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole().getValue())))
+		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
 			.thenReturn(tokenMap);
 
 		// when & then

@@ -19,6 +19,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.config.auth.Oauth2Properties;
 import com.capturecat.core.config.auth.Oauth2Properties.Provider;
@@ -30,6 +31,7 @@ import com.capturecat.core.support.error.ErrorType;
  * id_token 검증 서비스
  * OAuth2 기반의 "로그인 표준" 프로토콜 (OpenID Connect)
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class IdTokenVerifierService {
@@ -45,8 +47,9 @@ public class IdTokenVerifierService {
 
 		try {
 			// 1. JWT 파싱
+			log.info("idToken: {}", idToken);
 			SignedJWT jwt = SignedJWT.parse(idToken);
-
+			log.info("jwt: {}", jwt);
 			// 2. 클레임(issuer, audience, exp 등) 검증
 			JWTClaimsSet claims = extractClaims(jwt, providerInfo, registrationInfo);
 
@@ -86,6 +89,9 @@ public class IdTokenVerifierService {
 		throws ParseException {
 		JWTClaimsSet claims = jwt.getJWTClaimsSet();
 
+		log.info("claims.getIssuer(): {}", claims.getIssuer());
+		log.info("claims.getAudience(): {}", claims.getAudience());
+		log.info("claims.getExpirationTime(): {}", claims.getExpirationTime());
 		if (!claims.getIssuer().equals(providerInfo.getIssuerUri())) {
 			throw new RuntimeException("Invalid issuer");
 		}

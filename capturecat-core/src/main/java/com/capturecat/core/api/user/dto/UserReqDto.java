@@ -21,8 +21,9 @@ public class UserReqDto {
 	@Getter
 	@Setter
 	public static class JoinReqDto {
+		// @Pattern(regexp = "^[a-zA-Z0-9]{2,20}$", message = "영문/숫자 2~20자 이내로 작성해주세요")
+		// TODO: 우선 이메일로 회원이름을 정한다. 닉네임을 받을지는 추후 논의
 		@NotEmpty
-		@Pattern(regexp = "^[a-zA-Z0-9]{2,20}$", message = "영문/숫자 2~20자 이내로 작성해주세요")
 		private String username;
 
 		@NotEmpty
@@ -35,7 +36,7 @@ public class UserReqDto {
 
 		public User toEntity(PasswordEncoder passwordEncoder) {
 			return User.builder()
-				.username(username)
+				.username(email)
 				.password(passwordEncoder.encode(password))
 				.email(email)
 				.role(UserRole.USER)
