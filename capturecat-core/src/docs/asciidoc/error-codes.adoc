@@ -37,3 +37,7 @@ include::{snippets}/errorCode/searchImagesByTags/error-codes.adoc[]
 [[이미지-삭제]]
 === 이미지 삭제
 include::{snippets}/errorCode/removeImage/error-codes.adoc[]
+
+[[즐겨찾기-등록]]
+=== 즐겨찾기 등록
+include::{snippets}/errorCode/addBookmark/error-codes.adoc[]

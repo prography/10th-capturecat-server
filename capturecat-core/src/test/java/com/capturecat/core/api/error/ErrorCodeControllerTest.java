@@ -94,6 +94,13 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/removeImage", errorCodeDescriptors);
 	}
 
+	@Test
+	void 이미지_즐겨찾기_등록_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(BOOKMARK_DUPLICATION,
+			USER_NOT_FOUND, IMAGE_NOT_FOUND);
+		generateErrorDocs("errorCode/addBookmark", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")
