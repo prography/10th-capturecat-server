@@ -35,7 +35,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
-import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
@@ -211,20 +210,36 @@ class ImageControllerTest extends RestDocsTest {
 	}
 
 	@Test
-	void 태그를_삭제한다() {
+	void 이미지를_삭제한다() {
 		// given
 		Long imageId = 1L;
-		RemoveTagsToImageRequest request = new RemoveTagsToImageRequest(List.of(1L, 2L));
-		willDoNothing().given(imageService).removeTagsToImage(anyLong(), anyList());
+		willDoNothing().given(imageService).removeImages(anyLong());
 
 		// when & then
 		given().contentType(ContentType.JSON)
-			.body(request)
-			.when().delete(URL_PREFIX + "/{imageId}/tags", imageId)
+			.when().delete(URL_PREFIX + "/{imageId}", imageId)
 			.then().status(HttpStatus.OK)
-			.apply(document("removeTagsToImage", requestPreprocessor(), responsePreprocessor(),
-				pathParameters(parameterWithName("imageId").description("태그를 삭제할 이미지 ID")),
-				requestFields(fieldWithPath("tagIds").type(JsonFieldType.ARRAY).description("삭제할 태그 ID 목록")),
+			.apply(document("removeImage", requestPreprocessor(), responsePreprocessor(),
+				pathParameters(parameterWithName("imageId").description("삭제할 이미지 ID")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
+	}
+
+	@Test
+	void 태그를_삭제한다() {
+		// given
+		Long imageId = 1L;
+		Long tagId = 1L;
+		willDoNothing().given(imageService).removeTagToImage(anyLong(), anyLong());
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.when().delete(URL_PREFIX + "/{imageId}/tags/{tagId}", imageId, tagId)
+			.then().status(HttpStatus.OK)
+			.apply(document("removeTagToImage", requestPreprocessor(), responsePreprocessor(),
+				pathParameters(
+					parameterWithName("imageId").description("이미지 ID"),
+					parameterWithName("tagId").description("삭제할 이미지 ID")),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}

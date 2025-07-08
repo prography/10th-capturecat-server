@@ -1,16 +1,11 @@
 package com.capturecat.core.api.image;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -19,11 +14,8 @@ import org.springframework.http.HttpStatus;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
-import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
@@ -43,10 +35,6 @@ class ImageApiTest {
 	private ImageTagRepository imageTagRepository;
 
 	private Long imageId;
-
-	private static Stream<RemoveTagsToImageRequest> invalidTagIdsRequests() {
-		return Stream.of(new RemoveTagsToImageRequest(null), new RemoveTagsToImageRequest(Collections.emptyList()));
-	}
 
 	@BeforeEach
 	void setUp() {
@@ -114,7 +102,7 @@ class ImageApiTest {
 	@Test
 	void 이미지_태그를_삭제한다() {
 		// given
-		AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(List.of("tag1", "tag2"));
+		AddTagsToImageRequest 단일_이미지_태그_등록_요청 = new AddTagsToImageRequest(List.of("tag1"));
 
 		RestAssured.given()
 			.contentType(ContentType.JSON)
@@ -122,13 +110,10 @@ class ImageApiTest {
 			.when().post("/v1/images/{imageId}/tags", imageId)
 			.then();
 
-		RemoveTagsToImageRequest 태그_삭제_요청 = new RemoveTagsToImageRequest(List.of(1L, 2L));
-
 		// when
 		RestAssured.given().log().all()
 			.contentType(ContentType.JSON)
-			.body(태그_삭제_요청)
-			.when().delete("/v1/images/{imageId}/tags", imageId)
+			.when().delete("/v1/images/{imageId}/tags/{tagId}", imageId, 1L)
 			.then().log().all()
 			.statusCode(HttpStatus.OK.value());
 
@@ -138,25 +123,4 @@ class ImageApiTest {
 		List<String> tagNamesByImage = imageTagRepository.findTagNamesByImage(image);
 		assertThat(tagNamesByImage).isEmpty();
 	}
-
-	@ParameterizedTest
-	@MethodSource("invalidTagIdsRequests")
-	void 이미지_태그_삭제_시_잘못된_요청인_경우_400을_반환한다(RemoveTagsToImageRequest 태그_삭제_요청) {
-		// when
-		ExtractableResponse<Response> 태그_삭제_응답 = RestAssured.given().log().all()
-			.contentType(ContentType.JSON)
-			.body(태그_삭제_요청)
-			.when().delete("/v1/images/{imageId}/tags", imageId)
-			.then().log().all()
-			.extract();
-
-		// then
-		ErrorMessage 오류_메시지 = 태그_삭제_응답.jsonPath().getObject("error", ErrorMessage.class);
-		assertSoftly(softly -> {
-			softly.assertThat(태그_삭제_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-			softly.assertThat(오류_메시지.code()).isEqualTo(ErrorCode.BEAN_VALIDATION_FAIL.name());
-			softly.assertThat(오류_메시지.message()).isEqualTo(ErrorCode.BEAN_VALIDATION_FAIL.getMessage());
-		});
-	}
-
 }

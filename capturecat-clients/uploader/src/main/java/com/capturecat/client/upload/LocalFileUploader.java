@@ -47,4 +47,14 @@ public class LocalFileUploader extends AbstractFileUploader {
 		return destination.toAbsolutePath().toString();
 	}
 
+	@Override
+	public void delete(String fileName) {
+		Path destination = storagePath.resolve(fileName);
+
+		try {
+			Files.deleteIfExists(destination);
+		} catch (IOException e) {
+			throw new UploadException(ErrorCode.LOCAL_UPLOAD_FAILED, e);
+		}
+	}
 }
