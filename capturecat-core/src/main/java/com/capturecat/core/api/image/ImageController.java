@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
 import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
@@ -32,14 +31,12 @@ import com.capturecat.core.service.image.ImageWithTagsResponse;
 import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.core.support.response.CursorResponse;
 
-@Slf4j
 @RestController
 @RequestMapping("/v1/images")
 @RequiredArgsConstructor
 public class ImageController {
 
 	private final ImageService imageService;
-
 
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<?> upload(
@@ -57,7 +54,7 @@ public class ImageController {
 
 	@GetMapping
 	public ApiResponse<CursorResponse<ImageWithTagsResponse>> getImagesByUser(
-		@PageableDefault(size = 20) Pageable pageable) {
+			@PageableDefault(size = 20) Pageable pageable) {
 		return ApiResponse.success(imageService.getImagesWithTags(pageable));
 	}
 
@@ -74,10 +71,15 @@ public class ImageController {
 		return ApiResponse.success(response);
 	}
 
-	@DeleteMapping("/{imageId}/tags")
-	public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId,
-		@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
-		imageService.removeTagsToImage(imageId, request.tagIds());
+	@DeleteMapping("/{imageId}")
+	public ApiResponse<?> removeImageByUser(@PathVariable Long imageId) {
+		imageService.removeImages(imageId);
+		return ApiResponse.success();
+	}
+
+	@DeleteMapping("/{imageId}/tags/{tagId}")
+	public ApiResponse<?> removeTagFromImage(@PathVariable Long imageId, @PathVariable Long tagId) {
+		imageService.removeTagToImage(imageId, tagId);
 		return ApiResponse.success();
 	}
 }

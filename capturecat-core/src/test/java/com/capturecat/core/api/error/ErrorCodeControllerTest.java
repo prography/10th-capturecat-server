@@ -36,7 +36,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 이미지_업로드_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(UPLOAD_METADATA_MISMATCH,
+			INVALID_DATE_FORMAT, USER_NOT_FOUND, IMAGE_UPLOAD_FAILED);
 		generateErrorDocs("errorCode/upload", errorCodeDescriptors);
 	}
 
@@ -48,8 +49,9 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 태그_삭제_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REQUEST, IMAGE_NOT_FOUND);
-		generateErrorDocs("errorCode/removeTagsToImage", errorCodeDescriptors);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_NOT_FOUND,
+			USER_NOT_FOUND, IMAGE_TAG_NOT_FOUND);
+		generateErrorDocs("errorCode/removeTagToImage", errorCodeDescriptors);
 	}
 
 	@Test
@@ -89,6 +91,20 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_ACCESS_DENIED,
 			USER_NOT_FOUND, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/getImageWithTags", errorCodeDescriptors);
+	}
+
+	@Test
+	void 이미지_삭제_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_ACCESS_DENIED,
+			USER_NOT_FOUND, IMAGE_NOT_FOUND, IMAGE_DELETE_FAILED);
+		generateErrorDocs("errorCode/removeImage", errorCodeDescriptors);
+	}
+
+	@Test
+	void 이미지_즐겨찾기_등록_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(BOOKMARK_DUPLICATION,
+			USER_NOT_FOUND, IMAGE_NOT_FOUND);
+		generateErrorDocs("errorCode/addBookmark", errorCodeDescriptors);
 	}
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {

@@ -13,7 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
+import com.capturecat.client.upload.DeleteException;
 import com.capturecat.client.upload.FileUploader;
+import com.capturecat.client.upload.UploadException;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -22,6 +24,7 @@ import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagRegister;
+import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.tag.TagValidator;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
@@ -30,6 +33,7 @@ import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
 import com.capturecat.core.support.util.CursorUtil;
+import com.capturecat.core.support.util.DateTimeConverter;
 
 @Service
 @RequiredArgsConstructor
@@ -41,20 +45,30 @@ public class ImageService {
 	private final ImageTagFactory imageTagFactory;
 	private final TagValidator tagValidator;
 	private final TagRegister tagRegister;
+	private final TagRepository tagRepository;
 	private final UserRepository userRepository;
 
 	@Transactional
-	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기
+	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
 		List<Image> images = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
 			validate(file);
-			String fileUrl = fileUploader.upload(file);
+			String fileUrl = upload(file);
+
+			UploadItemRequest uploadItemRequest = getMatchingUploadRequest(uploadItems, file.getOriginalFilename());
 
 			Image image = Image.builder()
 				.fileName(file.getOriginalFilename())
 				.fileUrl(fileUrl)
 				.size(file.getSize())
+				.captureDate(DateTimeConverter.convert(uploadItemRequest.captureDate()))
+				.user(user)
 				.build();
 			images.add(image);
 		}
@@ -63,11 +77,8 @@ public class ImageService {
 
 		List<ImageTag> allImageTags = new ArrayList<>();
 		for (Image savedImage : savedImages) {
-			List<String> tagNames = uploadItems.stream()
-				.filter(i -> savedImage.isSameFileNameAs(i.fileName()))
-				.map(UploadItemRequest::tagNames)
-				.findFirst()
-				.orElseThrow(() -> new CoreException(ErrorType.TAG_INFO_MISMATCH));
+			UploadItemRequest uploadItemRequest = getMatchingUploadRequest(uploadItems, savedImage.getFileName());
+			List<String> tagNames = uploadItemRequest.tagNames();
 
 			tagValidator.validateTagNames(savedImage, tagNames);
 
@@ -103,14 +114,15 @@ public class ImageService {
 	}
 
 	@Transactional
-	public void removeTagsToImage(Long imageId, List<Long> tagIds) {
+	public void removeTagToImage(Long imageId, Long tagId) {
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
-		List<ImageTag> imageTags = imageTagRepository.findByImageAndTagIds(image, tagIds);
-		if (imageTags.isEmpty()) {
-			return;
-		}
-		imageTagRepository.deleteAll(imageTags);
+		Tag tag = tagRepository.findById(tagId)
+			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
+		ImageTag imageTag = imageTagRepository.findByImageAndTag(image, tag)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_TAG_NOT_FOUND));
+
+		imageTagRepository.delete(imageTag);
 	}
 
 	@Transactional(readOnly = true)
@@ -140,15 +152,56 @@ public class ImageService {
 
 		List<ImageTag> imageTags = imageTagRepository.findByImage(image);
 
-		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(), imageTags.stream()
-			.map(it -> TagResponse.from(it.getTag()))
-			.toList());
+		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(), image.getCaptureDate(),
+			imageTags.stream()
+				.map(it -> TagResponse.from(it.getTag()))
+				.toList());
+	}
+
+	@Transactional
+	public void removeImages(Long imageId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Image image = imageRepository.findById(imageId)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+		image.validateOwnership(user);
+
+		delete(image.getFileName());
+		imageRepository.delete(image);
+		imageTagRepository.deleteAllByImage(image);
 	}
 
 	private void validate(MultipartFile file) {
 		String contentType = file.getContentType();
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new CoreException(ErrorType.INVALID_IMAGE_FORMAT);
+		}
+	}
+
+	private UploadItemRequest getMatchingUploadRequest(List<UploadItemRequest> uploadItems, String fileName) {
+		return uploadItems.stream()
+			.filter(i -> i.fileName().equals(fileName))
+			.findFirst()
+			.orElseThrow(() -> new CoreException(ErrorType.UPLOAD_METADATA_MISMATCH));
+	}
+
+	private String upload(MultipartFile file) {
+		try {
+			return fileUploader.upload(file);
+		} catch (UploadException e) {
+			throw new CoreException(ErrorType.IMAGE_UPLOAD_FAILED);
+		}
+	}
+
+	private void delete(String name) {
+		try {
+			fileUploader.delete(name);
+		} catch (DeleteException e) {
+			throw new CoreException(ErrorType.IMAGE_DELETE_FAILED);
 		}
 	}
 }
