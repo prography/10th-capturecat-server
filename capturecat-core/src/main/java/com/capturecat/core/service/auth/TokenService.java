@@ -16,6 +16,7 @@ import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.domain.auth.RefreshToken;
 import com.capturecat.core.domain.auth.RefreshTokenRepository;
+import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -32,10 +33,10 @@ public class TokenService {
 	 * Access 토큰 만료시, Access/Refresh 토큰을 발행하고,
 	 * 새로운 Refresh 토큰을 DB에 저장한다. (rotating)
 	 */
-	public Map<TokenType, String> issue(String username, String role) {
+	public Map<TokenType, String> issue(String username, UserRole role) {
 		//Access token 생성, Refresh token rotating
-		String accessToken = jwtUtil.generateToken(username, role, TokenType.ACCESS);
-		String refreshToken = jwtUtil.generateToken(username, role, TokenType.REFRESH);
+		String accessToken = jwtUtil.generateToken(username, role.toRoleString(), TokenType.ACCESS);
+		String refreshToken = jwtUtil.generateToken(username, role.toRoleString(), TokenType.REFRESH);
 
 		//Refresh token 저장
 		saveRefreshToken(username, refreshToken);
@@ -50,7 +51,7 @@ public class TokenService {
 	public Map<TokenType, String> reissue(String authHeader) {
 		String refreshToken = deleteRefreshToken(authHeader);
 		//새 토큰 발급 후 Refresh 토큰 저장
-		return issue(jwtUtil.getUsername(refreshToken), jwtUtil.getRole(refreshToken));
+		return issue(jwtUtil.getUsername(refreshToken), UserRole.fromRoleString(jwtUtil.getRole(refreshToken)));
 	}
 
 	@Transactional(readOnly = true)

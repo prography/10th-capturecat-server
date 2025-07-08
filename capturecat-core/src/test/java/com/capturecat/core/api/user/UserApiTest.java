@@ -50,7 +50,7 @@ class UserApiTest {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result").value("SUCCESS"))
-			.andExpect(jsonPath("$.data.username").value("username1"))
+			.andExpect(jsonPath("$.data.username").value("username1@email.com"))
 			.andExpect(jsonPath("$.error").doesNotExist());
 	}
 

@@ -21,12 +21,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.LoginReqDto;
-import com.capturecat.core.config.auth.LoginUser;
+import com.capturecat.core.domain.user.UserRole;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.ApiResponse;
 
+/**
+ * 소셜 로그인/회원가입이 아닌,
+ * 일반 회원가입 후 /login 경로로, id, password로 로그인한 경우 (개발 용도)
+ */
 @RequiredArgsConstructor
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -58,7 +63,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 		String role = loginUser.getAuthorities().iterator().next().getAuthority();
 
 		//토큰 발급
-		Map<TokenType, String> tokenMap = tokenIssueService.issue(username, role);
+		Map<TokenType, String> tokenMap = tokenIssueService.issue(username, UserRole.fromRoleString(role));
 
 		//Header에 실어 응답
 		response.setHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + tokenMap.get(TokenType.ACCESS));

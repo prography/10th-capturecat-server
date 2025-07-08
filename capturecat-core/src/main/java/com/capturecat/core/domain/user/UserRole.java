@@ -15,12 +15,16 @@ public enum UserRole {
 
 	private final String value;
 
-	public static UserRole fromRoleName(String roleName) {
+	public static UserRole fromRoleString(String roleName) {
 		return switch (roleName) {
 			case "ROLE_ADMIN" -> ADMIN;
 			case "ROLE_PREMIUM_USER" -> PREMIUM_USER;
 			case "ROLE_USER" -> USER;
 			default -> throw new CoreException(ErrorType.UNKNOWN_ROLE);
 		};
+	}
+
+	public String toRoleString() {
+		return "ROLE_" + this.name();
 	}
 }

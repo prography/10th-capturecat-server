@@ -18,6 +18,7 @@ import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.domain.auth.RefreshToken;
 import com.capturecat.core.domain.auth.RefreshTokenRepository;
+import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -46,7 +47,7 @@ class TokenServiceTest {
 			.willReturn("refreshToken");
 
 		// when
-		Map<TokenType, String> tokenMap = tokenService.issue(username, role);
+		Map<TokenType, String> tokenMap = tokenService.issue(username, UserRole.fromRoleString(role));
 
 		// then
 		assertThat(tokenMap)

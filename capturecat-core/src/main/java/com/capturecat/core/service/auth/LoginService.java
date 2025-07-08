@@ -1,4 +1,4 @@
-package com.capturecat.core.config.auth;
+package com.capturecat.core.service.auth;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

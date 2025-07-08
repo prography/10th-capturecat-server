@@ -1,12 +1,9 @@
 package com.capturecat.core.service.bookmark;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
@@ -21,12 +18,12 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.capturecat.core.DummyObject;
-import com.capturecat.core.config.auth.LoginUser;
 import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 

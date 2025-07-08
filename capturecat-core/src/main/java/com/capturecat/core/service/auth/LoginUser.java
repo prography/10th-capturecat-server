@@ -1,4 +1,4 @@
-package com.capturecat.core.config.auth;
+package com.capturecat.core.service.auth;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,18 +23,18 @@ public class LoginUser implements UserDetails {
 	public LoginUser(User user) {
 		this.username = user.getUsername();
 		this.password = user.getPassword();
-		this.role = user.getRole();
+		this.role =  user.getRole();
 	}
 
 	public LoginUser(String username, String role) {
 		this.username = username;
-		this.role = UserRole.fromRoleName(role);
+		this.role = UserRole.fromRoleString(role);
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add((GrantedAuthority)() -> "ROLE_" + role);
+		authorities.add((GrantedAuthority)() -> role.toRoleString());
 		return authorities;
 	}
 

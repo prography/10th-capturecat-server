@@ -27,25 +27,31 @@ public class User extends BaseTimeEntity {
 	@GeneratedValue
 	private Long id;
 
-	@Column(unique = true, nullable = false, length = 30)
+	@Column(unique = true, nullable = false, length = 50)
 	private String username; //nickname
 
-	@Column(nullable = false, length = 70) //패스워드 인코딩(BCrypt)
+	@Column(length = 70) //패스워드 인코딩(BCrypt)
 	private String password;
 
-	@Column(nullable = false, length = 30)
+	@Column(nullable = false, length = 50)
 	private String email;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
+	private String provider;   // "google", "apple", "kakao" 등
+	private String socialId;   // 소셜 서비스의 "sub" (고유 OIDC ID)
+
 	@Builder
-	public User(Long id, String username, String password, String email, UserRole role) {
+	public User(Long id, String username, String password, String email, UserRole role,
+		String provider, String socialId) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.role = role;
+		this.provider = provider;
+		this.socialId = socialId;
 	}
 }

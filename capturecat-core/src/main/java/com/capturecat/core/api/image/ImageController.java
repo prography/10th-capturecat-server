@@ -2,9 +2,13 @@ package com.capturecat.core.api.image;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
+import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
 import com.capturecat.core.support.response.ApiResponse;
@@ -34,9 +40,8 @@ public class ImageController {
 
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<?> upload(
-		@RequestPart List<UploadItemRequest> uploadItems,
-		@RequestPart List<MultipartFile> files
-	) {
+		@RequestPart List<UploadItemRequest> uploadItems, @RequestPart List<MultipartFile> files,
+		@AuthenticationPrincipal LoginUser loginUser) { //접근 권한 permitAll 설정일 경우는 null
 		imageService.save(uploadItems, files);
 		return ApiResponse.success();
 	}

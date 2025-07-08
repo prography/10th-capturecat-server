@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.capturecat.core.config.auth.LoginUser;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;

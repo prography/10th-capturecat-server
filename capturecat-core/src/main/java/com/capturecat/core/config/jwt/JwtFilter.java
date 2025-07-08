@@ -23,7 +23,7 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import com.capturecat.core.config.auth.LoginUser;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.ApiResponse;
 

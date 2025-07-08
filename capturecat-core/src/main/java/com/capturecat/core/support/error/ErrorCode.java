@@ -28,7 +28,8 @@ public enum ErrorCode {
 	INVALID_DATE_FORMAT("올바르지 않은 날짜 형식입니다. 날짜는 yyyy-MM-dd 형식으로 입력해주세요."),
 	NOT_FOUND_TAG("태그를 찾을 수 없습니다."),
 	NOT_FOUND_IMAGE_TAG("이미지에 해당하는 태그를 찾을 수 없습니다."),
-	ALREADY_EXISTS_BOOKMARK("이미 즐겨찾기한 이미지입니다.");
+	ALREADY_EXISTS_BOOKMARK("이미 즐겨찾기한 이미지입니다."),
+	INVALID_ID_TOKEN("유효하지 않은 ID_TOKEN 입니다.");
 
 	private final String message;
 

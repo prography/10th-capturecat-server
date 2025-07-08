@@ -7,13 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import com.capturecat.core.config.auth.LoginUser;
 import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
