@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import com.capturecat.client.upload.config.S3Properties;
@@ -46,4 +47,16 @@ public class S3FileUploader extends AbstractFileUploader {
 		return String.join("/", s3Properties.urlPrefix(), key);
 	}
 
+	@Override
+	public void delete(String fileName) {
+		try {
+			DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+				.bucket(s3Properties.bucket())
+				.key(fileName)
+				.build();
+			s3Client.deleteObject(deleteRequest);
+		} catch (SdkException e) {
+			throw new DeleteException(ErrorCode.S3_UPLOAD_FAILED_IO, e);
+		}
+	}
 }

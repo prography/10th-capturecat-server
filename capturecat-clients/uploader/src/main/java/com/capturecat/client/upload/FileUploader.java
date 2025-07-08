@@ -6,4 +6,5 @@ public interface FileUploader {
 
 	String upload(MultipartFile file);
 
+	void delete(String fileName);
 }

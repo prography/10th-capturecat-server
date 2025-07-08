@@ -2,12 +2,9 @@ package com.capturecat.core.api.image;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.image.dto.AddTagsToImageRequest;
-import com.capturecat.core.api.image.dto.RemoveTagsToImageRequest;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
@@ -70,10 +66,15 @@ public class ImageController {
 		return ApiResponse.success(response);
 	}
 
-	@DeleteMapping("/{imageId}/tags")
-	public ApiResponse<?> removeTagsFromImage(@PathVariable Long imageId,
-			@RequestBody @Valid RemoveTagsToImageRequest request, BindingResult bindingResult) {
-		imageService.removeTagsToImage(imageId, request.tagIds());
+	@DeleteMapping("/{imageId}")
+	public ApiResponse<?> removeImageByUser(@PathVariable Long imageId) {
+		imageService.removeImages(imageId);
+		return ApiResponse.success();
+	}
+
+	@DeleteMapping("/{imageId}/tags/{tagId}")
+	public ApiResponse<?> removeTagFromImage(@PathVariable Long imageId, @PathVariable Long tagId) {
+		imageService.removeTagToImage(imageId, tagId);
 		return ApiResponse.success();
 	}
 }

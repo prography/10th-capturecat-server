@@ -18,9 +18,9 @@ include::{snippets}/errorCode/upload/error-codes.adoc[]
 === 단일 이미지 태그 등록
 include::{snippets}/errorCode/addTagsToImage/error-codes.adoc[]
 
-[[이미지-태그-삭제]]
-=== 이미지 태그 삭제
-include::{snippets}/errorCode/removeTagsToImage/error-codes.adoc[]
+[[이미지의-태그-삭제]]
+=== 이미지의 태그 삭제
+include::{snippets}/errorCode/removeTagToImage/error-codes.adoc[]
 
 [[태그-포함-이미지-목록-조회]]
 === 태그 포함 이미지 목록 조회
@@ -34,9 +34,9 @@ include::{snippets}/errorCode/getTags/error-codes.adoc[]
 === 태그로 이미지 검색
 include::{snippets}/errorCode/searchImagesByTags/error-codes.adoc[]
 
-
-
-
+[[이미지-삭제]]
+=== 이미지 삭제
+include::{snippets}/errorCode/removeImage/error-codes.adoc[]
 
 [[즐겨찾기-등록]]
 === 즐겨찾기 등록

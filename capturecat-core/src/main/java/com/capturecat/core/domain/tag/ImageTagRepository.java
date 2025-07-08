@@ -1,6 +1,7 @@
 package com.capturecat.core.domain.tag;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,8 +13,7 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 	@Query("SELECT t.name FROM ImageTag it JOIN it.tag t WHERE it.image = :image")
 	List<String> findTagNamesByImage(Image image);
 
-	@Query("SELECT it FROM ImageTag it JOIN it.tag t WHERE it.image = :image AND t.id IN :tagIds")
-	List<ImageTag> findByImageAndTagIds(Image image, List<Long> tagIds);
+	Optional<ImageTag> findByImageAndTag(Image image, Tag tag);
 
 	@Query("SELECT it FROM ImageTag it JOIN FETCH it.tag t WHERE it.image = :image")
 	List<ImageTag> findByImage(Image image);
@@ -22,4 +22,6 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 	boolean existsByImageAndTagNames(Image image, List<String> tagNames);
 
 	long countByImage(Image image);
+
+	void deleteAllByImage(Image image);
 }
