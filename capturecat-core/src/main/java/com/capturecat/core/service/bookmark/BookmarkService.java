@@ -35,6 +35,14 @@ public class BookmarkService {
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
+		validateBookmarkDuplication(user, image);
+
 		bookmarkRepository.save(new Bookmark(user, image));
+	}
+
+	private void validateBookmarkDuplication(User user, Image image) {
+		if (bookmarkRepository.existsByUserAndImage(user, image)) {
+			throw new CoreException(ErrorType.BOOKMARK_DUPLICATION);
+		}
 	}
 }

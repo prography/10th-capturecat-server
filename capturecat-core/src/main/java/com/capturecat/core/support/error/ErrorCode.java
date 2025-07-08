@@ -27,7 +27,8 @@ public enum ErrorCode {
 	IMAGE_ACCESS_DENIED("요청하신 이미지에 접근할 권한이 없습니다. 본인 소유가 아니면 접근이 제한됩니다."),
 	INVALID_DATE_FORMAT("올바르지 않은 날짜 형식입니다. 날짜는 yyyy-MM-dd 형식으로 입력해주세요."),
 	NOT_FOUND_TAG("태그를 찾을 수 없습니다."),
-	NOT_FOUND_IMAGE_TAG("이미지에 해당하는 태그를 찾을 수 없습니다.");
+	NOT_FOUND_IMAGE_TAG("이미지에 해당하는 태그를 찾을 수 없습니다."),
+	ALREADY_EXISTS_BOOKMARK("이미 즐겨찾기한 이미지입니다.");
 
 	private final String message;
 

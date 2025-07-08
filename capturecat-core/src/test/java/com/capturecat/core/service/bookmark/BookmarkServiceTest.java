@@ -56,6 +56,8 @@ class BookmarkServiceTest {
 			.willReturn(Optional.of(user));
 		given(imageRepository.findById(anyLong()))
 			.willReturn(Optional.of(image));
+		given(bookmarkRepository.existsByUserAndImage(user, image))
+			.willReturn(false);
 		given(bookmarkRepository.save(any()))
 			.willReturn(new Bookmark(user, image));
 
@@ -91,6 +93,26 @@ class BookmarkServiceTest {
 			.willReturn(Optional.of(user));
 		given(imageRepository.findById(anyLong()))
 			.willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+		// when & then
+		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
+			.isInstanceOf(CoreException.class);
+		verify(bookmarkRepository, never()).save(any(Bookmark.class));
+	}
+
+	@Test
+	void 북마크를_할_때_이미_북마크된_이미지이면_실패한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var image = DummyObject.newMockImage(1L);
+		setupLoggedInUser(user);
+
+		given(userRepository.findByUsername(anyString()))
+			.willReturn(Optional.of(user));
+		given(imageRepository.findById(anyLong()))
+			.willReturn(Optional.of(image));
+		given(bookmarkRepository.existsByUserAndImage(user, image))
+			.willReturn(true);
 
 		// when & then
 		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
