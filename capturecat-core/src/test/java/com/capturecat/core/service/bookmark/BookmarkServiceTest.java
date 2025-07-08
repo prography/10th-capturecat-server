@@ -25,6 +25,7 @@ import com.capturecat.core.config.auth.LoginUser;
 import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -49,12 +50,7 @@ class BookmarkServiceTest {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);
-
-		Authentication authentication = Mockito.mock(Authentication.class);
-		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-		given(securityContext.getAuthentication()).willReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		given(authentication.getPrincipal()).willReturn(new LoginUser(user));
+		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -74,12 +70,7 @@ class BookmarkServiceTest {
 	void 북마크할_때_회원이_존재하지_않으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
-
-		Authentication authentication = Mockito.mock(Authentication.class);
-		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-		given(securityContext.getAuthentication()).willReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		given(authentication.getPrincipal()).willReturn(new LoginUser(user));
+		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
@@ -94,12 +85,7 @@ class BookmarkServiceTest {
 	void 북마크를_할_때_이미지가_존재하지_읺으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
-
-		Authentication authentication = Mockito.mock(Authentication.class);
-		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-		given(securityContext.getAuthentication()).willReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		given(authentication.getPrincipal()).willReturn(new LoginUser(user));
+		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -110,5 +96,13 @@ class BookmarkServiceTest {
 		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
 			.isInstanceOf(CoreException.class);
 		verify(bookmarkRepository, never()).save(any(Bookmark.class));
+	}
+
+	private void setupLoggedInUser(User user) {
+		Authentication authentication = Mockito.mock(Authentication.class);
+		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+		given(securityContext.getAuthentication()).willReturn(authentication);
+		SecurityContextHolder.setContext(securityContext);
+		given(authentication.getPrincipal()).willReturn(new LoginUser(user));
 	}
 }
