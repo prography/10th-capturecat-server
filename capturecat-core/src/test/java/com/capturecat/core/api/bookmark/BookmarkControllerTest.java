@@ -34,7 +34,7 @@ class BookmarkControllerTest extends RestDocsTest {
 	}
 
 	@Test
-	void 북마크를_한다() {
+	void 즐겨찾기를_한다() {
 		// given
 		willDoNothing().given(bookmarkService).addBookmark(anyLong());
 

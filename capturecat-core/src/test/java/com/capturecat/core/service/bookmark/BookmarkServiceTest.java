@@ -46,7 +46,7 @@ class BookmarkServiceTest {
 	private BookmarkService bookmarkService;
 
 	@Test
-	void 북마크를_한다() {
+	void 즐겨찾기를_한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);
@@ -69,7 +69,7 @@ class BookmarkServiceTest {
 	}
 
 	@Test
-	void 북마크할_때_회원이_존재하지_않으면_실패한다() {
+	void 즐겨찾기할_때_회원이_존재하지_않으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		setupLoggedInUser(user);
@@ -84,7 +84,7 @@ class BookmarkServiceTest {
 	}
 
 	@Test
-	void 북마크를_할_때_이미지가_존재하지_읺으면_실패한다() {
+	void 즐겨찾기를_할_때_이미지가_존재하지_읺으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		setupLoggedInUser(user);
@@ -101,7 +101,7 @@ class BookmarkServiceTest {
 	}
 
 	@Test
-	void 북마크를_할_때_이미_북마크된_이미지이면_실패한다() {
+	void 즐겨찾기를_할_때_이미_즐겨찾기된_이미지이면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);

@@ -11,7 +11,7 @@ import com.capturecat.core.domain.user.User;
 class BookmarkTest {
 
 	@Test
-	void 북마크를_한다() {
+	void 즐겨찾기를_한다() {
 		// given
 		User user = DummyObject.newMockUser(1L);
 		Image image = DummyObject.newMockImage(1L);
