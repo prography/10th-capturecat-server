@@ -33,3 +33,11 @@ include::{snippets}/errorCode/getTags/error-codes.adoc[]
 [[태그로-이미지-검색]]
 === 태그로 이미지 검색
 include::{snippets}/errorCode/searchImagesByTags/error-codes.adoc[]
+
+
+
+
+
+[[즐겨찾기-등록]]
+=== 즐겨찾기 등록
+include::{snippets}/errorCode/addBookmark/error-codes.adoc[]
