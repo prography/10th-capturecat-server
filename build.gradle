@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.0'
+    id 'org.springframework.boot' version '3.5.0' apply false
     id 'io.spring.dependency-management' version '1.1.7'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
     id 'checkstyle'
@@ -49,8 +49,12 @@ subprojects {
         dependsOn test
     }
 
-    bootJar.enabled = false
-    jar.enabled = true
+    tasks.named('bootJar') {
+        enabled = false
+    }
+    tasks.named('jar') {
+        enabled = true
+    }
 
     test {
         outputs.dir snippetDir
