@@ -102,16 +102,16 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 이미지_즐겨찾기_등록_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
-			IMAGE_NOT_FOUND, BOOKMARK_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(BOOKMARK_DUPLICATION,
+			USER_NOT_FOUND, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/addBookmark", errorCodeDescriptors);
 	}
 
 	@Test
 	void 이미지_즐겨찾기_삭제_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(BOOKMARK_DUPLICATION,
-			USER_NOT_FOUND, IMAGE_NOT_FOUND);
-		generateErrorDocs("errorCode/addBookmark", errorCodeDescriptors);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
+			IMAGE_NOT_FOUND, BOOKMARK_NOT_FOUND);
+		generateErrorDocs("errorCode/deleteBookmark", errorCodeDescriptors);
 	}
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
