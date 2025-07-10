@@ -61,13 +61,6 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	}
 
 	@Test
-	void 토큰_재발행_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
-			REFRESH_TOKEN_EXPIRED);
-		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
-	}
-
-	@Test
 	void 태그로_이미지_검색_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/searchImagesByTags", errorCodeDescriptors);
@@ -76,7 +69,14 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 소셜_로그인_회원가입_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_ID_TOKEN);
-		generateErrorDocs("errorCode/oauthLogin", errorCodeDescriptors);
+		generateErrorDocs("errorCode/socialLogin", errorCodeDescriptors);
+	}
+
+	@Test
+	void 토큰_재발행_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
+			REFRESH_TOKEN_EXPIRED);
+		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
 	}
 
 	@Test

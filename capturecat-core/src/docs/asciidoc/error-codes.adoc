@@ -41,3 +41,15 @@ include::{snippets}/errorCode/removeImage/error-codes.adoc[]
 [[즐겨찾기-등록]]
 === 즐겨찾기 등록
 include::{snippets}/errorCode/addBookmark/error-codes.adoc[]
+
+[[소셜로그인]]
+=== 소셜 로그인
+include::{snippets}/errorCode/socialLogin/error-codes.adoc[]
+
+[[엑세스-토큰-재발급]]
+=== 엑세스-토큰-재발급
+include::{snippets}/errorCode/reissue/error-codes.adoc[]
+
+[[로그아웃]]
+=== 로그아웃
+include::{snippets}/errorCode/logout/error-codes.adoc[]
