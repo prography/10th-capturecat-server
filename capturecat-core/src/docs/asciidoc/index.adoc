@@ -11,6 +11,8 @@ include::{adocPath}/introduce.adoc[]
 
 include::{adocPath}/common-response.adoc[]
 
+include::{adocPath}/auth.adoc[]
+
 include::{adocPath}/image.adoc[]
 
 include::{adocPath}/tag.adoc[]
@@ -20,4 +22,3 @@ include:{adocPath}/bookmark.adoc[]
 include::{adocPath}/health.adoc[]
 
 == xref:error-codes.adoc[에러 코드]
-

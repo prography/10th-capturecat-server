@@ -70,15 +70,19 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 			.when().post(REQUEST_PATH, provider)
 			.then().status(HttpStatus.OK)
 			.apply(document("socialLogin", requestPreprocessor(), responsePreprocessor(),
-				pathParameters(parameterWithName("provider").description("소셜 로그인 서비스 제공자")),
-				requestFields(fieldWithPath("idToken").description("ID_TOKEN(암호화된 사용자 정보 JWT)")),
+				pathParameters(
+					parameterWithName("provider").description("소셜 로그인 제공자 (예: google, apple 등)")
+				),
+				requestFields(
+					fieldWithPath("idToken").type(JsonFieldType.STRING).description("클라이언트에서 받은 ID 토큰")
+				),
 				responseHeaders(
-					headerWithName(HttpHeaders.AUTHORIZATION)
-						.description("발급된 액세스 토큰"),
-					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
-						.description("발급된 리프레시 토큰")),
+					headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer 액세스 토큰"),
+					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER).description("Bearer 리프레시 토큰")
+				),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (예: SUCCESS)")
+				)));
 	}
 
 	private LoginUser buildUser(OidcUserPayload payload) {
