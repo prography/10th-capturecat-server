@@ -1,9 +1,13 @@
 package com.capturecat.core.service.bookmark;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.willDoNothing;
 
 import java.util.Optional;
 
@@ -115,6 +119,84 @@ class BookmarkServiceTest {
 		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
 			.isInstanceOf(CoreException.class);
 		verify(bookmarkRepository, never()).save(any(Bookmark.class));
+	}
+
+	@Test
+	void 즐겨찾기에서_삭제한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var image = DummyObject.newMockImage(1L);
+		var bookmark = DummyObject.newBookmark(user, image);
+		setupLoggedInUser(user);
+
+		given(userRepository.findByUsername(anyString()))
+			.willReturn(Optional.of(user));
+		given(imageRepository.findById(anyLong()))
+			.willReturn(Optional.of(image));
+		given(bookmarkRepository.findByUserAndImage(user, image))
+			.willReturn(Optional.of(bookmark));
+		willDoNothing().given(bookmarkRepository).delete(bookmark);
+
+		// when
+		bookmarkService.deleteBookmark(image.getId());
+
+		// then
+		verify(bookmarkRepository).delete(any(Bookmark.class));
+	}
+
+	@Test
+	void 즐겨찾기_삭제_시_회원이_존재하지_않으면_실패한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		setupLoggedInUser(user);
+
+		given(userRepository.findByUsername(anyString()))
+			.willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
+
+		// when & then
+		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L))
+			.isInstanceOf(CoreException.class);
+
+		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
+	}
+
+	@Test
+	void 즐겨찾기_삭제_시_이미지가_존재하지_않으면_실패한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		setupLoggedInUser(user);
+
+		given(userRepository.findByUsername(anyString()))
+			.willReturn(Optional.of(user));
+		given(imageRepository.findById(anyLong()))
+			.willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+		// when & then
+		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L))
+			.isInstanceOf(CoreException.class);
+
+		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
+	}
+
+	@Test
+	void 즐겨찾기_삭제_시_즐겨찾기가_존재하지_않으면_실패한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var image = DummyObject.newMockImage(1L);
+		setupLoggedInUser(user);
+
+		given(userRepository.findByUsername(anyString()))
+			.willReturn(Optional.of(user));
+		given(imageRepository.findById(anyLong()))
+			.willReturn(Optional.of(image));
+		given(bookmarkRepository.findByUserAndImage(user, image))
+			.willThrow(new CoreException(ErrorType.BOOKMARK_NOT_FOUND));
+
+		// when & then
+		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L))
+			.isInstanceOf(CoreException.class);
+
+		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
 	}
 
 	private void setupLoggedInUser(User user) {

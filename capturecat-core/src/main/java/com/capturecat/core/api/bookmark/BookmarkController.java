@@ -1,5 +1,6 @@
 package com.capturecat.core.api.bookmark;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +21,12 @@ public class BookmarkController {
 	@PostMapping
 	public ApiResponse<?> addBookmark(@RequestParam Long imageId) {
 		bookmarkService.addBookmark(imageId);
+		return ApiResponse.success();
+	}
+
+	@DeleteMapping
+	public ApiResponse<?> deleteBookmark(@RequestParam Long imageId) {
+		bookmarkService.deleteBookmark(imageId);
 		return ApiResponse.success();
 	}
 }

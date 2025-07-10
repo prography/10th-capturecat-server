@@ -9,6 +9,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRole;
@@ -60,4 +61,7 @@ public class DummyObject {
 			.build();
 	}
 
+	public static Bookmark newBookmark(User user, Image image) {
+		return new Bookmark(user, image);
+	}
 }
