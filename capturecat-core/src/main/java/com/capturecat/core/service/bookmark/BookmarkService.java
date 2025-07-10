@@ -40,6 +40,21 @@ public class BookmarkService {
 		bookmarkRepository.save(new Bookmark(user, image));
 	}
 
+	@Transactional
+	public void deleteBookmark(Long imageId) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Image image = imageRepository.findById(imageId)
+			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+		Bookmark bookmark = bookmarkRepository.findByUserAndImage(user, image)
+			.orElseThrow(() -> new CoreException(ErrorType.BOOKMARK_NOT_FOUND));
+
+		bookmarkRepository.delete(bookmark);
+	}
+
 	private void validateBookmarkDuplication(User user, Image image) {
 		if (bookmarkRepository.existsByUserAndImage(user, image)) {
 			throw new CoreException(ErrorType.BOOKMARK_DUPLICATION);

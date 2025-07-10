@@ -51,4 +51,23 @@ class BookmarkControllerTest extends RestDocsTest {
 					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
+
+	@Test
+	void 즐겨찾기에서_삭제한다() {
+		// given
+		willDoNothing().given(bookmarkService).deleteBookmark(anyLong());
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.accept(ContentType.JSON)
+			.queryParam("imageId", 1L)
+			.when().delete("/v1/bookmarks")
+			.then().status(HttpStatus.OK)
+			.apply(document("deleteBookmark", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(parameterWithName("imageId").description("즐겨찾기에서 삭제할 이미지 ID")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
+					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
 }
