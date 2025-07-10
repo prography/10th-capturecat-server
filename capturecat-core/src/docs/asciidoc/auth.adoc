@@ -1,0 +1,32 @@
+[[인증-API]]
+== 인증 관련 API
+
+[[소셜로그인]]
+=== 소셜 로그인
+==== 성공
+operation::socialLogin[snippets='curl-request,http-request,path-parameters,request-body,request-fields,http-response,response-fields']
+
+==== 실패
+소셜 로그인이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#소셜로그인, 소셜 로그인 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[엑세스-토큰-재발급]]
+=== 엑세스 토큰 재발급
+==== 성공
+operation::reissue[snippets='curl-request,request-headers,http-response,response-headers,response-fields']
+
+==== 실패
+엑세스 토큰 재발급이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#엑세스-토큰-재발급, 엑세스 토큰 재발급 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[로그아웃]]
+=== 로그아웃
+==== 성공
+operation::logout[snippets='curl-request,http-request,request-headers,http-response,response-fields']
+
+==== 실패
+로그아웃이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#로그아웃, 로그아웃 API에서 발생할 수 있는 에러>>를 살펴보세요.
