@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,9 +48,7 @@ public class ImageService {
 
 	@Transactional
 	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
-	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
@@ -179,7 +175,11 @@ public class ImageService {
 
 	private UploadItemRequest getMatchingUploadRequest(List<UploadItemRequest> uploadItems, String fileName) {
 		return uploadItems.stream()
-			.filter(i -> i.fileName().equals(fileName))
+			.filter(i -> {
+				System.out.println("i.fileName() = " + i.fileName());
+				System.out.println("fileName = " + fileName);
+				return i.fileName().equals(fileName);
+			})
 			.findFirst()
 			.orElseThrow(() -> new CoreException(ErrorType.UPLOAD_METADATA_MISMATCH));
 	}

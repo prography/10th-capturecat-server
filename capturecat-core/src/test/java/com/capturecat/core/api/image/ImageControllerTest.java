@@ -62,7 +62,7 @@ class ImageControllerTest extends RestDocsTest {
 	@Test
 	void 이미지_업로드_후_태그를_생성한다() throws JsonProcessingException {
 		// given
-		willDoNothing().given(imageService).save(anyList(), anyList());
+		willDoNothing().given(imageService).save(anyList(), anyList(), any());
 
 		List<UploadItemRequest> requests = List.of(
 			new UploadItemRequest("cat.jpg", LocalDate.now().toString(), List.of("고양이", "cat")),

@@ -38,7 +38,7 @@ public class ImageController {
 	public ApiResponse<?> upload(
 		@RequestPart List<UploadItemRequest> uploadItems, @RequestPart List<MultipartFile> files,
 		@AuthenticationPrincipal LoginUser loginUser) { //접근 권한 permitAll 설정일 경우는 null, 캐스팅 오류x
-		imageService.save(uploadItems, files); //SecurityContext에서 직접 꺼내면 'anonymousUser'로 조회되어 캐스팅 오류 발생
+		imageService.save(uploadItems, files, loginUser); //SecurityContext에서 직접 꺼내면 'anonymousUser'로 조회되어 캐스팅 오류 발생
 		return ApiResponse.success();
 	}
 
