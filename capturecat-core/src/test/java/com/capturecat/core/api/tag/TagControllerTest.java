@@ -40,7 +40,7 @@ class TagControllerTest extends RestDocsTest {
 	@Test
 	void 사용자가_등록한_태그_목록을_조회한다() {
 		// given
-		BDDMockito.given(tagService.getTags(any()))
+		BDDMockito.given(tagService.getTags(any(), any()))
 			.willReturn(new CursorResponse<>(false, 1L, List.of(
 				new TagResponse(1L, "tagName")
 			)));

@@ -62,7 +62,7 @@ class ImageControllerTest extends RestDocsTest {
 	@Test
 	void 이미지_업로드_후_태그를_생성한다() throws JsonProcessingException {
 		// given
-		willDoNothing().given(imageService).save(anyList(), anyList());
+		willDoNothing().given(imageService).save(anyList(), anyList(), any());
 
 		List<UploadItemRequest> requests = List.of(
 			new UploadItemRequest("cat.jpg", LocalDate.now().toString(), List.of("고양이", "cat")),
@@ -97,7 +97,7 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2"));
 		Long imageId = 1L;
-		willDoNothing().given(imageService).addTagsToImage(anyLong(), any());
+		willDoNothing().given(imageService).addTagsToImage(anyLong(), any(), any());
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -114,7 +114,7 @@ class ImageControllerTest extends RestDocsTest {
 	@Test
 	void 태그와_이미지를_조회한다() {
 		// given
-		BDDMockito.given(imageService.getImagesWithTags(any(Pageable.class)))
+		BDDMockito.given(imageService.getImagesWithTags(any(), any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
 				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
@@ -150,7 +150,7 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		List<String> tagNames = List.of("tag1", "tag2");
 
-		BDDMockito.given(imageService.searchImagesByTagNames(any(), any(Pageable.class)))
+		BDDMockito.given(imageService.searchImagesByTagNames(any(), any(), any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
 				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
@@ -187,7 +187,7 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		Long imageId = 1L;
 
-		BDDMockito.given(imageService.getImageWithTags(anyLong()))
+		BDDMockito.given(imageService.getImageWithTags(anyLong(), any()))
 			.willReturn(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
 				List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))));
 
@@ -213,7 +213,7 @@ class ImageControllerTest extends RestDocsTest {
 	void 이미지를_삭제한다() {
 		// given
 		Long imageId = 1L;
-		willDoNothing().given(imageService).removeImages(anyLong());
+		willDoNothing().given(imageService).removeImages(anyLong(), any());
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -230,7 +230,7 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		Long imageId = 1L;
 		Long tagId = 1L;
-		willDoNothing().given(imageService).removeTagToImage(anyLong(), anyLong());
+		willDoNothing().given(imageService).removeTagToImage(anyLong(), anyLong(), any());
 
 		// when & then
 		given().contentType(ContentType.JSON)

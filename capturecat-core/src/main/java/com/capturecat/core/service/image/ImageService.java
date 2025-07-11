@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,9 +48,7 @@ public class ImageService {
 
 	@Transactional
 	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
-	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
@@ -89,10 +85,13 @@ public class ImageService {
 	}
 
 	@Transactional
-	public void addTagsToImage(Long imageId, List<String> tagNames) {
+	public void addTagsToImage(Long imageId, List<String> tagNames, LoginUser loginUser) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
+		image.validateOwnership(user);
 		tagValidator.validateTagNames(image, tagNames);
 
 		List<Tag> newTags = tagRegister.registerTagsFor(tagNames);
@@ -101,9 +100,7 @@ public class ImageService {
 	}
 
 	@Transactional(readOnly = true)
-	public CursorResponse<ImageWithTagsResponse> getImagesWithTags(Pageable pageable) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+	public CursorResponse<ImageWithTagsResponse> getImagesWithTags(LoginUser loginUser, Pageable pageable) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
@@ -114,9 +111,14 @@ public class ImageService {
 	}
 
 	@Transactional
-	public void removeTagToImage(Long imageId, Long tagId) {
+	public void removeTagToImage(Long imageId, Long tagId, LoginUser loginUser) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+		image.validateOwnership(user);
+
 		Tag tag = tagRepository.findById(tagId)
 			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
 		ImageTag imageTag = imageTagRepository.findByImageAndTag(image, tag)
@@ -126,9 +128,8 @@ public class ImageService {
 	}
 
 	@Transactional(readOnly = true)
-	public CursorResponse<ImageWithTagsResponse> searchImagesByTagNames(List<String> tagNames, Pageable pageable) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+	public CursorResponse<ImageWithTagsResponse> searchImagesByTagNames(List<String> tagNames, LoginUser loginUser,
+		Pageable pageable) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
@@ -139,10 +140,7 @@ public class ImageService {
 	}
 
 	@Transactional(readOnly = true)
-	public ImageWithTagsResponse getImageWithTags(Long imageId) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
-
+	public ImageWithTagsResponse getImageWithTags(Long imageId, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
@@ -159,10 +157,7 @@ public class ImageService {
 	}
 
 	@Transactional
-	public void removeImages(Long imageId) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
-
+	public void removeImages(Long imageId, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
@@ -184,7 +179,11 @@ public class ImageService {
 
 	private UploadItemRequest getMatchingUploadRequest(List<UploadItemRequest> uploadItems, String fileName) {
 		return uploadItems.stream()
-			.filter(i -> i.fileName().equals(fileName))
+			.filter(i -> {
+				System.out.println("i.fileName() = " + i.fileName());
+				System.out.println("fileName = " + fileName);
+				return i.fileName().equals(fileName);
+			})
 			.findFirst()
 			.orElseThrow(() -> new CoreException(ErrorType.UPLOAD_METADATA_MISMATCH));
 	}

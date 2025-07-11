@@ -2,6 +2,7 @@ package com.capturecat.core.api.bookmark;
 
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
@@ -36,7 +37,7 @@ class BookmarkControllerTest extends RestDocsTest {
 	@Test
 	void 즐겨찾기를_한다() {
 		// given
-		willDoNothing().given(bookmarkService).addBookmark(anyLong());
+		willDoNothing().given(bookmarkService).addBookmark(anyLong(), any());
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -46,6 +47,25 @@ class BookmarkControllerTest extends RestDocsTest {
 			.then().status(HttpStatus.OK)
 			.apply(document("addBookmark", requestPreprocessor(), responsePreprocessor(),
 				queryParameters(parameterWithName("imageId").description("즐겨찾기할 이미지 ID")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
+					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 즐겨찾기에서_삭제한다() {
+		// given
+		willDoNothing().given(bookmarkService).deleteBookmark(anyLong(), any());
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.accept(ContentType.JSON)
+			.queryParam("imageId", 1L)
+			.when().delete("/v1/bookmarks")
+			.then().status(HttpStatus.OK)
+			.apply(document("deleteBookmark", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(parameterWithName("imageId").description("즐겨찾기에서 삭제할 이미지 ID")),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
 					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),

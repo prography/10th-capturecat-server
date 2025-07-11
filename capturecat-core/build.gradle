@@ -2,6 +2,7 @@ jar.enabled = false
 
 bootJar {
     enabled = true
+    mainClass = 'com.capturecat.CaptureCatApplication'
     dependsOn asciidoctor
     from("${asciidoctor.outputDir}") {
         into 'static/docs'

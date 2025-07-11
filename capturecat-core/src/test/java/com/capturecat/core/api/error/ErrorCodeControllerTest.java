@@ -30,7 +30,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 단일_이미지_태그_등록_에러_코드_문서화() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(TOO_MANY_TAGS,
-			DUPLICATE_TAG_NAMES, ALREADY_REGISTERED_TAGS, IMAGE_NOT_FOUND);
+			DUPLICATE_TAG_NAMES, ALREADY_REGISTERED_TAGS, IMAGE_ACCESS_DENIED, USER_NOT_FOUND, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/addTagsToImage", errorCodeDescriptors);
 	}
 
@@ -43,14 +43,14 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 태그를_포함한_이미지_목록_조회_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/getImagesWithTagsByUser", errorCodeDescriptors);
 	}
 
 	@Test
 	void 태그_삭제_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_NOT_FOUND,
-			USER_NOT_FOUND, IMAGE_TAG_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_ACCESS_DENIED,
+			IMAGE_NOT_FOUND, USER_NOT_FOUND, IMAGE_TAG_NOT_FOUND);
 		generateErrorDocs("errorCode/removeTagToImage", errorCodeDescriptors);
 	}
 
@@ -58,13 +58,6 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	void 태그_목록_조회_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/getTags", errorCodeDescriptors);
-	}
-
-	@Test
-	void 토큰_재발행_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
-			REFRESH_TOKEN_EXPIRED);
-		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
 	}
 
 	@Test
@@ -76,7 +69,14 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 소셜_로그인_회원가입_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_ID_TOKEN);
-		generateErrorDocs("errorCode/oauthLogin", errorCodeDescriptors);
+		generateErrorDocs("errorCode/socialLogin", errorCodeDescriptors);
+	}
+
+	@Test
+	void 토큰_재발행_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
+			REFRESH_TOKEN_EXPIRED);
+		generateErrorDocs("errorCode/reissue", errorCodeDescriptors);
 	}
 
 	@Test
@@ -105,6 +105,13 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(BOOKMARK_DUPLICATION,
 			USER_NOT_FOUND, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/addBookmark", errorCodeDescriptors);
+	}
+
+	@Test
+	void 이미지_즐겨찾기_삭제_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
+			IMAGE_NOT_FOUND, BOOKMARK_NOT_FOUND);
+		generateErrorDocs("errorCode/deleteBookmark", errorCodeDescriptors);
 	}
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
