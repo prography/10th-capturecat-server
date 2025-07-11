@@ -2,6 +2,7 @@ package com.capturecat.core.api.bookmark;
 
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.mock;
@@ -36,7 +37,7 @@ class BookmarkControllerTest extends RestDocsTest {
 	@Test
 	void 즐겨찾기를_한다() {
 		// given
-		willDoNothing().given(bookmarkService).addBookmark(anyLong());
+		willDoNothing().given(bookmarkService).addBookmark(anyLong(), any());
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -55,7 +56,7 @@ class BookmarkControllerTest extends RestDocsTest {
 	@Test
 	void 즐겨찾기에서_삭제한다() {
 		// given
-		willDoNothing().given(bookmarkService).deleteBookmark(anyLong());
+		willDoNothing().given(bookmarkService).deleteBookmark(anyLong(), any());
 
 		// when & then
 		given().contentType(ContentType.JSON)

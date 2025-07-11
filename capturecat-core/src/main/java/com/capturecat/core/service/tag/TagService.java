@@ -2,8 +2,6 @@ package com.capturecat.core.service.tag;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +26,7 @@ public class TagService {
 	private final UserRepository userRepository;
 
 	@Transactional(readOnly = true)
-	public CursorResponse<TagResponse> getTags(Pageable pageable) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
+	public CursorResponse<TagResponse> getTags(LoginUser loginUser, Pageable pageable) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 

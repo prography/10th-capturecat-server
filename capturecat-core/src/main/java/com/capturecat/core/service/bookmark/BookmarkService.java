@@ -1,7 +1,5 @@
 package com.capturecat.core.service.bookmark;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +24,7 @@ public class BookmarkService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public void addBookmark(Long imageId) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
-
+	public void addBookmark(Long imageId, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
@@ -41,10 +36,7 @@ public class BookmarkService {
 	}
 
 	@Transactional
-	public void deleteBookmark(Long imageId) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LoginUser loginUser = (LoginUser)authentication.getPrincipal();
-
+	public void deleteBookmark(Long imageId, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
