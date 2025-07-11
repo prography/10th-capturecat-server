@@ -15,17 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.capturecat.core.DummyObject;
 import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.ImageRepository;
-import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
@@ -51,7 +46,6 @@ class BookmarkServiceTest {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -63,7 +57,7 @@ class BookmarkServiceTest {
 			.willReturn(new Bookmark(user, image));
 
 		// when
-		bookmarkService.addBookmark(image.getId());
+		bookmarkService.addBookmark(image.getId(), new LoginUser(user));
 
 		// then
 		verify(bookmarkRepository).save(any(Bookmark.class));
@@ -73,13 +67,12 @@ class BookmarkServiceTest {
 	void 즐겨찾기할_때_회원이_존재하지_않으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
+		assertThatThrownBy(() -> bookmarkService.addBookmark(1L, new LoginUser(user)))
 			.isInstanceOf(CoreException.class);
 		verify(bookmarkRepository, never()).save(any(Bookmark.class));
 	}
@@ -88,7 +81,6 @@ class BookmarkServiceTest {
 	void 즐겨찾기를_할_때_이미지가_존재하지_읺으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -96,7 +88,7 @@ class BookmarkServiceTest {
 			.willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
+		assertThatThrownBy(() -> bookmarkService.addBookmark(1L, new LoginUser(user)))
 			.isInstanceOf(CoreException.class);
 		verify(bookmarkRepository, never()).save(any(Bookmark.class));
 	}
@@ -106,7 +98,6 @@ class BookmarkServiceTest {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -116,7 +107,7 @@ class BookmarkServiceTest {
 			.willReturn(true);
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.addBookmark(1L))
+		assertThatThrownBy(() -> bookmarkService.addBookmark(1L, new LoginUser(user)))
 			.isInstanceOf(CoreException.class);
 		verify(bookmarkRepository, never()).save(any(Bookmark.class));
 	}
@@ -127,7 +118,6 @@ class BookmarkServiceTest {
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);
 		var bookmark = DummyObject.newBookmark(user, image);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -138,7 +128,7 @@ class BookmarkServiceTest {
 		willDoNothing().given(bookmarkRepository).delete(bookmark);
 
 		// when
-		bookmarkService.deleteBookmark(image.getId());
+		bookmarkService.deleteBookmark(image.getId(), new LoginUser(user));
 
 		// then
 		verify(bookmarkRepository).delete(any(Bookmark.class));
@@ -148,13 +138,12 @@ class BookmarkServiceTest {
 	void 즐겨찾기_삭제_시_회원이_존재하지_않으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L))
+		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L, new LoginUser(user)))
 			.isInstanceOf(CoreException.class);
 
 		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
@@ -164,7 +153,7 @@ class BookmarkServiceTest {
 	void 즐겨찾기_삭제_시_이미지가_존재하지_않으면_실패한다() {
 		// given
 		var user = DummyObject.newMockUser(1L);
-		setupLoggedInUser(user);
+		// // setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -172,7 +161,7 @@ class BookmarkServiceTest {
 			.willThrow(new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L))
+		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L, new LoginUser(user)))
 			.isInstanceOf(CoreException.class);
 
 		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
@@ -183,7 +172,6 @@ class BookmarkServiceTest {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var image = DummyObject.newMockImage(1L);
-		setupLoggedInUser(user);
 
 		given(userRepository.findByUsername(anyString()))
 			.willReturn(Optional.of(user));
@@ -193,17 +181,9 @@ class BookmarkServiceTest {
 			.willThrow(new CoreException(ErrorType.BOOKMARK_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L))
+		assertThatThrownBy(() -> bookmarkService.deleteBookmark(1L, new LoginUser(user)))
 			.isInstanceOf(CoreException.class);
 
 		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
-	}
-
-	private void setupLoggedInUser(User user) {
-		Authentication authentication = Mockito.mock(Authentication.class);
-		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-		given(securityContext.getAuthentication()).willReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		given(authentication.getPrincipal()).willReturn(new LoginUser(user));
 	}
 }
