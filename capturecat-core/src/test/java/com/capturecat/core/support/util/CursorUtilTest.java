@@ -93,6 +93,58 @@ class CursorUtilTest {
 		});
 	}
 
+	@Test
+	void 빈_리스트일_경우_null_커서와_false를_반환한다() {
+		// given
+		List<DummyItem> items = Collections.emptyList();
+
+		// when
+		CursorResponse<DummyItem> response = CursorUtil.toCursorResponse(items, true, DummyItem::id);
+
+		// then
+		assertSoftly(softly -> {
+			softly.assertThat(response.hasNext()).isFalse();
+			softly.assertThat(response.lastCursor()).isNull();
+			softly.assertThat(response.items()).isEmpty();
+		});
+	}
+
+	@Test
+	void 아이템이_있는_경우_마지막_아이템의_ID를_커서로_반환한다() {
+		// given
+		List<DummyItem> items = List.of(
+			new DummyItem(1L, "A"),
+			new DummyItem(2L, "B"),
+			new DummyItem(3L, "C")
+		);
+
+		// when
+		CursorResponse<DummyItem> response = CursorUtil.toCursorResponse(items, true, DummyItem::id);
+
+		// then
+		assertSoftly(softly -> {
+			softly.assertThat(response.hasNext()).isTrue();
+			softly.assertThat(response.lastCursor()).isEqualTo(3L);
+			softly.assertThat(response.items()).hasSize(3);
+			softly.assertThat(response.items()).containsExactlyElementsOf(items);
+		});
+	}
+
+	@Test
+	void hasNext가_false인_경우_응답에도_false가_반영된다() {
+		// given
+		List<DummyItem> items = List.of(new DummyItem(100L, "X"));
+
+		// when
+		CursorResponse<DummyItem> response = CursorUtil.toCursorResponse(items, false, DummyItem::id);
+
+		// then
+		assertSoftly(softly -> {
+			softly.assertThat(response.hasNext()).isFalse();
+			softly.assertThat(response.lastCursor()).isEqualTo(100L);
+		});
+	}
+
 	// 내부 테스트용 Dummy DTO
 	record DummyItem(Long id, String name) {
 	}

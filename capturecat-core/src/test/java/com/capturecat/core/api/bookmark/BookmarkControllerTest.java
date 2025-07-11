@@ -12,14 +12,20 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import io.restassured.http.ContentType;
 
+import com.capturecat.core.DummyObject;
 import com.capturecat.core.service.bookmark.BookmarkService;
+import com.capturecat.core.service.bookmark.BookmarkedImageResponse;
+import com.capturecat.core.support.util.CursorUtil;
 import com.capturecat.test.api.RestDocsTest;
 
 class BookmarkControllerTest extends RestDocsTest {
@@ -50,6 +56,38 @@ class BookmarkControllerTest extends RestDocsTest {
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 성공 여부"),
 					fieldWithPath("data").type(JsonFieldType.NULL).optional().ignored(),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 즐겨찾기한_이미지를_조회한다() {
+		// given
+		BDDMockito.given(bookmarkService.getBookmarkImages(any(), any())).willReturn(
+			CursorUtil.toCursorResponse(
+				List.of(BookmarkedImageResponse.from(DummyObject.newMockImage(1L))),
+				false,
+				BookmarkedImageResponse::id));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.accept(ContentType.JSON)
+			.queryParam("page", 0)
+			.queryParam("size", 10)
+			.when().get("/v1/bookmarks/images")
+			.then().status(HttpStatus.OK)
+			.apply(document("getBookmarkImages", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(
+					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+					parameterWithName("size").description("페이지 크기 (기본값: 10, 최대: 100)").optional()),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("즐겨찾기한 이미지 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("이미지 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
+					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
+					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 

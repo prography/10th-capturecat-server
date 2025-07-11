@@ -1,5 +1,9 @@
 package com.capturecat.core.service.bookmark;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +18,8 @@ import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
+import com.capturecat.core.support.response.CursorResponse;
+import com.capturecat.core.support.util.CursorUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +39,20 @@ public class BookmarkService {
 		validateBookmarkDuplication(user, image);
 
 		bookmarkRepository.save(new Bookmark(user, image));
+	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<BookmarkedImageResponse> getBookmarkImages(LoginUser loginUser, Pageable pageable) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Slice<Bookmark> bookmarks = bookmarkRepository.searchBookmarksByUser(user, pageable);
+
+		List<BookmarkedImageResponse> responses = bookmarks.getContent().stream()
+			.map(Bookmark::getImage)
+			.map(BookmarkedImageResponse::from)
+			.toList();
+
+		return CursorUtil.toCursorResponse(responses, bookmarks.hasNext(), BookmarkedImageResponse::id);
 	}
 
 	@Transactional
