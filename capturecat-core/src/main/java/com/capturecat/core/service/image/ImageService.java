@@ -86,11 +86,12 @@ public class ImageService {
 
 	@Transactional
 	public void addTagsToImage(Long imageId, List<String> tagNames, LoginUser loginUser) {
-		validateUserExists(loginUser);
-
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
 
+		image.validateOwnership(user);
 		tagValidator.validateTagNames(image, tagNames);
 
 		List<Tag> newTags = tagRegister.registerTagsFor(tagNames);
@@ -111,10 +112,13 @@ public class ImageService {
 
 	@Transactional
 	public void removeTagToImage(Long imageId, Long tagId, LoginUser loginUser) {
-		validateUserExists(loginUser);
-
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+
+		image.validateOwnership(user);
+
 		Tag tag = tagRepository.findById(tagId)
 			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
 		ImageTag imageTag = imageTagRepository.findByImageAndTag(image, tag)
@@ -189,12 +193,6 @@ public class ImageService {
 			return fileUploader.upload(file);
 		} catch (UploadException e) {
 			throw new CoreException(ErrorType.IMAGE_UPLOAD_FAILED);
-		}
-	}
-
-	private void validateUserExists(LoginUser loginUser) {
-		if (userRepository.findByUsername(loginUser.getUsername()).isEmpty()) {
-			throw new CoreException(ErrorType.USER_NOT_FOUND);
 		}
 	}
 

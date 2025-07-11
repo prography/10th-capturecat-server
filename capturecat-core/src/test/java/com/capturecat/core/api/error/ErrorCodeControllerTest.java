@@ -30,7 +30,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 단일_이미지_태그_등록_에러_코드_문서화() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(TOO_MANY_TAGS,
-			DUPLICATE_TAG_NAMES, ALREADY_REGISTERED_TAGS, USER_NOT_FOUND, IMAGE_NOT_FOUND);
+			DUPLICATE_TAG_NAMES, ALREADY_REGISTERED_TAGS, IMAGE_ACCESS_DENIED, USER_NOT_FOUND, IMAGE_NOT_FOUND);
 		generateErrorDocs("errorCode/addTagsToImage", errorCodeDescriptors);
 	}
 
@@ -49,8 +49,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 태그_삭제_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_NOT_FOUND,
-			USER_NOT_FOUND, IMAGE_TAG_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(IMAGE_ACCESS_DENIED,
+			IMAGE_NOT_FOUND, USER_NOT_FOUND, IMAGE_TAG_NOT_FOUND);
 		generateErrorDocs("errorCode/removeTagToImage", errorCodeDescriptors);
 	}
 
