@@ -49,10 +49,10 @@ jobs:
             sudo fuser -k -n tcp 80 || true
             sleep 3
             sudo rm -rf /home/ubuntu/capturecat-server/current
-            sudo mkdir /home/ubuntu/capturecat-server/current
-            sudo mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
+            mkdir /home/ubuntu/capturecat-server/current
+            mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
             cd /home/ubuntu/capturecat-server/current
-            sudo nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
+            nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
             # 최대 30초 대기
             for i in {1..30}; do
               if ps -ef | grep '[p]roject.jar' > /dev/null; then
