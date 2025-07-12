@@ -54,7 +54,7 @@ jobs:
             cd /home/ubuntu/capturecat-server/current
             sudo nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
 
-          # 실행 여부 확인
+            # 실행 여부 확인
             sleep 2
             if [ ! -f output.log ]; then
               echo "output.log 파일이 없음! (jar 실행조차 안됨, 권한 등 문제)"
@@ -65,7 +65,7 @@ jobs:
               exit 1
             fi
 
-          # 최대 30초 대기하며 헬스 체크
+            # 최대 30초 대기하며 헬스 체크
             for i in {1..30}; do
               if ps -ef | grep '[p]roject.jar' > /dev/null; then
                 echo "프로세스 실행됨, 헬스체크 진입!"
