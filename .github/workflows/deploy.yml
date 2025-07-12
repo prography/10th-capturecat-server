@@ -52,5 +52,17 @@ jobs:
             sudo mkdir /home/ubuntu/capturecat-server/current
             sudo mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
             cd /home/ubuntu/capturecat-server/current
-            nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
+            sudo nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
+            # 최대 30초 대기
+            for i in {1..30}; do
+              if ps -ef | grep '[p]roject.jar' > /dev/null; then
+                echo "프로세스 실행됨"
+                break
+              fi
+              sleep 1
+              if [ $i -eq 30 ]; then
+                echo "실행 실패!"
+                exit 1
+              fi
+            done
             sudo rm -rf /home/ubuntu/capturecat-server/tobe
