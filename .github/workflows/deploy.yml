@@ -52,12 +52,36 @@ jobs:
             mkdir /home/ubuntu/capturecat-server/current
             mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
             cd /home/ubuntu/capturecat-server/current
-            nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
-            # 최대 30초 대기
+            sudo nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
+
+          # 실행 여부 확인
+            sleep 2
+            if [ ! -f output.log ]; then
+              echo "output.log 파일이 없음! (jar 실행조차 안됨, 권한 등 문제)"
+              exit 1
+            fi       
+            if grep -q "Permission denied" output.log; then
+              echo "output.log Permission denied 에러 발견, 배포 실패!"
+              exit 1
+            fi
+
+          # 최대 30초 대기하며 헬스 체크
             for i in {1..30}; do
               if ps -ef | grep '[p]roject.jar' > /dev/null; then
-                echo "프로세스 실행됨"
-                break
+                echo "프로세스 실행됨, 헬스체크 진입!"
+                for j in {1..30}; do
+                  if curl -sf https://api.capture-cat.com/health | grep -q '"status":"UP"'; then
+                    echo "헬스체크 성공!"
+                    break 2
+                  fi
+                  echo "헬스체크 대기중... ($j초)"
+                  sleep 1
+                  if [ $j -eq 30 ]; then
+                    echo "헬스체크 실패! 배포 실패!"
+                    tail -n 50 output.log || true
+                    exit 1
+                  fi
+                done
               fi
               sleep 1
               if [ $i -eq 30 ]; then
