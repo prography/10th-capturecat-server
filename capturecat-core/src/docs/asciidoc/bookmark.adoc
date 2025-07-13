@@ -11,6 +11,16 @@ operation::addBookmark[snippets='curl-request,query-parameters,http-response,res
 
 <<error-codes#즐겨찾기-등록, 즐겨찾기 등록 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
+[[즐겨찾기한-이미지-조회]]
+=== 즐겨찾기한 이미지 조회
+==== 성공
+operation::getBookmarkImages[snippets='curl-request,query-parameters,http-response,response-fields']
+
+==== 실패
+즐겨찾기한 이미지 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#즐겨찾기한-이미지-조회, 즐겨찾기한 이미지 조회 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
 [[즐겨찾기-삭제]]
 === 즐겨찾기 삭제
 ==== 성공

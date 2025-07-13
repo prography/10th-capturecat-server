@@ -1,5 +1,6 @@
 package com.capturecat.core;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -17,7 +18,18 @@ import com.capturecat.core.domain.user.UserRole;
 public class DummyObject {
 
 	public static Image newMockImage(long id) {
-		return Image.builder().id(id).fileName("test1.jpg").fileUrl("testUrl1").build();
+		return Image.builder()
+			.id(id)
+			.fileName("test1.jpg")
+			.fileUrl("testUrl1")
+			.captureDate(LocalDate.now())
+			.build();
+	}
+
+	public static Image newMockImage() {
+		return Image.builder().fileName("test1.jpg")
+			.fileUrl("testUrl1")
+			.build();
 	}
 
 	public static Image newMockUserImage(long userId, long imageId) {
@@ -26,6 +38,14 @@ public class DummyObject {
 			.fileName("test1.jpg")
 			.fileUrl("testUrl1")
 			.user(newMockUser(userId))
+			.build();
+	}
+
+	public static Image newMockUserImage(User user) {
+		return Image.builder()
+			.fileName("test1.jpg")
+			.fileUrl("testUrl1")
+			.user(user)
 			.build();
 	}
 
