@@ -40,10 +40,14 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 	@Override
 	public Slice<Tag> searchByRelatedTags(User user, List<String> tagNames, Pageable pageable) {
 		List<Tag> tags = queryFactory
-			.select(tag).distinct()
+			.select(tag)
 			.from(imageTag)
 			.join(imageTag.tag, tag)
-			.where(CommonTagQueryConditions.createExistsCondition(tagNames), tag.name.notIn(tagNames))
+			.where(
+				image.user.eq(user),
+				CommonTagQueryConditions.createExistsCondition(tagNames),
+				tag.name.notIn(tagNames)
+			)
 			.groupBy(tag)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
