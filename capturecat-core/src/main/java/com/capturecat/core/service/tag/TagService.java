@@ -1,5 +1,7 @@
 package com.capturecat.core.service.tag;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,17 @@ public class TagService {
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
 		Slice<Tag> tags = tagRepository.searchUserTagsByUser(user, pageable);
+		Slice<TagResponse> responses = tags.map(TagResponse::from);
+
+		return CursorUtil.toCursorResponse(responses, TagResponse::id);
+	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<TagResponse> getRelatedTags(LoginUser loginUser, List<String> tagNames, Pageable pageable) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		Slice<Tag> tags = tagRepository.searchByRelatedTags(user, tagNames, pageable);
 		Slice<TagResponse> responses = tags.map(TagResponse::from);
 
 		return CursorUtil.toCursorResponse(responses, TagResponse::id);

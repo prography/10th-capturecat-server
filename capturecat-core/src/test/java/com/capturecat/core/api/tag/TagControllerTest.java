@@ -3,6 +3,7 @@ package com.capturecat.core.api.tag;
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -61,6 +62,37 @@ class TagControllerTest extends RestDocsTest {
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
 					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
 					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("태그 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 연관된_태그_조회() {
+		// given
+		BDDMockito.given(tagService.getRelatedTags(any(), anyList(), any()))
+			.willReturn(new CursorResponse<>(false, 1L, List.of(
+				new TagResponse(1L, "relatedTag")
+			)));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.param("page", 0)
+			.param("size", 10)
+			.param("tagNames", List.of("tag1", "tag2"))
+			.when().get("/v1/tags/related")
+			.then().status(HttpStatus.OK)
+			.apply(document("getTags", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(
+					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+					parameterWithName("size").description("페이지 크기 (기본값: 10)").optional(),
+					parameterWithName("tagNames").description("검색에 사용되는 태그 이름 목록")
+				),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("연관된 태그 목록"),
 					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
