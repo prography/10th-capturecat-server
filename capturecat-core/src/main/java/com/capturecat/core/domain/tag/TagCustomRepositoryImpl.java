@@ -9,6 +9,8 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,30 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 			.limit(pageable.getPageSize() + 1)
 			.fetch();
 
+		return SliceUtil.toSlice(tags, pageable);
+	}
+
+	@Override
+	public Slice<Tag> searchByRelatedTags(User user, List<String> tagNames, Pageable pageable) {
+		BooleanBuilder allTagsExistBuilder = new BooleanBuilder();
+		for (String tagName : tagNames) {
+			allTagsExistBuilder.and(JPAExpressions.selectOne()
+				.from(imageTag)
+				.join(imageTag.tag, tag)
+				.where(imageTag.image.id.eq(image.id), tag.name.eq(tagName))
+				.exists()
+			);
+		}
+
+		List<Tag> tags = queryFactory
+			.select(tag).distinct()
+			.from(imageTag)
+			.join(imageTag.tag, tag)
+			.where(allTagsExistBuilder, tag.name.notIn(tagNames))
+			.groupBy(tag)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1)
+			.fetch();
 		return SliceUtil.toSlice(tags, pageable);
 	}
 }
