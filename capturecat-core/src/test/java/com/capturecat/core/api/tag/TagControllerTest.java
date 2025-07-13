@@ -82,7 +82,7 @@ class TagControllerTest extends RestDocsTest {
 			.param("tagNames", List.of("tag1", "tag2"))
 			.when().get("/v1/tags/related")
 			.then().status(HttpStatus.OK)
-			.apply(document("getTags", requestPreprocessor(), responsePreprocessor(),
+			.apply(document("getRelatedTags", requestPreprocessor(), responsePreprocessor(),
 				queryParameters(
 					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
 					parameterWithName("size").description("페이지 크기 (기본값: 10)").optional(),
