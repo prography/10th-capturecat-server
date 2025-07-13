@@ -16,6 +16,7 @@ import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.image.ImageWithTagsResponse;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
@@ -42,17 +43,17 @@ public class BookmarkService {
 	}
 
 	@Transactional(readOnly = true)
-	public CursorResponse<BookmarkedImageResponse> getBookmarkImages(LoginUser loginUser, Pageable pageable) {
+	public CursorResponse<ImageWithTagsResponse> getBookmarkImages(LoginUser loginUser, Pageable pageable) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Slice<Bookmark> bookmarks = bookmarkRepository.searchBookmarksByUser(user, pageable);
 
-		List<BookmarkedImageResponse> responses = bookmarks.getContent().stream()
+		List<ImageWithTagsResponse> responses = bookmarks.getContent().stream()
 			.map(Bookmark::getImage)
-			.map(BookmarkedImageResponse::from)
+			.map(ImageWithTagsResponse::from)
 			.toList();
 
-		return CursorUtil.toCursorResponse(responses, bookmarks.hasNext(), BookmarkedImageResponse::id);
+		return CursorUtil.toCursorResponse(responses, bookmarks.hasNext(), ImageWithTagsResponse::id);
 	}
 
 	@Transactional

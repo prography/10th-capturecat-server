@@ -24,7 +24,7 @@ import io.restassured.http.ContentType;
 
 import com.capturecat.core.DummyObject;
 import com.capturecat.core.service.bookmark.BookmarkService;
-import com.capturecat.core.service.bookmark.BookmarkedImageResponse;
+import com.capturecat.core.service.image.ImageWithTagsResponse;
 import com.capturecat.core.support.util.CursorUtil;
 import com.capturecat.test.api.RestDocsTest;
 
@@ -64,9 +64,9 @@ class BookmarkControllerTest extends RestDocsTest {
 		// given
 		BDDMockito.given(bookmarkService.getBookmarkImages(any(), any())).willReturn(
 			CursorUtil.toCursorResponse(
-				List.of(BookmarkedImageResponse.from(DummyObject.newMockImage(1L))),
+				List.of(ImageWithTagsResponse.from(DummyObject.newMockImage(1L))),
 				false,
-				BookmarkedImageResponse::id));
+				ImageWithTagsResponse::id));
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -74,7 +74,7 @@ class BookmarkControllerTest extends RestDocsTest {
 			.queryParam("page", 0)
 			.queryParam("size", 10)
 			.when().get("/v1/bookmarks/images")
-			.then().status(HttpStatus.OK)
+			.then().status(HttpStatus.OK).log().all()
 			.apply(document("getBookmarkImages", requestPreprocessor(), responsePreprocessor(),
 				queryParameters(
 					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
