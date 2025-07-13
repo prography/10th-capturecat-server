@@ -26,7 +26,8 @@ public class TagController {
 	private final TagService tagService;
 
 	@GetMapping
-	public ApiResponse<?> getTags(@AuthenticationPrincipal LoginUser loginUser, @PageableDefault Pageable pageable) {
+	public ApiResponse<CursorResponse<TagResponse>> getTags(@AuthenticationPrincipal LoginUser loginUser,
+		@PageableDefault Pageable pageable) {
 		CursorResponse<TagResponse> tags = tagService.getTags(loginUser, pageable);
 		return ApiResponse.success(tags);
 	}
