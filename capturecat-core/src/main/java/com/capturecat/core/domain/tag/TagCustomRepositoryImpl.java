@@ -14,6 +14,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.support.querydsl.CommonTagQueryConditions;
 import com.capturecat.core.support.util.SliceUtil;
 
 @RequiredArgsConstructor
@@ -29,6 +30,25 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 			.leftJoin(image).on(imageTag.tag.eq(tag))
 			.where(image.user.eq(user))
 			.orderBy(tag.id.desc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1)
+			.fetch();
+
+		return SliceUtil.toSlice(tags, pageable);
+	}
+
+	@Override
+	public Slice<Tag> searchByRelatedTags(User user, List<String> tagNames, Pageable pageable) {
+		List<Tag> tags = queryFactory
+			.select(tag)
+			.from(imageTag)
+			.join(imageTag.tag, tag)
+			.where(
+				image.user.eq(user),
+				CommonTagQueryConditions.createExistsCondition(tagNames),
+				tag.name.notIn(tagNames)
+			)
+			.groupBy(tag)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.fetch();

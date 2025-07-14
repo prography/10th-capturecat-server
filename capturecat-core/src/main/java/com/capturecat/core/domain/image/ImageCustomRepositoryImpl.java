@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.domain.image.dto.ImageInfo;
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.support.querydsl.CommonTagQueryConditions;
 import com.capturecat.core.support.util.SliceUtil;
 
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 	public Slice<ImageInfo> searchImagesByUserAndTagNames(User user, List<String> tagNames, Pageable pageable) {
 		List<ImageInfo> responses = queryFactory
 			.selectFrom(image)
-			.where(image.user.eq(user), buildHasAllTagsCondition(tagNames))
+			.where(image.user.eq(user), CommonTagQueryConditions.createExistsCondition(tagNames))
 			.leftJoin(imageTag).on(image.id.eq(imageTag.image.id))
 			.leftJoin(tag).on(imageTag.tag.id.eq(tag.id))
 			.offset(pageable.getOffset())
@@ -67,18 +68,5 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 			));
 
 		return SliceUtil.toSlice(responses, pageable);
-	}
-
-	private BooleanBuilder buildHasAllTagsCondition(List<String> tagNames) {
-		BooleanBuilder allTagsExistBuilder = new BooleanBuilder();
-		for (String tagName : tagNames) {
-			allTagsExistBuilder.and(JPAExpressions.selectOne()
-					.from(imageTag)
-					.join(imageTag.tag, tag)
-					.where(imageTag.image.id.eq(image.id), tag.name.eq(tagName))
-					.exists()
-			);
-		}
-		return allTagsExistBuilder;
 	}
 }
