@@ -3,7 +3,7 @@ name: Deploy To EC2
 on:
   push:
     branches:
-      - feature/#70-cicd  # 테스트를 위해 develop 대신 이 브랜치만 감지
+      - develop
 
 jobs:
   deploy:
