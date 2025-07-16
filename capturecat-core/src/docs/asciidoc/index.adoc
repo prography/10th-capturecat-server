@@ -17,7 +17,7 @@ include::{adocPath}/image.adoc[]
 
 include::{adocPath}/tag.adoc[]
 
-include:{adocPath}/bookmark.adoc[]
+include::{adocPath}/bookmark.adoc[]
 
 include::{adocPath}/health.adoc[]
 
