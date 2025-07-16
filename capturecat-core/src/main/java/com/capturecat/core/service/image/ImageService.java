@@ -15,6 +15,7 @@ import com.capturecat.client.upload.DeleteException;
 import com.capturecat.client.upload.FileUploader;
 import com.capturecat.client.upload.UploadException;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
+import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTag;
@@ -45,6 +46,7 @@ public class ImageService {
 	private final TagRegister tagRegister;
 	private final TagRepository tagRepository;
 	private final UserRepository userRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	@Transactional
 	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
@@ -105,7 +107,7 @@ public class ImageService {
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
 		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, pageable)
-			.map(ImageWithTagsResponse::of);
+			.map(ImageWithTagsResponse::from);
 
 		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}
@@ -134,7 +136,7 @@ public class ImageService {
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
 		Slice<ImageWithTagsResponse> responses = imageRepository.searchImagesByUserAndTagNames(user, tagNames, pageable)
-			.map(ImageWithTagsResponse::of);
+			.map(r -> ImageWithTagsResponse.from(r));
 
 		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}
@@ -145,15 +147,14 @@ public class ImageService {
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
 			.orElseThrow(() -> new CoreException(ErrorType.IMAGE_NOT_FOUND));
+		boolean isBookmarked = bookmarkRepository.existsByUserAndImage(user, image);
 
 		image.validateOwnership(user);
 
 		List<ImageTag> imageTags = imageTagRepository.findByImage(image);
 
 		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(), image.getCaptureDate(),
-			imageTags.stream()
-				.map(it -> TagResponse.from(it.getTag()))
-				.toList());
+			isBookmarked, convertToTagResponses(imageTags));
 	}
 
 	@Transactional
@@ -180,6 +181,7 @@ public class ImageService {
 	private UploadItemRequest getMatchingUploadRequest(List<UploadItemRequest> uploadItems, String fileName) {
 		return uploadItems.stream()
 			.filter(i -> {
+				// TODO: 제거
 				System.out.println("i.fileName() = " + i.fileName());
 				System.out.println("fileName = " + fileName);
 				return i.fileName().equals(fileName);
@@ -202,5 +204,11 @@ public class ImageService {
 		} catch (DeleteException e) {
 			throw new CoreException(ErrorType.IMAGE_DELETE_FAILED);
 		}
+	}
+
+	private List<TagResponse> convertToTagResponses(List<ImageTag> imageTags) {
+		return imageTags.stream()
+			.map(it -> TagResponse.from(it.getTag()))
+			.toList();
 	}
 }

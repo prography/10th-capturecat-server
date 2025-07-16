@@ -116,7 +116,7 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		BDDMockito.given(imageService.getImagesWithTags(any(), any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
-				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
+				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(), true,
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
 
 		// when & then
@@ -139,6 +139,7 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
 					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
+					fieldWithPath("data.items[].isBookmarked").type(JsonFieldType.BOOLEAN).description("즐겨찾기 여부"),
 					fieldWithPath("data.items[].tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
 					fieldWithPath("data.items[].tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
@@ -152,7 +153,7 @@ class ImageControllerTest extends RestDocsTest {
 
 		BDDMockito.given(imageService.searchImagesByTagNames(any(), any(), any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
-				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
+				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(), false,
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
 
 		// when & then
@@ -176,6 +177,7 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
 					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
+					fieldWithPath("data.items[].isBookmarked").type(JsonFieldType.BOOLEAN).description("즐겨찾기 여부"),
 					fieldWithPath("data.items[].tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
 					fieldWithPath("data.items[].tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
@@ -188,7 +190,7 @@ class ImageControllerTest extends RestDocsTest {
 		Long imageId = 1L;
 
 		BDDMockito.given(imageService.getImageWithTags(anyLong(), any()))
-			.willReturn(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(),
+			.willReturn(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(), true,
 				List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))));
 
 		// when & then
@@ -203,6 +205,7 @@ class ImageControllerTest extends RestDocsTest {
 					fieldWithPath("data.name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.url").type(JsonFieldType.STRING).description("이미지 URL"),
 					fieldWithPath("data.captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
+					fieldWithPath("data.isBookmarked").type(JsonFieldType.BOOLEAN).description("즐겨찾기 여부"),
 					fieldWithPath("data.tags").type(JsonFieldType.ARRAY).description("이미지에 등록된 태그 목록"),
 					fieldWithPath("data.tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.tags[].name").type(JsonFieldType.STRING).description("태그 이름"),

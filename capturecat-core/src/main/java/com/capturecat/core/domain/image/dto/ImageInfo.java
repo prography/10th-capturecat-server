@@ -9,5 +9,6 @@ public record ImageInfo(Long id,
 						String fileName,
 						String fileUrl,
 						LocalDate captureDate,
+						boolean isBookmarked,
 						List<Tag> tags) {
 }

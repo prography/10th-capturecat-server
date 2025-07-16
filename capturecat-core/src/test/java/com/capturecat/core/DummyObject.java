@@ -45,6 +45,7 @@ public class DummyObject {
 		return Image.builder()
 			.fileName("test1.jpg")
 			.fileUrl("testUrl1")
+			.captureDate(LocalDate.now())
 			.user(user)
 			.build();
 	}

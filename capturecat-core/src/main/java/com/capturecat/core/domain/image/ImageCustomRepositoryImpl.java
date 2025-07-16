@@ -1,5 +1,6 @@
 package com.capturecat.core.domain.image;
 
+import static com.capturecat.core.domain.bookmark.QBookmark.bookmark;
 import static com.capturecat.core.domain.image.QImage.image;
 import static com.capturecat.core.domain.tag.QImageTag.imageTag;
 import static com.capturecat.core.domain.tag.QTag.tag;
@@ -9,10 +10,8 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -32,8 +31,9 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 		List<ImageInfo> responses = queryFactory
 			.selectFrom(image)
 			.where(image.user.eq(user))
-			.leftJoin(imageTag).on(image.id.eq(imageTag.image.id))
-			.leftJoin(tag).on(imageTag.tag.id.eq(tag.id))
+			.leftJoin(imageTag).on(image.eq(imageTag.image))
+			.leftJoin(tag).on(imageTag.tag.eq(tag))
+			.leftJoin(bookmark).on(image.eq(bookmark.image), bookmark.user.eq(user))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.orderBy(image.id.desc())
@@ -43,6 +43,7 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 					image.fileName,
 					image.fileUrl,
 					image.captureDate,
+					bookmark.id.isNotNull(),
 					GroupBy.list(tag))
 				));
 

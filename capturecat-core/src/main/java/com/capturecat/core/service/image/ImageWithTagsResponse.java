@@ -9,15 +9,20 @@ import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.dto.ImageInfo;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ImageWithTagsResponse(Long id, String name, String url, LocalDate captureDate, List<TagResponse> tags) {
+public record ImageWithTagsResponse(Long id,
+									String name,
+									String url,
+									LocalDate captureDate,
+									boolean isBookmarked,
+									List<TagResponse> tags) {
 
-	public static ImageWithTagsResponse of(ImageInfo imageInfo) {
+	public static ImageWithTagsResponse from(ImageInfo imageInfo) {
 		return new ImageWithTagsResponse(imageInfo.id(), imageInfo.fileName(), imageInfo.fileUrl(),
-			imageInfo.captureDate(), TagResponse.from(imageInfo.tags()));
+			imageInfo.captureDate(), imageInfo.isBookmarked(), TagResponse.from(imageInfo.tags()));
 	}
 
 	public static ImageWithTagsResponse from(Image image) {
 		return new ImageWithTagsResponse(image.getId(), image.getFileName(), image.getFileUrl(),
-			image.getCaptureDate(), null);
+			image.getCaptureDate(), true, null);
 	}
 }
