@@ -65,8 +65,8 @@ class ImageControllerTest extends RestDocsTest {
 		willDoNothing().given(imageService).save(anyList(), anyList(), any());
 
 		List<UploadItemRequest> requests = List.of(
-			new UploadItemRequest("cat.jpg", LocalDate.now().toString(), List.of("고양이", "cat")),
-			new UploadItemRequest("dog.jpg", LocalDate.now().toString(), List.of("강아지", "dog"))
+			new UploadItemRequest("cat.jpg", LocalDate.now().toString(), true, List.of("고양이", "cat")),
+			new UploadItemRequest("dog.jpg", LocalDate.now().toString(), false, List.of("강아지", "dog"))
 		);
 
 		// when & then
@@ -84,6 +84,7 @@ class ImageControllerTest extends RestDocsTest {
 				requestPartFields("uploadItems",
 					fieldWithPath("[].fileName").description("이미지 파일 이름"),
 					fieldWithPath("[].captureDate").description("이미지를 캡처한 날짜"),
+					fieldWithPath("[].isBookmarked").description("이미지를 즐겨찾기 여부"),
 					fieldWithPath("[].tagNames").description("이미지에 등록할 태그 목록")
 				),
 				responseFields(

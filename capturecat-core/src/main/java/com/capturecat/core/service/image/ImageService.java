@@ -15,6 +15,7 @@ import com.capturecat.client.upload.DeleteException;
 import com.capturecat.client.upload.FileUploader;
 import com.capturecat.client.upload.UploadException;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
+import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -50,11 +51,13 @@ public class ImageService {
 
 	@Transactional
 	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
+	// 역할이 너무 많음.. 이미지 업로드 -> 이미지 저장 -> 즐겨찾기 -> 태그 저장 -> 이미지 태그 저장
 	public void save(List<UploadItemRequest> uploadItems, List<MultipartFile> files, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
 		List<Image> images = new ArrayList<>(files.size());
+		List<Bookmark> bookmarks = new ArrayList<>(files.size());
 		for (MultipartFile file : files) {
 			validate(file);
 			String fileUrl = upload(file);
@@ -69,9 +72,14 @@ public class ImageService {
 				.user(user)
 				.build();
 			images.add(image);
+
+			if (uploadItemRequest.isBookmarked()) {
+				bookmarks.add(new Bookmark(user, image));
+			}
 		}
 
 		List<Image> savedImages = imageRepository.saveAll(images);
+		bookmarkRepository.saveAll(bookmarks);
 
 		List<ImageTag> allImageTags = new ArrayList<>();
 		for (Image savedImage : savedImages) {
