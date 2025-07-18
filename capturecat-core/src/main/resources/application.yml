@@ -28,5 +28,5 @@ logging:
       springframework.security: DEBUG
 
 jwt:
-  access-token-expiration: 36000000 # *10 for development
+  access-token-expiration: 3600000
   refresh-token-expiration: 2592000000
