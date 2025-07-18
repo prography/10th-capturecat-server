@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.client.upload.DeleteException;
 import com.capturecat.client.upload.FileUploader;
@@ -33,6 +34,7 @@ import com.capturecat.core.support.response.CursorResponse;
 import com.capturecat.core.support.util.CursorUtil;
 import com.capturecat.core.support.util.DateTimeConverter;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -192,6 +194,8 @@ public class ImageService {
 		try {
 			return fileUploader.upload(file);
 		} catch (UploadException e) {
+			//공통적으로 이 부분에 e를 넣던가 하는게 좋다 생각함. 에러코드 전부 만들기 귀찮고, 전부 예상 못함
+			log.error("fileUploader.upload(file) {}:", e.getMessage());
 			throw new CoreException(ErrorType.IMAGE_UPLOAD_FAILED);
 		}
 	}

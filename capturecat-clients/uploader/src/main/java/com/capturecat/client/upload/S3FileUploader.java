@@ -39,8 +39,13 @@ public class S3FileUploader extends AbstractFileUploader {
 		try {
 			s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 		} catch (IOException e) {
+			log.error("s3Client.putObject :: IOException{}:", e.getMessage());
 			throw new UploadException(ErrorCode.S3_UPLOAD_FAILED_IO, e);
 		} catch (SdkException e) {
+			log.error("s3Client.putObject :: SdkException{}:", e.getMessage());
+			throw new UploadException(ErrorCode.S3_DOWNLOAD_FAILED_SDK, e);
+		} catch (Exception e) {
+			log.error("s3Client.putObject :: Exception{}:", e.getMessage());
 			throw new UploadException(ErrorCode.S3_DOWNLOAD_FAILED_SDK, e);
 		}
 

@@ -41,9 +41,10 @@ public class JwtFilter extends OncePerRequestFilter {
 		// Authorization 헤더에서 "Bearer <token>" 추출
 		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+		log.info("jwtFilter:request.getRequestURI(): {}", request.getRequestURI());
 		if (authHeader == null || !authHeader.startsWith(JwtUtil.BEARER_PREFIX)) {
 			log.info("Authorization header missing or malformed");
-			filterChain.doFilter(request, response); // 다음 필터로 넘김 (비인증 요청 허용할 수 있음)
+			filterChain.doFilter(request, response); // 다음 필터로 ㅉ넘김 (비인증 요청 허용할 수 있음)
 			return;
 		}
 

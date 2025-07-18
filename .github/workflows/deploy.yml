@@ -3,7 +3,8 @@ name: Deploy To EC2
 on:
   push:
     branches:
-      - develop
+      - feature/#78-fix-image-upload-500-err
+#      - develop
 
 jobs:
   deploy:
