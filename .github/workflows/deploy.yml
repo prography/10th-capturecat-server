@@ -50,6 +50,7 @@ jobs:
             # AWS CLI로 Parameter Store에서 값 읽기
             export DB_USERNAME=$(aws ssm get-parameter --name "/prod/capturecat/db-username" --with-decryption --query "Parameter.Value" --output text)
             export DB_PASSWORD=$(aws ssm get-parameter --name "/prod/capturecat/db-password" --with-decryption --query "Parameter.Value" --output text)
+            echo "확인: DB_USERNAME=$DB_USERNAME"
             
             sudo fuser -k -n tcp 80 || true
             sleep 3
@@ -57,7 +58,7 @@ jobs:
             mkdir /home/ubuntu/capturecat-server/current
             mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
             cd /home/ubuntu/capturecat-server/current
-            sudo nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
+            sudo -E nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
 
             # 실행 여부 확인
             sleep 2
