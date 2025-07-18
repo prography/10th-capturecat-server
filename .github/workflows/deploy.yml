@@ -58,6 +58,7 @@ jobs:
             mkdir /home/ubuntu/capturecat-server/current
             mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
             cd /home/ubuntu/capturecat-server/current
+            env DB_USERNAME="$DB_USERNAME" DB_PASSWORD="$DB_PASSWORD" \
             sudo -E nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
 
             # 실행 여부 확인
