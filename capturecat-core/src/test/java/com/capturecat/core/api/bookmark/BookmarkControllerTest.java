@@ -88,6 +88,7 @@ class BookmarkControllerTest extends RestDocsTest {
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 이름"),
 					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
 					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
+					fieldWithPath("data.items[].isBookmarked").type(JsonFieldType.BOOLEAN).description("즐겨찾기 여부"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 

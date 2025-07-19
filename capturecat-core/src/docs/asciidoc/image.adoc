@@ -14,7 +14,7 @@ operation::upload[snippets='curl-request,http-request,request-parts,request-part
 [[단일-이미지-태그-등록]]
 === 단일 이미지 태그 등록
 ==== 성공
-operation::addTagsToImage[snippets='curl-request,request-fields,http-response,response-fields']
+operation::addTagsToImage[snippets='curl-request,path-parameters,request-fields,http-response,response-fields']
 
 ==== 실패
 단일 이미지에 태그 등록이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
