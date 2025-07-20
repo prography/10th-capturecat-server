@@ -127,6 +127,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 가장_많이_사용된_태그_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getMostUsedTags", errorCodeDescriptors);
+	}
+
+	@Test
 	void 튜토리얼_완료_업데이트_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/tutorialComplete", errorCodeDescriptors);

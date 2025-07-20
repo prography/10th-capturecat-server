@@ -39,4 +39,10 @@ public class TagController {
 		CursorResponse<TagResponse> tags = tagService.getRelatedTags(loginUser, tagNames, pageable);
 		return ApiResponse.success(tags);
 	}
+
+	@GetMapping("/most-used")
+	public ApiResponse<CursorResponse<TagResponse>> getMostUsedTags(@AuthenticationPrincipal LoginUser loginUser,
+			@PageableDefault Pageable pageable) {
+		return ApiResponse.success(tagService.getMostUsedTags(loginUser, pageable));
+	}
 }

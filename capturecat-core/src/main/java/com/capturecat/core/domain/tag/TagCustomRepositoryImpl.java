@@ -55,4 +55,21 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 
 		return SliceUtil.toSlice(tags, pageable);
 	}
+
+	@Override
+	public Slice<Tag> searchMostUsedTagsByUser(User user, Pageable pageable) {
+		List<Tag> tags = queryFactory
+			.select(tag)
+			.from(imageTag)
+			.join(imageTag.tag, tag)
+			.join(imageTag.image, image)
+			.where(image.user.eq(user))
+			.groupBy(tag)
+			.orderBy(imageTag.count().desc(), tag.id.desc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1)
+			.fetch();
+
+		return SliceUtil.toSlice(tags, pageable);
+	}
 }

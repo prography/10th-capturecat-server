@@ -1,6 +1,7 @@
 package com.capturecat.core.service.tag;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -29,21 +30,25 @@ public class TagService {
 
 	@Transactional(readOnly = true)
 	public CursorResponse<TagResponse> getTags(LoginUser loginUser, Pageable pageable) {
-		User user = userRepository.findByUsername(loginUser.getUsername())
-			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
-
-		Slice<Tag> tags = tagRepository.searchUserTagsByUser(user, pageable);
-		Slice<TagResponse> responses = tags.map(TagResponse::from);
-
-		return CursorUtil.toCursorResponse(responses, TagResponse::id);
+		return searchTagsWithCursor(loginUser, user -> tagRepository.searchUserTagsByUser(user, pageable));
 	}
 
 	@Transactional(readOnly = true)
 	public CursorResponse<TagResponse> getRelatedTags(LoginUser loginUser, List<String> tagNames, Pageable pageable) {
+		return searchTagsWithCursor(loginUser, user -> tagRepository.searchByRelatedTags(user, tagNames, pageable));
+	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<TagResponse> getMostUsedTags(LoginUser loginUser, Pageable pageable) {
+		return searchTagsWithCursor(loginUser, user -> tagRepository.searchMostUsedTagsByUser(user, pageable));
+	}
+
+	private CursorResponse<TagResponse> searchTagsWithCursor(LoginUser loginUser,
+		Function<User, Slice<Tag>> tagSearchFunction) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
-		Slice<Tag> tags = tagRepository.searchByRelatedTags(user, tagNames, pageable);
+		Slice<Tag> tags = tagSearchFunction.apply(user);
 		Slice<TagResponse> responses = tags.map(TagResponse::from);
 
 		return CursorUtil.toCursorResponse(responses, TagResponse::id);
