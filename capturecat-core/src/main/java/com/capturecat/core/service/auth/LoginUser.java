@@ -18,14 +18,19 @@ public class LoginUser implements UserDetails {
 
 	private String username;
 	private String password;
+	private String nickname;
 	private UserRole role;
+	private boolean tutorialCompleted;
 
 	public LoginUser(User user) {
 		this.username = user.getUsername();
 		this.password = user.getPassword();
-		this.role =  user.getRole();
+		this.nickname = user.getNickname();
+		this.role = user.getRole();
+		this.tutorialCompleted = user.isTutorialCompleted(); //TODO
 	}
 
+	//엑세스 토큰에서 사용자 정보 추출 시 사용
 	public LoginUser(String username, String role) {
 		this.username = username;
 		this.role = UserRole.fromRoleString(role);

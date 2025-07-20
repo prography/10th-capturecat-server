@@ -51,6 +51,7 @@ public class UserService {
 	private User buildUser(OidcUserPayload payload) {
 		return User.builder()
 			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.nickname(payload.nickname())
 			.email(payload.email())
 			.provider(payload.provider())
 			.socialId(payload.sub())

@@ -67,6 +67,7 @@ public class DummyObject {
 			.username("username")
 			.password(passwordEncoder.encode("password"))
 			.email("username@email.com")
+			.nickname("nickname")
 			.build();
 	}
 
@@ -78,6 +79,7 @@ public class DummyObject {
 			.username(username)
 			.password(encPassword)
 			.email(username + "@email.com")
+			.nickname(username)
 			.role(UserRole.USER)
 			.build();
 	}

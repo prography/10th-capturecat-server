@@ -60,7 +60,7 @@ class Oauth2AuthControllerSliceTest {
 		String idToken = "test-id-token";
 		SocialLoginRequest req = new SocialLoginRequest(idToken);
 		OidcUserPayload payload =
-			new OidcUserPayload(provider, "1234", "test@test.com", true);
+			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", true);
 
 		LoginUser user = buildUser(payload);
 
@@ -87,7 +87,7 @@ class Oauth2AuthControllerSliceTest {
 			.andExpect(header().string(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + "access.jwt.token"))
 			.andExpect(header().string(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + "refresh.jwt.token"))
 			.andExpect(jsonPath("$.result").value("SUCCESS"))
-			.andExpect(jsonPath("$.data").doesNotExist());
+			.andExpect(jsonPath("$.data").exists());
 	}
 
 	@DisplayName("id_token 검증 실패 시 401 응답")

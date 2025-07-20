@@ -56,11 +56,12 @@ public class IdTokenVerifierService {
 			// 3. 공개키(JWK)로 서명 검증.
 			verifyJwtSignature(jwt, providerInfo);
 
-			// 4. 유저 정보 반환 (provider, sub, email, email_verified)
+			// 4. 유저 정보 반환 (provider, sub, email, nickname, email_verified)
 			return new OidcUserPayload(
 				provider,
 				claims.getSubject(),
 				claims.getStringClaim("email"),
+				extractNickname(provider, claims),
 				claims.getBooleanClaim("email_verified")
 			);
 		} catch (Exception e) {
@@ -104,10 +105,20 @@ public class IdTokenVerifierService {
 		return claims;
 	}
 
+	private String extractNickname(String provider, JWTClaimsSet claims) throws ParseException {
+		return switch (provider) {
+			case "kakao" -> claims.getStringClaim("nickname");
+			case "apple" -> claims.getStringClaim("fullName");
+			case "google" -> claims.getStringClaim("name");
+			default -> claims.getStringClaim("email");
+		};
+	}
+
 	public record OidcUserPayload(
 		String provider,
 		String sub, // OIDC에서 각 사용자를 "서비스 내에서 고유하게 구별"하는 고유 식별자(Primary Key)
 		String email,
+		String nickname,
 		Boolean emailVerified
 	) {
 	}
