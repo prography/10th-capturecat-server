@@ -23,11 +23,6 @@ public class Tag extends BaseTimeEntity {
 	private String name;
 
 	public Tag(String name) {
-		this(null, name);
-	}
-
-	public Tag(Long id, String name) {
-		this.id = id;
 		this.name = name;
 	}
 }

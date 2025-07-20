@@ -21,7 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 
 import com.capturecat.core.DummyObject;
-import com.capturecat.core.domain.tag.Tag;
+import com.capturecat.core.domain.tag.TagFixture;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
@@ -45,7 +45,7 @@ class TagServiceTest {
 		// given
 		var user = DummyObject.newMockUser(1L);
 		var loginUser = new LoginUser(user);
-		var tags = List.of(new Tag(1L, "java"), new Tag(1L, "spring"));
+		var tags = List.of(TagFixture.createTag(1L, "java"), TagFixture.createTag(1L, "spring"));
 		var pageRequest = of(0, 10);
 		var tagSlice = new SliceImpl<>(tags, pageRequest, false);
 
