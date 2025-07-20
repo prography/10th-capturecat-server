@@ -34,6 +34,10 @@ include::{snippets}/errorCode/getTags/error-codes.adoc[]
 === 연관된 태그 조회
 include::{snippets}/errorCode/getRelatedTags/error-codes.adoc[]
 
+[[많이-사용된-태그-조회]]
+=== 많이 사용된 태그 조회
+include::{snippets}/errorCode/getMostUsedTags/error-codes.adoc[]
+
 [[태그로-이미지-검색]]
 === 태그로 이미지 검색
 include::{snippets}/errorCode/searchImagesByTags/error-codes.adoc[]
