@@ -42,9 +42,7 @@ class TagControllerTest extends RestDocsTest {
 	void 사용자가_등록한_태그_목록을_조회한다() {
 		// given
 		BDDMockito.given(tagService.getTags(any(), any()))
-			.willReturn(new CursorResponse<>(false, 1L, List.of(
-				new TagResponse(1L, "tagName")
-			)));
+			.willReturn(new CursorResponse<>(false, 1L, List.of(new TagResponse(1L, "tagName"))));
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -71,9 +69,7 @@ class TagControllerTest extends RestDocsTest {
 	void 연관된_태그_조회() {
 		// given
 		BDDMockito.given(tagService.getRelatedTags(any(), anyList(), any()))
-			.willReturn(new CursorResponse<>(false, 1L, List.of(
-				new TagResponse(1L, "relatedTag")
-			)));
+			.willReturn(new CursorResponse<>(false, 1L, List.of(new TagResponse(1L, "relatedTag"))));
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -102,9 +98,7 @@ class TagControllerTest extends RestDocsTest {
 	void 가장_많이_사용된_태그_조회() {
 		// given
 		BDDMockito.given(tagService.getMostUsedTags(any(), any()))
-			.willReturn(new CursorResponse<>(false, 1L, List.of(
-				new TagResponse(1L, "relatedTag")
-			)));
+			.willReturn(new CursorResponse<>(false, 1L, List.of(new TagResponse(1L, "tag"))));
 
 		// when & then
 		given().contentType(ContentType.JSON)
