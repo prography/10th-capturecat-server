@@ -26,11 +26,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-home-cache-cleanup: true # 오래된 캐시 자동 정리
-          cache-read-only: false # 캐시 읽기/쓰기 모두 가능
-          cache-overwrite-existing: true # 기존 캐시 덮어쓰기 허용
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Check code conventions
         run: ./gradlew checkstyleMain checkstyleTest
