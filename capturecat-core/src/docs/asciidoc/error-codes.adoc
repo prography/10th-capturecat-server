@@ -59,9 +59,13 @@ include::{snippets}/errorCode/deleteBookmark/error-codes.adoc[]
 include::{snippets}/errorCode/socialLogin/error-codes.adoc[]
 
 [[엑세스-토큰-재발급]]
-=== 엑세스-토큰-재발급
+=== 엑세스 토큰 재발급
 include::{snippets}/errorCode/reissue/error-codes.adoc[]
 
 [[로그아웃]]
 === 로그아웃
 include::{snippets}/errorCode/logout/error-codes.adoc[]
+
+[[튜토리얼-완료-업데이트]]
+=== 튜토리얼 완료 업데이트
+include::{snippets}/errorCode/tutorialComplete/error-codes.adoc[]

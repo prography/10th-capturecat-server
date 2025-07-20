@@ -30,7 +30,7 @@ public class UserController {
 		return ApiResponse.success(joinRespDto);
 	}
 
-	@PostMapping("/tutorial")
+	@PostMapping("/tutorialComplete")
 	public ApiResponse<?> tutorialCompleted(@AuthenticationPrincipal LoginUser loginUser) {
 		userService.updateTutorialCompleted(loginUser);
 		return ApiResponse.success();
