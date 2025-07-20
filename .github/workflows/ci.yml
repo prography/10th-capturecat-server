@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true # 오래된 캐시 자동 정리
+          cache-read-only: false # 캐시 읽기/쓰기 모두 가능
+          cache-overwrite-existing: true # 기존 캐시 덮어쓰기 허용
+
+      - name: Check code conventions
+        run: ./gradlew checkstyleMain checkstyleTest
+        continue-on-error: false
+
+      - name: Run tests
+        run: ./gradlew test
+        continue-on-error: false
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
