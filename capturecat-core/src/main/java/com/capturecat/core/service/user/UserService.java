@@ -2,6 +2,7 @@ package com.capturecat.core.service.user;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +18,7 @@ import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -57,5 +59,11 @@ public class UserService {
 			.socialId(payload.sub())
 			.role(UserRole.USER)
 			.build();
+	}
+
+	public void updateTutorialCompleted(LoginUser loginUser) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		user.tutorialComplete();
 	}
 }

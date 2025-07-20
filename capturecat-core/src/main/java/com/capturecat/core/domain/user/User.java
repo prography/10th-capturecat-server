@@ -60,4 +60,8 @@ public class User extends BaseTimeEntity {
 		this.provider = provider;
 		this.socialId = socialId;
 	}
+
+	public void tutorialComplete() {
+		this.tutorialCompleted = true;
+	}
 }
