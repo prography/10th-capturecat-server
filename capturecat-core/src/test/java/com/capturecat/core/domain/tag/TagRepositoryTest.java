@@ -6,6 +6,7 @@ import java.util.List;
 
 import jakarta.persistence.EntityManager;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -17,6 +18,7 @@ import com.capturecat.core.config.JpaAuditingConfig;
 import com.capturecat.core.config.QueryDslConfig;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 
 @DataJpaTest
@@ -38,12 +40,26 @@ class TagRepositoryTest {
 	@Autowired
 	private EntityManager entityManager;
 
+	private User user;
+
+	private Image image1;
+
+	private Image image2;
+
+	private Image image3;
+
+	@BeforeEach
+	void setUp() {
+		user = userRepository.save(DummyObject.newUser("test"));
+
+		image1 = imageRepository.save(DummyObject.newMockUserImage(user));
+		image2 = imageRepository.save(DummyObject.newMockUserImage(user));
+		image3 = imageRepository.save(DummyObject.newMockUserImage(user));
+	}
+
 	@Test
 	void 연관_태그_조회() {
 		// given
-		var user = userRepository.save(DummyObject.newUser("test"));
-		var image1 = imageRepository.save(DummyObject.newMockUserImage(user));
-		var image2 = imageRepository.save(DummyObject.newMockUserImage(user));
 		var tag1 = tagRepository.save(new Tag("tag1"));
 		var tag2 = tagRepository.save(new Tag("tag2"));
 		var tag3 = tagRepository.save(new Tag("tag3"));
@@ -63,6 +79,39 @@ class TagRepositoryTest {
 		assertThat(tags.hasNext()).isFalse();
 		assertThat(tags.getContent()).extracting(Tag::getName)
 			.containsExactly(tag3.getName(), tag4.getName());
+	}
+
+	@Test
+	void 사용자가_가장_많이_사용한_태그_순으로_조회한다() {
+		// given
+		var tag1 = tagRepository.save(new Tag("tag1"));
+		var tag2 = tagRepository.save(new Tag("tag2"));
+		var tag3 = tagRepository.save(new Tag("tag3"));
+
+		// tag1은 3개의 이미지에 사용
+		imageTagRepository.save(new ImageTag(image1, tag1));
+		imageTagRepository.save(new ImageTag(image2, tag1));
+		imageTagRepository.save(new ImageTag(image3, tag1));
+
+		// tag2는 2개의 이미지에 사용
+		imageTagRepository.save(new ImageTag(image1, tag2));
+		imageTagRepository.save(new ImageTag(image2, tag2));
+
+		// tag3는 1개의 이미지에 사용
+		imageTagRepository.save(new ImageTag(image1, tag3));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when
+		var result = tagRepository.searchMostUsedTagsByUser(user, PageRequest.of(0, 10));
+
+		// then
+		List<Tag> tags = result.getContent();
+		assertThat(tags).hasSize(3);
+		assertThat(tags.get(0).getName()).isEqualTo(tag1.getName());
+		assertThat(tags.get(1).getName()).isEqualTo(tag2.getName());
+		assertThat(tags.get(2).getName()).isEqualTo(tag3.getName());
 	}
 
 	private void saveImageTags(Image image1, List<Tag> tags) {

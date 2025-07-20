@@ -48,4 +48,15 @@ public class TagService {
 
 		return CursorUtil.toCursorResponse(responses, TagResponse::id);
 	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<TagResponse> getMostUsedTags(LoginUser loginUser, Pageable pageable) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		Slice<Tag> tags = tagRepository.searchMostUsedTagsByUser(user, pageable);
+		Slice<TagResponse> responses = tags.map(TagResponse::from);
+
+		return CursorUtil.toCursorResponse(responses, TagResponse::id);
+	}
 }

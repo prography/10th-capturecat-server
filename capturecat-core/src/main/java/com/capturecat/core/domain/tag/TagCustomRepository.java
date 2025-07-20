@@ -12,4 +12,6 @@ public interface TagCustomRepository {
 	Slice<Tag> searchUserTagsByUser(User user, Pageable pageable);
 
 	Slice<Tag> searchByRelatedTags(User user, List<String> tagNames, Pageable pageable);
+
+	Slice<Tag> searchMostUsedTagsByUser(User user, Pageable pageable);
 }

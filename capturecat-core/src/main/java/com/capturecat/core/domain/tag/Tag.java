@@ -30,9 +30,4 @@ public class Tag extends BaseTimeEntity {
 		this.id = id;
 		this.name = name;
 	}
-
-	public boolean isSameNameAs(String name) {
-		return this.name.equals(name);
-	}
-
 }
