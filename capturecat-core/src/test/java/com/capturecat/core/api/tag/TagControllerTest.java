@@ -42,9 +42,7 @@ class TagControllerTest extends RestDocsTest {
 	void 사용자가_등록한_태그_목록을_조회한다() {
 		// given
 		BDDMockito.given(tagService.getTags(any(), any()))
-			.willReturn(new CursorResponse<>(false, 1L, List.of(
-				new TagResponse(1L, "tagName")
-			)));
+			.willReturn(new CursorResponse<>(false, 1L, List.of(new TagResponse(1L, "tagName"))));
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -71,9 +69,7 @@ class TagControllerTest extends RestDocsTest {
 	void 연관된_태그_조회() {
 		// given
 		BDDMockito.given(tagService.getRelatedTags(any(), anyList(), any()))
-			.willReturn(new CursorResponse<>(false, 1L, List.of(
-				new TagResponse(1L, "relatedTag")
-			)));
+			.willReturn(new CursorResponse<>(false, 1L, List.of(new TagResponse(1L, "relatedTag"))));
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -93,6 +89,33 @@ class TagControllerTest extends RestDocsTest {
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
 					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
 					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("연관된 태그 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 가장_많이_사용된_태그_조회() {
+		// given
+		BDDMockito.given(tagService.getMostUsedTags(any(), any()))
+			.willReturn(new CursorResponse<>(false, 1L, List.of(new TagResponse(1L, "tag"))));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.param("page", 0)
+			.param("size", 10)
+			.when().get("/v1/tags/most-used")
+			.then().status(HttpStatus.OK)
+			.apply(document("getMostUsedTags", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(
+					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+					parameterWithName("size").description("페이지 크기 (기본값: 10)").optional()
+				),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("가장 많이 사용된 태그 목록"),
 					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
