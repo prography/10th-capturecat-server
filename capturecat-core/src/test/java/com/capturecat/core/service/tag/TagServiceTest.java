@@ -73,6 +73,7 @@ class TagServiceTest {
 
 		// when & then
 		assertThatThrownBy(() -> tagService.getMostUsedTags(loginUser, of(0, 10)))
-			.isInstanceOf(CoreException.class);
+			.isInstanceOf(CoreException.class)
+			.hasFieldOrPropertyWithValue("errorType", ErrorType.USER_NOT_FOUND);
 	}
 }
