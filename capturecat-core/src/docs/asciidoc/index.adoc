@@ -13,6 +13,8 @@ include::{adocPath}/common-response.adoc[]
 
 include::{adocPath}/auth.adoc[]
 
+include::{adocPath}/user.adoc[]
+
 include::{adocPath}/image.adoc[]
 
 include::{adocPath}/tag.adoc[]

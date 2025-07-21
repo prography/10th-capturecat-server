@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.auth.dto.SocialLoginRequest;
+import com.capturecat.core.api.auth.dto.SocialLoginResponse;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.service.auth.IdTokenVerifierService;
@@ -49,6 +50,7 @@ public class Oauth2AuthController {
 		return ResponseEntity
 			.ok()
 			.headers(headers)
-			.body(ApiResponse.success());
+			.body(ApiResponse.success(
+				new SocialLoginResponse(user.getUsername(), user.getNickname(), user.isTutorialCompleted())));
 	}
 }

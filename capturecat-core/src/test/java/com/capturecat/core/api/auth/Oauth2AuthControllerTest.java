@@ -53,7 +53,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 		String idToken = "test-id-token";
 		SocialLoginRequest request = new SocialLoginRequest(idToken);
 		OidcUserPayload payload =
-			new OidcUserPayload(provider, "1234", "test@test.com", true);
+			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", true);
 		LoginUser user = buildUser(payload);
 		Map<TokenType, String> tokenMap = Map.of(
 			TokenType.ACCESS, "access.jwt.token",
@@ -81,7 +81,10 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER).description("Bearer 리프레시 토큰")
 				),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (예: SUCCESS)")
+					fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (예: SUCCESS)"),
+					fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
+					fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("닉네임"),
+					fieldWithPath("data.tutorialCompleted").type(JsonFieldType.BOOLEAN).description("튜토리얼(시작하기) 완료 여부")
 				)));
 	}
 
@@ -92,6 +95,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 			.socialId(payload.sub())
 			.role(UserRole.USER)
 			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.nickname(payload.nickname())
 			.build();
 		return new LoginUser(user);
 	}

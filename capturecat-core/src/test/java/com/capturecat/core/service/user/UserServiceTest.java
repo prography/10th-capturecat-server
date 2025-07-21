@@ -5,6 +5,8 @@ import static com.capturecat.core.api.user.dto.UserReqDto.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +16,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.service.auth.LoginUser;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -44,5 +48,23 @@ class UserServiceTest {
 
 		//then
 		Assertions.assertEquals(1L, joinRespDto.getId());
+	}
+
+	@Test
+	void 튜토리얼_완료_업데이트() {
+		//given
+		//기 회원 만들기
+		User savedUser = newMockUser(1L);
+
+		//기본값 false
+		Assertions.assertEquals(false, savedUser.isTutorialCompleted());
+
+		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.of(savedUser));
+
+		//when
+		userService.updateTutorialCompleted(new LoginUser(savedUser));
+
+		//then
+		Assertions.assertEquals(true, savedUser.isTutorialCompleted());
 	}
 }

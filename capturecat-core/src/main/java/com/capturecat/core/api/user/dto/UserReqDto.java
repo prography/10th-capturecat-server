@@ -40,6 +40,7 @@ public class UserReqDto {
 				.password(passwordEncoder.encode(password))
 				.email(email)
 				.role(UserRole.USER)
+				.nickname(username)
 				.build();
 		}
 	}

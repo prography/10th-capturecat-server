@@ -1,0 +1,12 @@
+[[회원-API]]
+== 회원 관련 API
+
+[[튜토리얼-완료-업데이트]]
+=== 튜토리얼(시작하기) 완료 업데이트
+==== 성공
+operation::tutorialComplete[snippets='curl-request,http-request,http-response,response-fields']
+
+==== 실패
+튜토리얼(시작하기) 완료 업데이트가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#튜토리얼-완료-업데이트, 튜토리얼 완료 업데이트 API에서 발생할 수 있는 에러>>를 살펴보세요.

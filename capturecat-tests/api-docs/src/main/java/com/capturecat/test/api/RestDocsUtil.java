@@ -11,7 +11,7 @@ public class RestDocsUtil {
 
 	public static OperationRequestPreprocessor requestPreprocessor() {
 		return Preprocessors.preprocessRequest(
-				Preprocessors.modifyUris().scheme("https").host("dev.capture-cat.com").removePort(),
+				Preprocessors.modifyUris().scheme("https").host("api.capture-cat.com").removePort(),
 				Preprocessors.prettyPrint());
 	}
 

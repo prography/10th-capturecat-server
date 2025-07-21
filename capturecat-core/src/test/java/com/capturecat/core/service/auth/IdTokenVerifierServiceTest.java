@@ -38,12 +38,12 @@ class IdTokenVerifierServiceTest {
 		Provider provider = new Provider();
 		provider.setIssuerUri("https://test-issuer.com");
 		provider.setJwkSetUri("https://test-issuer.com/keys");
-		props.getProvider().put("test", provider);
+		props.getProvider().put("google", provider);
 
 		// 2. Registration 세팅
 		Registration reg = new Registration();
 		reg.setClientId("test-client-id");
-		props.getRegistration().put("test", reg);
+		props.getRegistration().put("google", reg);
 
 		// 3. 서비스 생성
 		service = Mockito.spy(new IdTokenVerifierService(props));
@@ -70,6 +70,7 @@ class IdTokenVerifierServiceTest {
 			.subject("mysub")
 			.claim("email", "test@test.com")
 			.claim("email_verified", true)
+			.claim("name", "testNickname")
 			.build();
 
 		SignedJWT idToken = TestJwtUtil.createJwt(claims, privateKey);
@@ -78,12 +79,13 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		//when
-		OidcUserPayload payload = service.verifyAndExtract("test", idToken.serialize());
+		OidcUserPayload payload = service.verifyAndExtract("google", idToken.serialize());
 
 		//then
-		assertThat(payload.provider()).isEqualTo("test");
+		assertThat(payload.provider()).isEqualTo("google");
 		assertThat(payload.sub()).isEqualTo("mysub");
 		assertThat(payload.email()).isEqualTo("test@test.com");
+		assertThat(payload.nickname()).isEqualTo("testNickname");
 		assertThat(payload.emailVerified()).isTrue();
 	}
 
@@ -105,7 +107,7 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		assertThatThrownBy(() ->
-			service.verifyAndExtract("test", idToken.serialize())
+			service.verifyAndExtract("google", idToken.serialize())
 		).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(ErrorType.INVALID_ID_TOKEN);
@@ -129,7 +131,7 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		assertThatThrownBy(() ->
-			service.verifyAndExtract("test", idToken.serialize())
+			service.verifyAndExtract("google", idToken.serialize())
 		).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(ErrorType.INVALID_ID_TOKEN);
@@ -153,7 +155,7 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		assertThatThrownBy(() ->
-			service.verifyAndExtract("test", idToken.serialize())
+			service.verifyAndExtract("google", idToken.serialize())
 		).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(ErrorType.INVALID_ID_TOKEN);
