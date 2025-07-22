@@ -144,7 +144,7 @@ public class ImageService {
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
 		Slice<ImageWithTagsResponse> responses = imageRepository.searchImagesByUserAndTagNames(user, tagNames, pageable)
-			.map(r -> ImageWithTagsResponse.from(r));
+			.map(ImageWithTagsResponse::from);
 
 		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);
 	}

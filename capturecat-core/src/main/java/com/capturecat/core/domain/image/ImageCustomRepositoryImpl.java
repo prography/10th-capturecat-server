@@ -45,7 +45,7 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 					image.captureDate,
 					bookmark.id.isNotNull(),
 					GroupBy.list(tag))
-				));
+			));
 
 		return SliceUtil.toSlice(responses, pageable);
 	}
@@ -54,9 +54,10 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 	public Slice<ImageInfo> searchImagesByUserAndTagNames(User user, List<String> tagNames, Pageable pageable) {
 		List<ImageInfo> responses = queryFactory
 			.selectFrom(image)
-			.where(image.user.eq(user), CommonTagQueryConditions.createExistsCondition(tagNames))
+			.leftJoin(bookmark).on(image.eq(bookmark.image), bookmark.user.eq(user))
 			.leftJoin(imageTag).on(image.id.eq(imageTag.image.id))
 			.leftJoin(tag).on(imageTag.tag.id.eq(tag.id))
+			.where(image.user.eq(user), CommonTagQueryConditions.createExistsCondition(tagNames))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.orderBy(image.id.desc())
@@ -65,6 +66,7 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 				image.fileName,
 				image.fileUrl,
 				image.captureDate,
+				bookmark.isNotNull(),
 				GroupBy.list(tag))
 			));
 
