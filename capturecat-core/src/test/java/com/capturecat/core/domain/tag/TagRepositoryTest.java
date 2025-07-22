@@ -64,9 +64,11 @@ class TagRepositoryTest {
 		var tag2 = tagRepository.save(new Tag("tag2"));
 		var tag3 = tagRepository.save(new Tag("tag3"));
 		var tag4 = tagRepository.save(new Tag("tag4"));
+		var tag5 = tagRepository.save(new Tag("tag5"));
 
 		saveImageTags(image1, List.of(tag1, tag2, tag3));
 		saveImageTags(image2, List.of(tag1, tag2, tag4));
+		saveImageTags(image3, List.of(tag5));
 
 		entityManager.flush();
 		entityManager.clear();

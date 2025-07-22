@@ -42,6 +42,7 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 		List<Tag> tags = queryFactory
 			.select(tag)
 			.from(imageTag)
+			.join(imageTag.image, image)
 			.join(imageTag.tag, tag)
 			.where(
 				image.user.eq(user),
