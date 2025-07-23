@@ -100,6 +100,24 @@ class ImageServiceTest {
 	}
 
 	@Test
+	void getImagesWithTags_hasTagsIsTrue() {
+		// given
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(imageRepository.searchByUser(eq(user), eq(true), any(Pageable.class)))
+			.willReturn(new SliceImpl<>(List.of(
+					new ImageInfo(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(), true,
+						List.of(createTag(1L, "tag1"), createTag(2L, "tag2"))))));
+
+		// when
+		var response = imageService.getImagesWithTags(new LoginUser(user), true, PageRequest.of(0, 10));
+
+		// then
+		assertThat(response.hasNext()).isFalse();
+		assertThat(response.items()).hasSize(1);
+		assertThat(response.items().get(0).tags()).hasSize(2);
+	}
+
+	@Test
 	void getImagesWithTags_hasTagsIsFalse() {
 		// given
 		given(userRepository.findByUsername(anyString()))

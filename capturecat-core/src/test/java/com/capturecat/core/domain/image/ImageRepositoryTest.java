@@ -101,7 +101,7 @@ class ImageRepositoryTest {
 		assertThat(response.getContent().get(0).id()).isEqualTo(image2.getId());
 		assertThat(response.getContent().get(0).tags()).isNotEmpty();
 		assertThat(response.getContent().get(1).id()).isEqualTo(image1.getId());
-		assertThat(response.getContent().get(0).tags()).isNotEmpty();
+		assertThat(response.getContent().get(1).tags()).isNotEmpty();
 	}
 
 	@Test
@@ -131,6 +131,6 @@ class ImageRepositoryTest {
 		assertThat(response.getContent().get(0).id()).isEqualTo(image4.getId());
 		assertThat(response.getContent().get(0).tags()).isEmpty();
 		assertThat(response.getContent().get(1).id()).isEqualTo(image3.getId());
-		assertThat(response.getContent().get(0).tags()).isEmpty();
+		assertThat(response.getContent().get(1).tags()).isEmpty();
 	}
 }
