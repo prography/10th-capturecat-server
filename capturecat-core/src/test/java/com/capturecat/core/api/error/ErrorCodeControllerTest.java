@@ -138,6 +138,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/tutorialComplete", errorCodeDescriptors);
 	}
 
+	@Test
+	void 회원탈퇴_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/withdraw", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")

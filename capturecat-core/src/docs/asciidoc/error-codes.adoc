@@ -70,6 +70,10 @@ include::{snippets}/errorCode/reissue/error-codes.adoc[]
 === 로그아웃
 include::{snippets}/errorCode/logout/error-codes.adoc[]
 
+[[회원탈퇴]]
+=== 회원탈퇴
+include::{snippets}/errorCode/withdraw/error-codes.adoc[]
+
 [[튜토리얼-완료-업데이트]]
 === 튜토리얼 완료 업데이트
 include::{snippets}/errorCode/tutorialComplete/error-codes.adoc[]
