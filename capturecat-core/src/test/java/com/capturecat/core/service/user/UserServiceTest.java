@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -18,6 +20,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.capturecat.core.domain.image.Image;
+import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
@@ -32,6 +37,12 @@ class UserServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private ImageRepository imageRepository;
+
+	@Mock
+	private ImageTagRepository imageTagRepository;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -80,10 +91,27 @@ class UserServiceTest {
 
 		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.of(savedUser));
 
-		//when
+		// User가 소유한 이미지 2개라고 가정
+		Image image1 = mock(Image.class);
+		Image image2 = mock(Image.class);
+		List<Image> userImages = List.of(image1, image2);
+
+		when(imageRepository.findByUser(savedUser)).thenReturn(userImages);
+
+		// when
 		userService.withdraw(new LoginUser(savedUser));
 
-		//then
+		// then
+		verify(imageRepository).findByUser(savedUser);
+
+		// 각 이미지에 대해 imageTagRepository.deleteAllByImage 호출
+		verify(imageTagRepository).deleteAllByImage(image1);
+		verify(imageTagRepository).deleteAllByImage(image2);
+
+		// 이미지 전체 삭제
+		verify(imageRepository).deleteAll(userImages);
+
+		// 마지막으로 user 삭제
 		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 		verify(userRepository).delete(captor.capture());
 		assertThat(captor.getValue()).isSameAs(savedUser);
