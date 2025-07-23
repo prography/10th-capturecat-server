@@ -110,11 +110,12 @@ public class ImageService {
 	}
 
 	@Transactional(readOnly = true)
-	public CursorResponse<ImageWithTagsResponse> getImagesWithTags(LoginUser loginUser, Pageable pageable) {
+	public CursorResponse<ImageWithTagsResponse> getImagesWithTags(LoginUser loginUser, Boolean hasTags,
+		Pageable pageable) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
-		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, pageable)
+		Slice<ImageWithTagsResponse> responses = imageRepository.searchByUser(user, hasTags, pageable)
 			.map(ImageWithTagsResponse::from);
 
 		return CursorUtil.toCursorResponse(responses, ImageWithTagsResponse::id);

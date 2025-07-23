@@ -12,6 +12,8 @@ import org.springframework.data.domain.Slice;
 
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -27,12 +29,12 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Slice<ImageInfo> searchByUser(User user, Pageable pageable) {
+	public Slice<ImageInfo> searchByUser(User user, Boolean hasTags, Pageable pageable) {
 		List<ImageInfo> responses = queryFactory
 			.selectFrom(image)
-			.where(image.user.eq(user))
 			.leftJoin(imageTag).on(image.eq(imageTag.image))
 			.leftJoin(tag).on(imageTag.tag.eq(tag))
+			.where(image.user.eq(user), createHasTagCondition(hasTags))
 			.leftJoin(bookmark).on(image.eq(bookmark.image), bookmark.user.eq(user))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
@@ -69,5 +71,23 @@ public class ImageCustomRepositoryImpl implements ImageCustomRepository {
 			));
 
 		return SliceUtil.toSlice(responses, pageable);
+	}
+
+	private BooleanExpression createHasTagCondition(Boolean hasTags) {
+		if (hasTags == null) {
+			return null;
+		}
+
+		if (hasTags) {
+			return JPAExpressions.selectOne()
+				.from(imageTag)
+				.where(imageTag.image.eq(image))
+				.exists();
+		} else {
+			return JPAExpressions.selectOne()
+				.from(imageTag)
+				.where(imageTag.image.eq(image))
+				.notExists();
+		}
 	}
 }
