@@ -1,5 +1,7 @@
 package com.capturecat.core.service.user;
 
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
+import com.capturecat.core.domain.image.Image;
+import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.domain.user.UserRole;
@@ -23,6 +28,9 @@ import com.capturecat.core.support.error.ErrorType;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final ImageRepository imageRepository;
+	private final ImageTagRepository imageTagRepository;
+
 	private final PasswordEncoder passwordEncoder;
 
 	/**
@@ -66,6 +74,13 @@ public class UserService {
 	public void withdraw(LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		// 1. 해당 User가 소유한 이미지 모두 삭제
+		List<Image> byUser = imageRepository.findByUser(user);
+		byUser.forEach(imageTagRepository::deleteAllByImage);
+		imageRepository.deleteAll(byUser);
+
+		// 2. User 삭제
 		userRepository.delete(user);
 	}
 
