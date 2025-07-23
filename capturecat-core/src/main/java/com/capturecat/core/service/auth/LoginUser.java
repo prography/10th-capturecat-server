@@ -27,7 +27,7 @@ public class LoginUser implements UserDetails {
 		this.password = user.getPassword();
 		this.nickname = user.getNickname();
 		this.role = user.getRole();
-		this.tutorialCompleted = user.isTutorialCompleted(); //TODO
+		this.tutorialCompleted = user.isTutorialCompleted();
 	}
 
 	//엑세스 토큰에서 사용자 정보 추출 시 사용

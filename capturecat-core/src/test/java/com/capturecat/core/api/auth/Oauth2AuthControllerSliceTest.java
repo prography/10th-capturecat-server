@@ -56,9 +56,10 @@ class Oauth2AuthControllerSliceTest {
 	@Test
 	void socialLogin_success() throws Exception {
 		// given
-		String provider = "google";
+		String provider = "apple";
 		String idToken = "test-id-token";
-		SocialLoginRequest req = new SocialLoginRequest(idToken);
+		String nickname = "최재량";
+		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", true);
 
@@ -70,7 +71,7 @@ class Oauth2AuthControllerSliceTest {
 		);
 
 		// idTokenVerifierService.verifyAndExtract → payload
-		Mockito.when(idTokenVerifierService.verifyAndExtract(eq(provider), eq(idToken)))
+		Mockito.when(idTokenVerifierService.verifyAndExtract(anyString(), anyString(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
 		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
@@ -96,15 +97,16 @@ class Oauth2AuthControllerSliceTest {
 		// given
 		String provider = "google";
 		String idToken = "bad-id-token";
-		SocialLoginRequest req = new SocialLoginRequest(idToken);
+		String nickname = null;
+		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname);
 
-		Mockito.when(idTokenVerifierService.verifyAndExtract(eq(provider), eq(idToken)))
+		Mockito.when(idTokenVerifierService.verifyAndExtract(anyString(), anyString(), any()))
 			.thenThrow(new CoreException(ErrorType.INVALID_ID_TOKEN));
 
 		// when & then
 		mockMvc.perform(post(REQUEST_PATH, provider)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(req))) //컨트롤러 슬라이스 테스트 시 security config가 load 되지 않아 추가)
+				.content(objectMapper.writeValueAsString(req)))
 			.andExpect(status().isUnauthorized()) // 실제 예외 핸들러에 따라 다를 수 있음
 			.andExpect(jsonPath("$.result").value("ERROR"))
 			.andExpect(jsonPath("$.error").exists());
@@ -113,10 +115,9 @@ class Oauth2AuthControllerSliceTest {
 	private LoginUser buildUser(IdTokenVerifierService.OidcUserPayload payload) {
 		User user = User.builder()
 			.email(payload.email())
-			.provider(payload.provider())
-			.socialId(payload.sub())
 			.role(UserRole.USER)
 			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.nickname(payload.nickname())
 			.build();
 		return new LoginUser(user);
 	}

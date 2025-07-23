@@ -37,7 +37,7 @@ import com.capturecat.core.support.error.ErrorType;
 public class IdTokenVerifierService {
 	private final Oauth2Properties oauth2Properties;
 
-	public OidcUserPayload verifyAndExtract(String provider, String idToken) {
+	public OidcUserPayload verifyAndExtract(String provider, String idToken, String nickname) {
 		// 공급자 정보 조회
 		Provider providerInfo = oauth2Properties.getProvider().get(provider);
 		Registration registrationInfo = oauth2Properties.getRegistration().get(provider);
@@ -61,7 +61,7 @@ public class IdTokenVerifierService {
 				provider,
 				claims.getSubject(),
 				claims.getStringClaim("email"),
-				extractNickname(provider, claims),
+				extractNickname(claims, provider, nickname),
 				claims.getBooleanClaim("email_verified")
 			);
 		} catch (Exception e) {
@@ -105,12 +105,12 @@ public class IdTokenVerifierService {
 		return claims;
 	}
 
-	private String extractNickname(String provider, JWTClaimsSet claims) throws ParseException {
+	private String extractNickname(JWTClaimsSet claims, String provider, String nickname) throws ParseException {
 		return switch (provider) {
 			case "kakao" -> claims.getStringClaim("nickname");
-			case "apple" -> claims.getStringClaim("fullName");
 			case "google" -> claims.getStringClaim("name");
-			default -> claims.getStringClaim("email");
+			case "apple" -> nickname;
+			default -> claims.getStringClaim("email"); //apple의 경우 requestDto를 통해 받는다.
 		};
 	}
 
