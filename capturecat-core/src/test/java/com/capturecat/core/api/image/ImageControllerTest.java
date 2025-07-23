@@ -115,21 +115,26 @@ class ImageControllerTest extends RestDocsTest {
 	@Test
 	void 태그와_이미지를_조회한다() {
 		// given
-		BDDMockito.given(imageService.getImagesWithTags(any(), any(Pageable.class)))
+		BDDMockito.given(imageService.getImagesWithTags(any(), any(), any(Pageable.class)))
 			.willReturn(new CursorResponse<>(false, 1L,
 				List.of(new ImageWithTagsResponse(1L, "cat.jpg", "http://example.com/cat.jpg", LocalDate.now(), true,
 					List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat"))))));
 
 		// when & then
-		given().contentType(ContentType.JSON).log().all()
+		given().contentType(ContentType.JSON)
 			.param("page", 0)
 			.param("size", 20)
 			.when().get(URL_PREFIX)
-			.then().status(HttpStatus.OK)
+			.then().status(HttpStatus.OK).log().all()
 			.apply(document("getImagesWithTagsByUser", requestPreprocessor(), responsePreprocessor(),
 				queryParameters(
 					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
-					parameterWithName("size").description("페이지 크기 (기본값: 20, 최대: 100)").optional()
+					parameterWithName("size").description("페이지 크기 (기본값: 20, 최대: 100)").optional(),
+					parameterWithName("hasTags").description(
+						"이미지 태그 존재 유무로 필터링합니다.\n\n"
+							+ "- `true`: 태그가 있는 이미지만 조회\n\n"
+							+ "- `false`: 태그가 없는 이미지만 조회\n\n"
+							+ "- 미입력 시: 전체 이미지 조회").optional()
 				),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),

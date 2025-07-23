@@ -10,7 +10,7 @@ import com.capturecat.core.domain.user.User;
 
 public interface ImageCustomRepository {
 
-	Slice<ImageInfo> searchByUser(User user, Pageable pageable);
+	Slice<ImageInfo> searchByUser(User user, Boolean hasTags, Pageable pageable);
 
 	Slice<ImageInfo> searchImagesByUserAndTagNames(User user, List<String> tagNames, Pageable pageable);
 }

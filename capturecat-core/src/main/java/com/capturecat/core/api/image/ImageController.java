@@ -52,8 +52,9 @@ public class ImageController {
 	@GetMapping
 	public ApiResponse<CursorResponse<ImageWithTagsResponse>> getImagesByUser(
 		@AuthenticationPrincipal LoginUser loginUser,
+		@RequestParam(required = false) Boolean hasTags,
 		@PageableDefault(size = 20) Pageable pageable) {
-		return ApiResponse.success(imageService.getImagesWithTags(loginUser, pageable));
+		return ApiResponse.success(imageService.getImagesWithTags(loginUser, hasTags, pageable));
 	}
 
 	@GetMapping("/search")
