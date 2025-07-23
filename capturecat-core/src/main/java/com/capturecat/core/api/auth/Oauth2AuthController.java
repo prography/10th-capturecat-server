@@ -32,9 +32,10 @@ public class Oauth2AuthController {
 	private final TokenService tokenService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> socialLogin(@PathVariable String provider, @RequestBody SocialLoginRequest request) {
+	public ResponseEntity<?> socialLogin(@PathVariable String provider, @RequestBody SocialLoginRequest requestDto) {
 		// 1. provider별 id_token 검증(JWK, iss, aud 등)
-		OidcUserPayload payload = idTokenVerifierService.verifyAndExtract(provider, request.idToken());
+		OidcUserPayload payload = idTokenVerifierService.verifyAndExtract(provider, requestDto.idToken(),
+			requestDto.nickname());
 
 		// 2. 유저 정보 추출/회원 처리
 		LoginUser user = userService.upsertSocialUser(payload);

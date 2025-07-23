@@ -51,7 +51,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 		// given
 		String provider = "google";
 		String idToken = "test-id-token";
-		SocialLoginRequest request = new SocialLoginRequest(idToken);
+		SocialLoginRequest request = new SocialLoginRequest(idToken, null);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", true);
 		LoginUser user = buildUser(payload);
@@ -60,7 +60,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 			TokenType.REFRESH, "refresh.jwt.token"
 		);
 
-		willReturn(payload).given(idTokenVerifierService).verifyAndExtract(provider, idToken);
+		willReturn(payload).given(idTokenVerifierService).verifyAndExtract(provider, idToken, null);
 		willReturn(user).given(userService).upsertSocialUser(payload);
 		willReturn(tokenMap).given(tokenService).issue(user.getUsername(), user.getRole());
 
@@ -74,7 +74,10 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 					parameterWithName("provider").description("소셜 로그인 제공자 (예: google, apple 등)")
 				),
 				requestFields(
-					fieldWithPath("idToken").type(JsonFieldType.STRING).description("클라이언트에서 받은 ID 토큰")
+					fieldWithPath("idToken").type(JsonFieldType.STRING).description("클라이언트에서 받은 ID 토큰"),
+					fieldWithPath("nickname").type(JsonFieldType.STRING)
+						.optional()
+						.description("apple 로그인 시 fullName 별도 전달")
 				),
 				responseHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer 액세스 토큰"),
