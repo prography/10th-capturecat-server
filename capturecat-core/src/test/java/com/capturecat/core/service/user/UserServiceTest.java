@@ -20,6 +20,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
@@ -43,6 +44,9 @@ class UserServiceTest {
 
 	@Mock
 	private ImageTagRepository imageTagRepository;
+
+	@Mock
+	private BookmarkRepository bookmarkRepository;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -102,6 +106,7 @@ class UserServiceTest {
 		userService.withdraw(new LoginUser(savedUser));
 
 		// then
+		verify(bookmarkRepository).deleteByUser(savedUser);
 		verify(imageRepository).findByUser(savedUser);
 
 		// 각 이미지에 대해 imageTagRepository.deleteAllByImage 호출

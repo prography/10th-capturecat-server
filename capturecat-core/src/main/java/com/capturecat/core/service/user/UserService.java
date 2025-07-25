@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
+import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
@@ -30,6 +31,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final ImageRepository imageRepository;
 	private final ImageTagRepository imageTagRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -75,7 +77,10 @@ public class UserService {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
-		// 1. 해당 User가 소유한 이미지 모두 삭제
+		//1. 즐겨찾기 삭제
+		bookmarkRepository.deleteByUser(user);
+
+		// 2. 해당 User가 소유한 이미지 모두 삭제
 		List<Image> byUser = imageRepository.findByUser(user);
 		byUser.forEach(imageTagRepository::deleteAllByImage);
 		imageRepository.deleteAll(byUser);
