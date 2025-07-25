@@ -13,5 +13,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, Bookm
 
 	boolean existsByUserAndImage(User user, Image image);
 
+	void deleteByUserAndImage(User user, Image image);
+
 	void deleteByUser(User user);
 }

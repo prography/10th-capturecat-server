@@ -176,8 +176,9 @@ public class ImageService {
 		image.validateOwnership(user);
 
 		delete(image.getFileName());
-		imageRepository.delete(image);
+		bookmarkRepository.deleteByUserAndImage(user, image);
 		imageTagRepository.deleteAllByImage(image);
+		imageRepository.delete(image);
 	}
 
 	private void validate(MultipartFile file) {
@@ -189,12 +190,7 @@ public class ImageService {
 
 	private UploadItemRequest getMatchingUploadRequest(List<UploadItemRequest> uploadItems, String fileName) {
 		return uploadItems.stream()
-			.filter(i -> {
-				// TODO: 제거
-				System.out.println("i.fileName() = " + i.fileName());
-				System.out.println("fileName = " + fileName);
-				return i.fileName().equals(fileName);
-			})
+			.filter(i -> i.fileName().equals(fileName))
 			.findFirst()
 			.orElseThrow(() -> new CoreException(ErrorType.UPLOAD_METADATA_MISMATCH));
 	}
