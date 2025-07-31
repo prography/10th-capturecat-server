@@ -98,7 +98,8 @@ class ImageControllerTest extends RestDocsTest {
 		// given
 		AddTagsToImageRequest request = new AddTagsToImageRequest(List.of("tag1", "tag2"));
 		Long imageId = 1L;
-		willDoNothing().given(imageService).addTagsToImage(anyLong(), any(), any());
+		BDDMockito.given(imageService.addTagsToImage(anyLong(), any(), any()))
+			.willReturn(List.of(new TagResponse(1L, "tag1"), new TagResponse(2L, "tag2")));
 
 		// when & then
 		given().contentType(ContentType.JSON)
@@ -109,7 +110,11 @@ class ImageControllerTest extends RestDocsTest {
 				pathParameters(parameterWithName("imageId").description("태그를 등록할 이미지 ID")),
 				requestFields(fieldWithPath("tagNames").type(JsonFieldType.ARRAY).description("등록할 태그 목록")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data").type(JsonFieldType.ARRAY).description("등록된 태그 목록"),
+					fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 
 	@Test

@@ -24,6 +24,7 @@ import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.ImageService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
+import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.core.support.response.CursorResponse;
 
@@ -43,10 +44,10 @@ public class ImageController {
 	}
 
 	@PostMapping("/{imageId}/tags")
-	public ApiResponse<?> addTagsToImage(@PathVariable Long imageId, @RequestBody AddTagsToImageRequest request,
+	public ApiResponse<List<TagResponse>> addTagsToImage(@PathVariable Long imageId,
+		@RequestBody AddTagsToImageRequest request,
 		@AuthenticationPrincipal LoginUser loginUser) {
-		imageService.addTagsToImage(imageId, request.tagNames(), loginUser);
-		return ApiResponse.success();
+		return ApiResponse.success(imageService.addTagsToImage(imageId, request.tagNames(), loginUser));
 	}
 
 	@GetMapping
