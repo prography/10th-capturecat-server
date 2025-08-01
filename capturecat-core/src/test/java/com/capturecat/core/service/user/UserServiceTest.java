@@ -26,6 +26,7 @@ import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.domain.user.UserSocialAccountRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -47,6 +48,9 @@ class UserServiceTest {
 
 	@Mock
 	private BookmarkRepository bookmarkRepository;
+
+	@Mock
+	private UserSocialAccountRepository userSocialAccountRepository;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;

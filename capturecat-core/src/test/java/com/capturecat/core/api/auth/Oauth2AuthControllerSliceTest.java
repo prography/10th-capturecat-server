@@ -116,7 +116,7 @@ class Oauth2AuthControllerSliceTest {
 		User user = User.builder()
 			.email(payload.email())
 			.role(UserRole.USER)
-			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.socialId())
 			.nickname(payload.nickname())
 			.build();
 		return new LoginUser(user);

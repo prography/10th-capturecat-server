@@ -17,7 +17,8 @@ import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.domain.user.UserRole;
-import com.capturecat.core.service.auth.IdTokenVerifierService;
+import com.capturecat.core.domain.user.UserSocialAccount;
+import com.capturecat.core.domain.user.UserSocialAccountRepository;
 import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
@@ -29,6 +30,7 @@ import com.capturecat.core.support.error.ErrorType;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final UserSocialAccountRepository userSocialAccountRepository;
 	private final ImageRepository imageRepository;
 	private final ImageTagRepository imageTagRepository;
 	private final BookmarkRepository bookmarkRepository;
@@ -52,12 +54,22 @@ public class UserService {
 
 	/**
 	 * 소셜 로그인 시 회원가입 처리
-	 * TODO: PROVIDER와 SUBJECT를 기준으로 '소셜서비스'+'소셜ID' 형태로 찾는다. 각기 다른 소셜로그인으로 로그인했을 때 문제가 될 것 같다.
-	 * => 소셜 로그인 매핑 테이블 만들 것. (구글, 애플, 카카오 세개 전부 가능하다) + 회원 탈퇴 시 cascade 삭제
 	 */
 	public LoginUser upsertSocialUser(OidcUserPayload payload) {
-		User user = userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
-			.orElseGet(() -> userRepository.save(buildUser(payload)));
+		User user = userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
+			.map(UserSocialAccount::getUser)
+			.orElseGet(() -> {
+				// 1. User 생성/저장
+				User newUser = userRepository.save(buildUser(payload));
+				// 2. UserSocialAccount 생성/저장
+				UserSocialAccount newAccount = UserSocialAccount.builder()
+					.user(newUser)
+					.provider(payload.provider())
+					.socialId(payload.socialId())
+					.build();
+				userSocialAccountRepository.save(newAccount);
+				return newUser;
+			});
 		return new LoginUser(user);
 	}
 
@@ -91,11 +103,9 @@ public class UserService {
 
 	private User buildUser(OidcUserPayload payload) {
 		return User.builder()
-			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.socialId())
 			.nickname(payload.nickname())
 			.email(payload.email())
-			.provider(payload.provider())
-			.socialId(payload.sub())
 			.role(UserRole.USER)
 			.build();
 	}

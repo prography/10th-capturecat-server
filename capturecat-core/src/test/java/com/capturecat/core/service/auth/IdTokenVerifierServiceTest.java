@@ -85,7 +85,7 @@ class IdTokenVerifierServiceTest {
 
 		//then
 		assertThat(payload.provider()).isEqualTo("apple");
-		assertThat(payload.sub()).isEqualTo("mysub");
+		assertThat(payload.socialId()).isEqualTo("mysub");
 		assertThat(payload.email()).isEqualTo("test@test.com");
 		assertThat(payload.nickname()).isEqualTo("최재량");
 		assertThat(payload.emailVerified()).isTrue();

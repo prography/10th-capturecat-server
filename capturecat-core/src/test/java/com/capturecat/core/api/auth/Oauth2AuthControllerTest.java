@@ -94,10 +94,8 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 	private LoginUser buildUser(OidcUserPayload payload) {
 		User user = User.builder()
 			.email(payload.email())
-			.provider(payload.provider())
-			.socialId(payload.sub())
 			.role(UserRole.USER)
-			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.socialId())
 			.nickname(payload.nickname())
 			.build();
 		return new LoginUser(user);

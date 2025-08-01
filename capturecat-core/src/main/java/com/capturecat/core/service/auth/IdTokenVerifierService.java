@@ -116,7 +116,7 @@ public class IdTokenVerifierService {
 
 	public record OidcUserPayload(
 		String provider,
-		String sub, // OIDC에서 각 사용자를 "서비스 내에서 고유하게 구별"하는 고유 식별자(Primary Key)
+		String socialId, // OIDC에서 각 사용자를 "서비스 내에서 고유하게 구별"하는 고유 식별자(Primary Key)
 		String email,
 		String nickname,
 		Boolean emailVerified
