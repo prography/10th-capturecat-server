@@ -1,54 +1,72 @@
 package com.capturecat.core.service.auth;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
+import reactor.core.publisher.Mono;
+
 import com.capturecat.core.config.auth.Oauth2Properties;
 import com.capturecat.core.config.auth.Oauth2Properties.Provider;
 import com.capturecat.core.config.auth.Oauth2Properties.Registration;
-import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
+import com.capturecat.core.config.auth.SocialApiProperties;
+import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
-class IdTokenVerifierServiceTest {
+class SocialServiceTest {
 
-	private IdTokenVerifierService service;
-	private Oauth2Properties props;
+	private SocialService service;
+	private Oauth2Properties oauth2Properties;
+	private SocialApiProperties socialApiProperties;
+	private WebClient webClient;
 
 	// 테스트용 provider/registration 세팅
 	@BeforeEach
 	void setUp() {
-		props = new Oauth2Properties();
-
-		// 1. Provider 세팅
+		oauth2Properties = new Oauth2Properties();
+		// Provider 세팅
 		Provider provider = new Provider();
 		provider.setIssuerUri("https://test-issuer.com");
 		provider.setJwkSetUri("https://test-issuer.com/keys");
-		props.getProvider().put("google", provider);
-		props.getProvider().put("apple", provider);
+		oauth2Properties.getProvider().put("google", provider);
+		oauth2Properties.getProvider().put("apple", provider);
 
-		// 2. Registration 세팅
+		// Registration 세팅
 		Registration reg = new Registration();
 		reg.setClientId("test-client-id");
-		props.getRegistration().put("google", reg);
-		props.getRegistration().put("apple", reg);
+		oauth2Properties.getRegistration().put("google", reg);
+		oauth2Properties.getRegistration().put("apple", reg);
 
-		// 3. 서비스 생성
-		service = Mockito.spy(new IdTokenVerifierService(props));
+		// SocialApiProperties 세팅
+		socialApiProperties = new SocialApiProperties();
+		SocialApiProperties.Apple apple = new SocialApiProperties.Apple();
+		apple.setTokenUrl("https://appleid.apple.com/auth/token");
+		apple.setPrivateKeyPath("/dummy/path");
+		apple.setTeamId("A1B2C3D4E5");
+		apple.setKeyId("XYZ1234567");
+		socialApiProperties.setApple(apple);
+
+		// WebClient mock 준비
+		webClient = Mockito.mock(WebClient.class);
+
+		// SocialService 생성자에 WebClient 주입!
+		service = Mockito.spy(new SocialService(webClient, oauth2Properties, socialApiProperties));
 	}
 
 	// RSA Key 생성
@@ -72,7 +90,6 @@ class IdTokenVerifierServiceTest {
 			.subject("mysub")
 			.claim("email", "test@test.com")
 			.claim("email_verified", true)
-			.claim("name", "testNickname")
 			.build();
 
 		SignedJWT idToken = TestJwtUtil.createJwt(claims, privateKey);
@@ -81,13 +98,12 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		//when
-		OidcUserPayload payload = service.verifyAndExtract("apple", idToken.serialize(), "최재량");
+		OidcUserPayload payload = service.verifyAndExtract("google", idToken.serialize(), null, null);
 
 		//then
-		assertThat(payload.provider()).isEqualTo("apple");
+		assertThat(payload.provider()).isEqualTo("google");
 		assertThat(payload.socialId()).isEqualTo("mysub");
 		assertThat(payload.email()).isEqualTo("test@test.com");
-		assertThat(payload.nickname()).isEqualTo("최재량");
 		assertThat(payload.emailVerified()).isTrue();
 	}
 
@@ -109,7 +125,7 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		assertThatThrownBy(() ->
-			service.verifyAndExtract("google", idToken.serialize(), null)
+			service.verifyAndExtract("google", idToken.serialize(), null, null)
 		).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(ErrorType.INVALID_ID_TOKEN);
@@ -133,7 +149,7 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		assertThatThrownBy(() ->
-			service.verifyAndExtract("google", idToken.serialize(), null)
+			service.verifyAndExtract("google", idToken.serialize(), null, null)
 		).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(ErrorType.INVALID_ID_TOKEN);
@@ -157,10 +173,51 @@ class IdTokenVerifierServiceTest {
 		Mockito.doNothing().when(service).verifyJwtSignature(Mockito.any(), Mockito.any());
 
 		assertThatThrownBy(() ->
-			service.verifyAndExtract("google", idToken.serialize(), null)
+			service.verifyAndExtract("google", idToken.serialize(), null, null)
 		).isInstanceOf(CoreException.class)
 			.extracting("errorType")
 			.isEqualTo(ErrorType.INVALID_ID_TOKEN);
+	}
+
+	//외부 API 연동(애플 등)은 실서버를 직접 호출하지 않고도 코드의 동작을 보장해야 한다.
+	@DisplayName("애플 토큰 발급 fetchAppleToken 테스트")
+	@Test
+	void fetchAppleToken_returnsTokenMap() {
+		// WebClient 체인 mocking. 각 단계별로 mock 객체를 만들고 연결.
+		WebClient.RequestBodyUriSpec uriSpec = Mockito.mock(WebClient.RequestBodyUriSpec.class);
+		WebClient.RequestBodySpec bodySpec = Mockito.mock(WebClient.RequestBodySpec.class);
+		WebClient.RequestHeadersSpec headersSpec = Mockito.mock(WebClient.RequestHeadersSpec.class);
+		WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
+
+		Mockito.when(webClient.post()).thenReturn(uriSpec);
+		Mockito.when(uriSpec.uri(anyString())).thenReturn(bodySpec);
+		Mockito.when(bodySpec.header(anyString(), anyString())).thenReturn(bodySpec);
+		Mockito.when(bodySpec.bodyValue(any())).thenReturn(headersSpec);
+		Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
+
+		Mockito.doReturn("dummyClientSecret").when(service).generateAppleClientSecret();
+
+		// 응답값 Mocking
+		Map<String, Object> fakeResponse = Map.of(
+			"id_token", "dummyIdToken",
+			"refresh_token", "dummyRefreshToken"
+		);
+		Mockito.when(responseSpec.bodyToMono(Map.class)).thenReturn(Mono.just(fakeResponse));
+
+		// when
+		Map result = service.fetchAppleToken("dummyAuthorizationCode");
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.get("id_token")).isEqualTo("dummyIdToken");
+		assertThat(result.get("refresh_token")).isEqualTo("dummyRefreshToken");
+
+		// 전송 파라미터(실제 body) 검증
+		ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+		Mockito.verify(bodySpec).bodyValue(bodyCaptor.capture());
+		String sentParams = bodyCaptor.getValue();
+		assertThat(sentParams).contains("grant_type=authorization_code");
+		assertThat(sentParams).contains("code=dummyAuthorizationCode");
 	}
 
 	static class TestJwtUtil {

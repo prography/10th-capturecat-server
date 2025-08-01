@@ -24,9 +24,9 @@ import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRole;
-import com.capturecat.core.service.auth.IdTokenVerifierService;
-import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.SocialService;
+import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.core.support.error.CoreException;
@@ -41,7 +41,7 @@ class Oauth2AuthControllerSliceTest {
 	private MockMvc mockMvc;
 
 	@MockitoBean
-	private IdTokenVerifierService idTokenVerifierService;
+	private SocialService socialService;
 
 	@MockitoBean
 	private UserService userService;
@@ -59,9 +59,9 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "apple";
 		String idToken = "test-id-token";
 		String nickname = "최재량";
-		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null);
 		OidcUserPayload payload =
-			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", true);
+			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
 
 		LoginUser user = buildUser(payload);
 
@@ -71,7 +71,7 @@ class Oauth2AuthControllerSliceTest {
 		);
 
 		// idTokenVerifierService.verifyAndExtract → payload
-		Mockito.when(idTokenVerifierService.verifyAndExtract(anyString(), anyString(), any()))
+		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
 		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
@@ -98,9 +98,9 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "google";
 		String idToken = "bad-id-token";
 		String nickname = null;
-		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null);
 
-		Mockito.when(idTokenVerifierService.verifyAndExtract(anyString(), anyString(), any()))
+		Mockito.when(socialService.verifyAndExtract(any(), any(), any(), any()))
 			.thenThrow(new CoreException(ErrorType.INVALID_ID_TOKEN));
 
 		// when & then
@@ -112,7 +112,7 @@ class Oauth2AuthControllerSliceTest {
 			.andExpect(jsonPath("$.error").exists());
 	}
 
-	private LoginUser buildUser(IdTokenVerifierService.OidcUserPayload payload) {
+	private LoginUser buildUser(SocialService.OidcUserPayload payload) {
 		User user = User.builder()
 			.email(payload.email())
 			.role(UserRole.USER)
