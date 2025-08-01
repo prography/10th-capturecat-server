@@ -58,6 +58,7 @@ public class SocialService {
 	private static final String EC_KEY_ALGORITHM = "EC";
 	private static final String ID_TOKEN = "id_token";
 	private static final String REFRESH_TOKEN = "refresh_token";
+	private static final String BEARER_PREFIX = "Bearer ";
 
 	public OidcUserPayload verifyAndExtract(String provider, String idToken,
 		String nickname, String authToken) {
@@ -80,7 +81,7 @@ public class SocialService {
 			unlinkKey = (String)response.get(REFRESH_TOKEN);
 		} else if (provider.equals(KAKAO) && StringUtils.hasText(authToken)) {
 			//카카오: 최초 회원가입 시 userId를 얻어온다.
-			unlinkKey = fetchKakaoUserId(provider, authToken);
+			unlinkKey = fetchKakaoUserId(authToken);
 		}
 
 		try {
@@ -109,8 +110,24 @@ public class SocialService {
 	/**
 	 * 카카오: authToken(access_token) → userId 획득
 	 */
-	private String fetchKakaoUserId(String provider, String accessToken) {
-		return null;
+	String fetchKakaoUserId(String accessToken) {
+		String url = socialApiProperties.getKakao().getUserinfoUrl();
+		// WebClient로 API 호출
+		Map response = webClient.post()
+			.uri(url)
+			.header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+			.retrieve()
+			.bodyToMono(Map.class)
+			.block();
+
+		if (response == null || !response.containsKey("id")) {
+			throw new CoreException(ErrorType.INVALID_AUTH_TOKEN);
+		}
+
+		// Kakao의 userId는 Long(숫자)이므로 String 변환
+		Object id = response.get("id");
+		return String.valueOf(id);
 	}
 
 	/**
