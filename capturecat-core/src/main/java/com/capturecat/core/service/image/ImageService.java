@@ -95,7 +95,7 @@ public class ImageService {
 	}
 
 	@Transactional
-	public void addTagsToImage(Long imageId, List<String> tagNames, LoginUser loginUser) {
+	public List<TagResponse> addTagsToImage(Long imageId, List<String> tagNames, LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 		Image image = imageRepository.findById(imageId)
@@ -107,6 +107,8 @@ public class ImageService {
 		List<Tag> newTags = tagRegister.registerTagsFor(tagNames);
 		List<ImageTag> imageTags = imageTagFactory.create(image, newTags);
 		imageTagRepository.saveAll(imageTags);
+
+		return TagResponse.from(newTags);
 	}
 
 	@Transactional(readOnly = true)
