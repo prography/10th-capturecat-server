@@ -19,8 +19,8 @@ import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.domain.user.UserSocialAccount;
 import com.capturecat.core.domain.user.UserSocialAccountRepository;
-import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
@@ -66,6 +66,7 @@ public class UserService {
 					.user(newUser)
 					.provider(payload.provider())
 					.socialId(payload.socialId())
+					.unlinkKey(payload.unlinkKey())
 					.build();
 				userSocialAccountRepository.save(newAccount);
 				return newUser;

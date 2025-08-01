@@ -15,12 +15,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import com.capturecat.core.domain.BaseTimeEntity;
+
 @Entity
 @Table(name = "user_social_account")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(of = "id")
-public class UserSocialAccount {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class UserSocialAccount extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue
@@ -34,7 +36,7 @@ public class UserSocialAccount {
 	private String provider;    // "google", "apple", "kakao" 등
 
 	@Column(nullable = false, length = 100)
-	private String socialId;    // 구글/애플의 sub, 카카오의 userId(숫자→String), 등
+	private String socialId;    // sub. 카카오의 경우 userId와 같은 값
 
 	@Column(length = 512)
 	private String unlinkKey; // provider별 unlink/revoke에 필요한 값만 저장
