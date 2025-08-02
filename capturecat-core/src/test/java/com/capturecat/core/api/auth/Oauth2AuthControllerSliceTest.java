@@ -52,16 +52,54 @@ class Oauth2AuthControllerSliceTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@DisplayName("소셜 로그인 성공 - JWT 토큰 헤더, 응답 OK")
+	@DisplayName("구글, 카카오 소셜 로그인 성공 - JWT 토큰 헤더, 응답 OK")
 	@Test
 	void socialLogin_success() throws Exception {
 		// given
-		String provider = "apple";
+		String provider = "google";
 		String idToken = "test-id-token";
-		String nickname = "최재량";
-		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
+
+		LoginUser user = buildUser(payload);
+
+		Map<TokenType, String> tokenMap = Map.of(
+			TokenType.ACCESS, "access.jwt.token",
+			TokenType.REFRESH, "refresh.jwt.token"
+		);
+
+		// idTokenVerifierService.verifyAndExtract → payload
+		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
+			.thenReturn(payload);
+		// userService.upsertSocialUser → user
+		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
+		// tokenService.issue → tokenMap
+		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
+			.thenReturn(tokenMap);
+
+		// when & then
+		mockMvc.perform(post(REQUEST_PATH, provider)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(header().string(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + "access.jwt.token"))
+			.andExpect(header().string(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + "refresh.jwt.token"))
+			.andExpect(jsonPath("$.result").value("SUCCESS"))
+			.andExpect(jsonPath("$.data").exists());
+	}
+
+	@DisplayName("애플 소셜 로그인 성공 - idToken이 아닌 authorization_code 송신")
+	@Test
+	void socialLogin_apple_success() throws Exception {
+		// given
+		String provider = "apple";
+		String authorization_code = "test_authorization_code";
+		String nickname = "최재량";
+		SocialLoginRequest req = new SocialLoginRequest(null, nickname, authorization_code);
+		OidcUserPayload payload =
+			new OidcUserPayload(provider, "1234", "test@test.com", nickname, "apple_refresh_token", true);
 
 		LoginUser user = buildUser(payload);
 

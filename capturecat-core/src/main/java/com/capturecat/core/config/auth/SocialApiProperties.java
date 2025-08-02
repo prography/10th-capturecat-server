@@ -29,5 +29,6 @@ public class SocialApiProperties {
 	public static class Kakao {
 		private String userinfoUrl;
 		private String unlinkUrl;
+		private String serviceAppAdminKey;
 	}
 }

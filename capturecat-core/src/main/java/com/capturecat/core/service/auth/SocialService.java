@@ -56,6 +56,8 @@ public class SocialService {
 	private static final String APPLE = "apple";
 	private static final String GOOGLE = "google";
 	private static final String EC_KEY_ALGORITHM = "EC";
+	private static final String KAKAO_AK_PREFIX = "KakaoAK ";
+
 	private static final String ID_TOKEN = "id_token";
 	private static final String REFRESH_TOKEN = "refresh_token";
 	private static final String BEARER_PREFIX = "Bearer ";
@@ -231,6 +233,8 @@ public class SocialService {
 		return claims;
 	}
 
+
+
 	private String extractNickname(JWTClaimsSet claims, String provider, String nickname) throws ParseException {
 		return switch (provider) {
 			case KAKAO -> claims.getStringClaim("nickname");
@@ -238,6 +242,40 @@ public class SocialService {
 			case APPLE -> nickname;
 			default -> claims.getStringClaim("email"); //apple의 경우 requestDto를 통해 받는다.
 		};
+	}
+
+	/**
+	 * 소셜 로그인 연결 해제
+	 * 베스트 에포트 패턴: 할 수 있는 만큼(최대한) 시도하고, 실패해도 전체 트랜잭션을 되돌리지 않고 오류만 로그로 남긴다.
+	 */
+	public void unlink(String provider, String unlinkKey) {
+		switch (provider) {
+			case KAKAO -> unlinkKaKaoUser(unlinkKey);
+			// case APPLE -> revokeAppleUser(unlinkKey);
+		}
+	}
+
+	private void unlinkKaKaoUser(String kakaoUserId) {
+		String url = socialApiProperties.getKakao().getUnlinkUrl();
+		String adminKey = socialApiProperties.getKakao().getServiceAppAdminKey();
+
+		// 파라미터 구성
+		String params = String.format("target_id_type=user_id&target_id=%s", kakaoUserId);
+
+		// API 호출
+		Map response = webClient.post()
+			.uri(url)
+			.header(HttpHeaders.AUTHORIZATION, KAKAO_AK_PREFIX + adminKey)
+			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+			.bodyValue(params)
+			.retrieve()
+			.bodyToMono(Map.class)
+			.block();
+
+		// 정상적으로 "id" 반환 시 성공, 아니면 예외 처리
+		if (response == null || !response.containsKey("id")) {
+			throw new CoreException(ErrorType.UNLINK_SOCIAL_FAIL, "카카오 연동 해제 실패: " + response);
+		}
 	}
 
 	public record OidcUserPayload(

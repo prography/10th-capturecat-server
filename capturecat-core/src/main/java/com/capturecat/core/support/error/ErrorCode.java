@@ -32,7 +32,8 @@ public enum ErrorCode {
 	INVALID_ID_TOKEN("유효하지 않은 ID_TOKEN 입니다."),
 	INVALID_AUTH_TOKEN("유효하지 않은 AUTH_TOKEN 입니다. apple:authorization_code, kakao:access_token"),
 	NOT_FOUND_BOOKMARK("존재하지 않는 즐겨찾기입니다."),
-	GENERATE_CLIENT_SECRET_FAIL("Apple client_secret 생성 실패");
+	GENERATE_CLIENT_SECRET_FAIL("Apple client_secret 생성 실패"),
+	UNLINK_SOCIAL_FAIL("소셜 로그인 연결 해제에 실패했습니다.");
 
 	private final String message;
 

@@ -1,7 +1,9 @@
 package com.capturecat.core.support.error;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 public class CoreException extends RuntimeException {
 
@@ -12,4 +14,9 @@ public class CoreException extends RuntimeException {
 		this.errorType = errorType;
 	}
 
+	public CoreException(ErrorType errorType, String message) {
+		super(errorType.getCode().getMessage());
+		this.errorType = errorType;
+		log.error(message);
+	}
 }

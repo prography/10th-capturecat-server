@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
@@ -20,10 +21,12 @@ import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.domain.user.UserSocialAccount;
 import com.capturecat.core.domain.user.UserSocialAccountRepository;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.SocialService;
 import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class UserService {
 	private final ImageRepository imageRepository;
 	private final ImageTagRepository imageTagRepository;
 	private final BookmarkRepository bookmarkRepository;
+	private final SocialService socialService;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -53,7 +57,7 @@ public class UserService {
 	}
 
 	/**
-	 * 소셜 로그인 시 회원가입 처리
+	 * 소셜 로그인 및 신규 회원가입 처리
 	 */
 	public LoginUser upsertSocialUser(OidcUserPayload payload) {
 		User user = userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
@@ -66,7 +70,7 @@ public class UserService {
 					.user(newUser)
 					.provider(payload.provider())
 					.socialId(payload.socialId())
-					.unlinkKey(payload.unlinkKey())
+					.unlinkKey(payload.unlinkKey()) //최초 생성 시에만 존재
 					.build();
 				userSocialAccountRepository.save(newAccount);
 				return newUser;
@@ -90,6 +94,20 @@ public class UserService {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
+		//0. 소셜 로그인 연결 해제
+		//모든 소셜 로그인에 대해 연결 해제. userSocialAccountRepository에 id와 unlinkKey가 있는 경우
+		List<UserSocialAccount> socialAccounts = userSocialAccountRepository.findByUser(user);
+		for (UserSocialAccount socialAccount : socialAccounts) {
+			try {
+				socialService.unlink(socialAccount.getProvider(), socialAccount.getUnlinkKey());
+			} catch (Exception e) {
+				log.warn("소셜 연결 해제 실패: provider={}, unlinkKey={}", socialAccount.getProvider(),
+					socialAccount.getUnlinkKey(), e);
+				// 필요시 알림/모니터링
+			}
+
+		}
+
 		//1. 즐겨찾기 삭제
 		bookmarkRepository.deleteByUser(user);
 
@@ -98,7 +116,7 @@ public class UserService {
 		byUser.forEach(imageTagRepository::deleteAllByImage);
 		imageRepository.deleteAll(byUser);
 
-		// 2. User 삭제
+		// 3. User 삭제 -> social account도 삭제됨
 		userRepository.delete(user);
 	}
 
