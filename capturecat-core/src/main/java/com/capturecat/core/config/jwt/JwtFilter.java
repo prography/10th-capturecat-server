@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
 		if (authHeader == null || !authHeader.startsWith(JwtUtil.BEARER_PREFIX)) {
-			log.info("Authorization header missing or malformed");
+			log.info("Authorization header missing or malformed, url={}", request.getRequestURI());
 			filterChain.doFilter(request, response); // 다음 필터로 넘김 (비인증 요청 허용할 수 있음)
 			return;
 		}
