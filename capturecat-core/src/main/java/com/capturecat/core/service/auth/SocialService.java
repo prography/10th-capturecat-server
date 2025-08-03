@@ -159,7 +159,7 @@ public class SocialService {
 		params.add("code", authorizationCode);
 		params.add("client_id", oauth2Properties.getRegistration().get(APPLE).getClientId());
 		params.add("client_secret", generateAppleClientSecret());
-		log.info("Apple /token params: {}", params.get("client_secret"));
+		log.info("Apple /token params: {}", params.get("client_secret")); //TODO: 안정화 후 삭제
 
 		// 토큰 요청
 		return webClient.post()
@@ -238,9 +238,6 @@ public class SocialService {
 		throws ParseException {
 		JWTClaimsSet claims = jwt.getJWTClaimsSet();
 
-		log.info("claims.getIssuer(): {}", claims.getIssuer());
-		log.info("claims.getAudience(): {}", claims.getAudience());
-		log.info("claims.getExpirationTime(): {}", claims.getExpirationTime());
 		if (!claims.getIssuer().equals(providerInfo.getIssuerUri())) {
 			throw new RuntimeException("Invalid issuer");
 		}

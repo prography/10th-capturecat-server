@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +19,8 @@ import lombok.NoArgsConstructor;
 import com.capturecat.core.domain.BaseTimeEntity;
 
 @Entity
-@Table(name = "user_social_account")
+@Table(name = "user_social_account",
+	uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "socialId"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = "id", callSuper = false)
