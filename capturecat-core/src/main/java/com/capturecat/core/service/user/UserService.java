@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
@@ -17,21 +18,26 @@ import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.domain.user.UserRole;
-import com.capturecat.core.service.auth.IdTokenVerifierService;
-import com.capturecat.core.service.auth.IdTokenVerifierService.OidcUserPayload;
+import com.capturecat.core.domain.user.UserSocialAccount;
+import com.capturecat.core.domain.user.UserSocialAccountRepository;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.SocialService;
+import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final UserSocialAccountRepository userSocialAccountRepository;
 	private final ImageRepository imageRepository;
 	private final ImageTagRepository imageTagRepository;
 	private final BookmarkRepository bookmarkRepository;
+	private final SocialService socialService;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -51,13 +57,24 @@ public class UserService {
 	}
 
 	/**
-	 * 소셜 로그인 시 회원가입 처리
-	 * TODO: PROVIDER와 SUBJECT를 기준으로 '소셜서비스'+'소셜ID' 형태로 찾는다. 각기 다른 소셜로그인으로 로그인했을 때 문제가 될 것 같다.
-	 * => 소셜 로그인 매핑 테이블 만들 것. (구글, 애플, 카카오 세개 전부 가능하다) + 회원 탈퇴 시 cascade 삭제
+	 * 소셜 로그인 및 신규 회원가입 처리
 	 */
 	public LoginUser upsertSocialUser(OidcUserPayload payload) {
-		User user = userRepository.findByProviderAndSocialId(payload.provider(), payload.sub())
-			.orElseGet(() -> userRepository.save(buildUser(payload)));
+		User user = userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
+			.map(UserSocialAccount::getUser)
+			.orElseGet(() -> {
+				// 1. User 생성/저장
+				User newUser = userRepository.save(buildUser(payload));
+				// 2. UserSocialAccount 생성/저장
+				UserSocialAccount newAccount = UserSocialAccount.builder()
+					.user(newUser)
+					.provider(payload.provider())
+					.socialId(payload.socialId())
+					.unlinkKey(payload.unlinkKey()) //최초 생성 시에만 존재
+					.build();
+				userSocialAccountRepository.save(newAccount);
+				return newUser;
+			});
 		return new LoginUser(user);
 	}
 
@@ -72,10 +89,31 @@ public class UserService {
 
 	/**
 	 * 회원 탈퇴
+	 * 모든 소셜 서비스 연결 해제 시도
+	 * 회원 관련 데이터 삭제
 	 */
-	public void withdraw(LoginUser loginUser) {
+	public String withdraw(LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		//0. 연결된 모든 소셜 로그인 해지
+		StringBuilder resultMessage = new StringBuilder();
+		List<UserSocialAccount> socialAccounts = userSocialAccountRepository.findByUser(user);
+		for (UserSocialAccount socialAccount : socialAccounts) {
+			try {
+				socialService.unlink(socialAccount.getProvider(), socialAccount.getUnlinkKey());
+				// 연결 해지 성공 메시지 추가
+				resultMessage.append(String.format("소셜(%s) 연결 해지 성공\n", socialAccount.getProvider()));
+			} catch (Exception e) {
+				// 연결 해지 실패 메시지 추가
+				String msg = String.format("소셜(%s) 연결 해지 실패: unlinkKey=%s, reason=%s\n",
+					socialAccount.getProvider(),
+					socialAccount.getUnlinkKey(),
+					e.getMessage());
+				resultMessage.append(msg);
+			}
+
+		}
 
 		//1. 즐겨찾기 삭제
 		bookmarkRepository.deleteByUser(user);
@@ -85,17 +123,17 @@ public class UserService {
 		byUser.forEach(imageTagRepository::deleteAllByImage);
 		imageRepository.deleteAll(byUser);
 
-		// 2. User 삭제
+		// 3. User 삭제 -> social account도 삭제됨
 		userRepository.delete(user);
+
+		return resultMessage.toString();
 	}
 
 	private User buildUser(OidcUserPayload payload) {
 		return User.builder()
-			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.sub())
+			.username(payload.email() != null ? payload.email() : payload.provider() + "_" + payload.socialId())
 			.nickname(payload.nickname())
 			.email(payload.email())
-			.provider(payload.provider())
-			.socialId(payload.sub())
 			.role(UserRole.USER)
 			.build();
 	}

@@ -31,3 +31,12 @@ jwt:
   secret: capture_cat_jwt_secret_key_capture_cat_jwt_secret_key
   access-token-expiration: 3600000
   refresh-token-expiration: 2592000000
+
+social:
+  api:
+    apple:
+      token-url: "https://appleid.apple.com/auth/token"
+      revoke-url: "https://appleid.apple.com/auth/revoke"
+    kakao:
+      userinfo-url: "https://kapi.kakao.com/v2/user/me"
+      unlink-url: "https://kapi.kakao.com/v1/user/unlink"

@@ -37,9 +37,14 @@ public class UserController {
 		return ApiResponse.success();
 	}
 
+	/**
+	 * 탈퇴 API
+	 * 1) 소셜 로그인 연결 해제
+	 * 2) 회원 정보 삭제
+	 */
 	@DeleteMapping("/withdraw")
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser) {
-		userService.withdraw(loginUser);
-		return ApiResponse.success();
+		String resultMessage = userService.withdraw(loginUser);
+		return ApiResponse.success(resultMessage);
 	}
 }

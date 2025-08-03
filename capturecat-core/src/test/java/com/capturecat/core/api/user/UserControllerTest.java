@@ -12,6 +12,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -65,7 +66,7 @@ class UserControllerTest extends RestDocsTest {
 	@Test
 	void 회원_탈퇴() {
 		// given
-		willDoNothing().given(userService).withdraw(any(LoginUser.class));
+		willReturn("").given(userService).withdraw(any(LoginUser.class));
 
 		// when & then
 		given().header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
@@ -77,7 +78,9 @@ class UserControllerTest extends RestDocsTest {
 					headerWithName(HttpHeaders.AUTHORIZATION)
 						.description("유효한 Access 토큰")),
 				responseFields(
-					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과 (예: SUCCESS)"))));
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과 (예: SUCCESS)"),
+					fieldWithPath("data").type(JsonFieldType.STRING).description("소셜 서비스 해지 요청 결과")
+				)));
 	}
 
 }

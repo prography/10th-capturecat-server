@@ -30,7 +30,12 @@ public enum ErrorCode {
 	NOT_FOUND_IMAGE_TAG("이미지에 해당하는 태그를 찾을 수 없습니다."),
 	ALREADY_EXISTS_BOOKMARK("이미 즐겨찾기한 이미지입니다."),
 	INVALID_ID_TOKEN("유효하지 않은 ID_TOKEN 입니다."),
-	NOT_FOUND_BOOKMARK("존재하지 않는 즐겨찾기입니다.");
+	INVALID_AUTH_TOKEN("유효하지 않은 AUTH_TOKEN 입니다. apple:authorization_code, kakao:access_token"),
+	NOT_FOUND_BOOKMARK("존재하지 않는 즐겨찾기입니다."),
+	GENERATE_CLIENT_SECRET_FAIL("Apple client_secret 생성에 실패했습니다."),
+	UNLINK_SOCIAL_FAIL("소셜 로그인 연결 해제에 실패했습니다."),
+	FETCH_SOCIAL_TOKEN_FAIL("소셜 서비스로부터 idToken 혹은 unlinkKey 획득에 실패했습니다."),
+	SOCIAL_API_ERROR("소셜 서비스 API 호출 결과 실패를 응답받았습니다.");
 
 	private final String message;
 

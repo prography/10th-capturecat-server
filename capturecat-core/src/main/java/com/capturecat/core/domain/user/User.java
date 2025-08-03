@@ -1,11 +1,16 @@
 package com.capturecat.core.domain.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import lombok.AccessLevel;
@@ -43,22 +48,19 @@ public class User extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
-	private String provider;   // "google", "apple", "kakao" 등
-	private String socialId;   // 소셜 서비스의 "sub" (고유 OIDC ID)
-
 	private boolean tutorialCompleted = false;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserSocialAccount> socialAccounts = new ArrayList<>();
+
 	@Builder
-	public User(Long id, String username, String password, String email, String nickname,
-		UserRole role, String provider, String socialId) {
+	public User(Long id, String username, String password, String email, String nickname, UserRole role) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.nickname = nickname;
 		this.role = role;
-		this.provider = provider;
-		this.socialId = socialId;
 	}
 
 	public void tutorialComplete() {
