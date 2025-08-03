@@ -1,8 +1,10 @@
 package com.capturecat.core.service.auth;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
+import java.lang.reflect.Field;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -12,8 +14,9 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -183,26 +186,30 @@ class SocialServiceTest {
 	@DisplayName("애플 토큰 발급 fetchAppleToken 테스트")
 	@Test
 	void fetchAppleToken_returnsTokenMap() {
-		// WebClient 체인 mocking. 각 단계별로 mock 객체를 만들고 연결.
+		// WebClient 체인 mock 준비
 		WebClient.RequestBodyUriSpec uriSpec = Mockito.mock(WebClient.RequestBodyUriSpec.class);
 		WebClient.RequestBodySpec bodySpec = Mockito.mock(WebClient.RequestBodySpec.class);
-		WebClient.RequestHeadersSpec headersSpec = Mockito.mock(WebClient.RequestHeadersSpec.class);
+		WebClient.RequestHeadersSpec<?> headersSpec = Mockito.mock(WebClient.RequestHeadersSpec.class);
 		WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
 
+		// webClient.post()부터 체인 연결
 		Mockito.when(webClient.post()).thenReturn(uriSpec);
 		Mockito.when(uriSpec.uri(anyString())).thenReturn(bodySpec);
 		Mockito.when(bodySpec.header(anyString(), anyString())).thenReturn(bodySpec);
-		Mockito.when(bodySpec.bodyValue(any())).thenReturn(headersSpec);
+		// BodyInserters 사용 시 별도 처리 필요 (body 메서드)
+		Mockito.when(bodySpec.body(any(BodyInserters.FormInserter.class))).thenReturn(headersSpec);
 		Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
 
-		Mockito.doReturn("dummyClientSecret").when(service).generateAppleClientSecret();
-
-		// 응답값 Mocking
+		// 정상 응답 map
 		Map<String, Object> fakeResponse = Map.of(
 			"id_token", "dummyIdToken",
 			"refresh_token", "dummyRefreshToken"
 		);
+		Mockito.when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
 		Mockito.when(responseSpec.bodyToMono(Map.class)).thenReturn(Mono.just(fakeResponse));
+
+		// spy로 client_secret mock
+		Mockito.doReturn("dummyClientSecret").when(service).generateAppleClientSecret();
 
 		// when
 		Map result = service.fetchAppleToken("dummyAuthorizationCode");
@@ -213,11 +220,53 @@ class SocialServiceTest {
 		assertThat(result.get("refresh_token")).isEqualTo("dummyRefreshToken");
 
 		// 전송 파라미터(실제 body) 검증
-		ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
-		Mockito.verify(bodySpec).bodyValue(bodyCaptor.capture());
-		String sentParams = bodyCaptor.getValue();
-		assertThat(sentParams).contains("grant_type=authorization_code");
-		assertThat(sentParams).contains("code=dummyAuthorizationCode");
+		Mockito.verify(bodySpec).body(argThat(formInserter -> {
+			try {
+				Field mapField = formInserter.getClass().getDeclaredField("data");
+				mapField.setAccessible(true);
+				MultiValueMap<String, String> map = (MultiValueMap<String, String>)mapField.get(formInserter);
+				return "authorization_code".equals(map.getFirst("grant_type"))
+					&& "dummyAuthorizationCode".equals(map.getFirst("code"))
+					&& "dummyClientSecret".equals(map.getFirst("client_secret"));
+			} catch (Exception e) {
+				return false;
+			}
+		}));
+	}
+
+	@DisplayName("애플 토큰 발급 실패(에러 바디 반환)시 예외 발생 검증")
+	@Test
+	void fetchAppleToken_apiError() {
+		// --- WebClient 체인 mock 준비 ---
+		WebClient.RequestBodyUriSpec uriSpec = Mockito.mock(WebClient.RequestBodyUriSpec.class);
+		WebClient.RequestBodySpec bodySpec = Mockito.mock(WebClient.RequestBodySpec.class);
+		WebClient.RequestHeadersSpec<?> headersSpec = Mockito.mock(WebClient.RequestHeadersSpec.class);
+		WebClient.ResponseSpec responseSpec = Mockito.mock(WebClient.ResponseSpec.class);
+
+		// 체인 연결
+		Mockito.when(webClient.post()).thenReturn(uriSpec);
+		Mockito.when(uriSpec.uri(anyString())).thenReturn(bodySpec);
+		Mockito.when(bodySpec.header(anyString(), anyString())).thenReturn(bodySpec);
+		Mockito.when(bodySpec.body(any(BodyInserters.FormInserter.class))).thenReturn(headersSpec);
+		Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
+
+		// onStatus: 4xx, 5xx 상태 코드면 커스텀 예외를 던지도록 mock
+		Mockito.when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+
+		// 실제 bodyToMono 호출 시 예외 발생하도록 지정 (애플 API가 에러 body 반환)
+		Mockito.when(responseSpec.bodyToMono(Map.class))
+			.thenReturn(Mono.error(new RuntimeException("Apple Token API error: invalid_grant")));
+
+		// 내부 의존 메서드 mock
+		Mockito.doReturn("dummyClientSecret").when(service).generateAppleClientSecret();
+
+		// --- 실제 호출 및 예외 검증 ---
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+			service.fetchAppleToken("dummyAuthorizationCode");
+		});
+
+		// --- 예외 메시지 검증 ---
+		assertThat(ex.getMessage()).contains("Apple Token API error: invalid_grant");
 	}
 
 	static class TestJwtUtil {

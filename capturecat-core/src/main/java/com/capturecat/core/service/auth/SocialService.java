@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.nimbusds.jose.JOSEException;
@@ -158,7 +159,7 @@ public class SocialService {
 		return webClient.post()
 			.uri(url)
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-			.bodyValue(params)
+			.body(BodyInserters.fromFormData(params))
 			.retrieve()
 			.onStatus(
 				status -> status.is4xxClientError() || status.is5xxServerError(),
