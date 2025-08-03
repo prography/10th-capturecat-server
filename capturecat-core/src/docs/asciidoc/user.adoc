@@ -14,6 +14,9 @@ operation::tutorialComplete[snippets='curl-request,http-request,request-headers,
 
 [[회원-탈퇴]]
 === 회원 탈퇴
+소셜 서비스 연결 해제 후 회원 관련 데이터를 삭제 처리 합니다.
+소셜 서비스 연결 해제가 모종의 이유로 실패하더라도 삭제 처리는 롤백하지 않습니다. (별도 회원 안내 필요)
+
 ==== 성공
 operation::withdraw[snippets='curl-request,http-request,request-headers,http-response,response-fields']
 
