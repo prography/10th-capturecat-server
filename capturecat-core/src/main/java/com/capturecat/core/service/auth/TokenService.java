@@ -2,7 +2,10 @@ package com.capturecat.core.service.auth;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.config.jwt.TokenType;
-import com.capturecat.core.domain.auth.RefreshToken;
-import com.capturecat.core.domain.auth.RefreshTokenRepository;
 import com.capturecat.core.domain.user.UserRole;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -27,7 +28,14 @@ import com.capturecat.core.support.error.ErrorType;
 public class TokenService {
 
 	private final JwtUtil jwtUtil;
-	private final RefreshTokenRepository refreshTokenRepository;
+	private final RedisTemplate<String, String> redisTemplate;
+
+	@Value("${jwt.refresh-token-expiration}")
+	long refreshTokenExpiration;
+
+	private String getRefreshTokenKey(String username) {
+		return "refresh_token:" + username;
+	}
 
 	/**
 	 * Access 토큰 만료시, Access/Refresh 토큰을 발행하고,
@@ -49,6 +57,7 @@ public class TokenService {
 	}
 
 	public Map<TokenType, String> reissue(String authHeader) {
+		//기존 refresh token 삭제
 		String refreshToken = deleteRefreshToken(authHeader);
 		//새 토큰 발급 후 Refresh 토큰 저장
 		return issue(jwtUtil.getUsername(refreshToken), UserRole.fromRoleString(jwtUtil.getRole(refreshToken)));
@@ -65,9 +74,13 @@ public class TokenService {
 		log.info("Refresh Token: {}", refreshToken);
 
 		try {
-			if (refreshToken.isEmpty()
-				|| !jwtUtil.isRefreshToken(refreshToken) //토큰 만료 검사 포함
-				|| !refreshTokenRepository.existsByRefreshToken(refreshToken)) {
+			if (refreshToken.isEmpty() || !jwtUtil.isRefreshToken(refreshToken)) { //토큰 만료 검사 포함
+				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
+			}
+			// Redis에 저장되어 있는 Refresh token 인지 확인
+			String username = jwtUtil.getUsername(refreshToken);
+			String savedToken = redisTemplate.opsForValue().get(getRefreshTokenKey(username));
+			if (savedToken == null || !savedToken.equals(refreshToken)) {
 				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
 			}
 		} catch (ExpiredJwtException e) {
@@ -79,20 +92,26 @@ public class TokenService {
 		return refreshToken;
 	}
 
+	/**
+	 * Redis에 Refresh token 저장
+	 */
+	private void saveRefreshToken(String username, String refreshToken) {
+		redisTemplate.opsForValue().set(
+			getRefreshTokenKey(username),
+			refreshToken,
+			refreshTokenExpiration, TimeUnit.MILLISECONDS
+		);
+	}
+
+	/**
+	 * Redis에서 Refresh token 삭제
+	 */
 	public String deleteRefreshToken(String authHeader) {
 		//Refresh token parsing 및 유효성 검사
 		String refreshToken = parseRefreshToken(authHeader);
+		String username = jwtUtil.getUsername(refreshToken);
 		//기존 Refresh 토큰 삭제
-		refreshTokenRepository.deleteByRefreshToken(refreshToken);
+		redisTemplate.delete(getRefreshTokenKey(username));
 		return refreshToken;
-	}
-
-	private void saveRefreshToken(String username, String refreshToken) {
-		RefreshToken token = RefreshToken.builder()
-			.username(username)
-			.refreshToken(refreshToken)
-			.build();
-
-		refreshTokenRepository.save(token);
 	}
 }
