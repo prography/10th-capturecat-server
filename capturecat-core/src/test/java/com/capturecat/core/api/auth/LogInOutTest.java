@@ -39,7 +39,7 @@ class LogInOutTest extends RestDocsTest {
 	void 로그아웃() {
 		//given
 		String refreshToken = "valid-refresh-token";
-		willReturn(refreshToken).given(tokenService).deleteRefreshToken(anyString());
+		willReturn(refreshToken).given(tokenService).deleteValidRefreshToken(anyString());
 
 		//when & then
 		given().header(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + refreshToken)

@@ -54,7 +54,7 @@ public class JwtLogoutFilter extends GenericFilterBean {
 			if (refreshHeader == null || refreshHeader.isEmpty()) {
 				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
 			}
-			tokenService.deleteRefreshToken(refreshHeader);
+			tokenService.deleteValidRefreshToken(refreshHeader);
 		} catch (CoreException e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);

@@ -64,7 +64,7 @@ class JwtLogoutFilterTest {
 
 		// then
 		assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
-		verify(tokenService, never()).deleteRefreshToken(anyString());
+		verify(tokenService, never()).deleteValidRefreshToken(anyString());
 		verify(filterChain, never()).doFilter(any(), any());
 	}
 
@@ -76,14 +76,15 @@ class JwtLogoutFilterTest {
 		String refreshToken = "invalid refresh-token";
 		request.addHeader(REFRESH_TOKEN_HEADER, BEARER_PREFIX + refreshToken);
 
-		doThrow(new CoreException(ErrorType.INVALID_REFRESH_TOKEN)).when(tokenService).deleteRefreshToken(anyString());
+		doThrow(new CoreException(ErrorType.INVALID_REFRESH_TOKEN))
+			.when(tokenService).deleteValidRefreshToken(anyString());
 
 		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
 
 		// then
 		assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
-		verify(tokenService).deleteRefreshToken(anyString());
+		verify(tokenService).deleteValidRefreshToken(anyString());
 		verify(filterChain, never()).doFilter(any(), any());
 	}
 
@@ -96,14 +97,14 @@ class JwtLogoutFilterTest {
 		request.addHeader(REFRESH_TOKEN_HEADER, BEARER_PREFIX + refreshToken);
 
 		// 토큰 서비스 mock: 항상 정상 처리
-		when(tokenService.deleteRefreshToken(anyString())).thenReturn(refreshToken);
+		when(tokenService.deleteValidRefreshToken(anyString())).thenReturn(refreshToken);
 
 		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
 
 		// then
 		assertEquals(HttpStatus.SC_OK, response.getStatus());
-		verify(tokenService).deleteRefreshToken(anyString());
+		verify(tokenService).deleteValidRefreshToken(anyString());
 		verify(filterChain, never()).doFilter(any(), any());
 	}
 }

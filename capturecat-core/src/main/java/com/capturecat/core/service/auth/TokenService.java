@@ -57,12 +57,15 @@ public class TokenService {
 	}
 
 	public Map<TokenType, String> reissue(String authHeader) {
-		//기존 refresh token 삭제
-		String refreshToken = deleteRefreshToken(authHeader);
+		//기존 refresh token 삭제 (유효성 검사 포함)
+		String refreshToken = deleteValidRefreshToken(authHeader);
 		//새 토큰 발급 후 Refresh 토큰 저장
 		return issue(jwtUtil.getUsername(refreshToken), UserRole.fromRoleString(jwtUtil.getRole(refreshToken)));
 	}
 
+	/**
+	 * Refresh token이 유효한지 확인하고 파싱
+	 */
 	@Transactional(readOnly = true)
 	public String parseRefreshToken(String authHeader) {
 
@@ -104,14 +107,19 @@ public class TokenService {
 	}
 
 	/**
-	 * Redis에서 Refresh token 삭제
+	 * 유효성 검사 후 Redis에서 Refresh token 삭제
 	 */
-	public String deleteRefreshToken(String authHeader) {
+	public String deleteValidRefreshToken(String authHeader) {
+		log.info("deleteRefreshToken: {}", authHeader);
 		//Refresh token parsing 및 유효성 검사
 		String refreshToken = parseRefreshToken(authHeader);
 		String username = jwtUtil.getUsername(refreshToken);
 		//기존 Refresh 토큰 삭제
 		redisTemplate.delete(getRefreshTokenKey(username));
 		return refreshToken;
+	}
+
+	public void deleteRefreshTokenByUsername(String username) {
+		redisTemplate.delete(getRefreshTokenKey(username));
 	}
 }

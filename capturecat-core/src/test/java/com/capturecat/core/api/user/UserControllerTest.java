@@ -1,18 +1,13 @@
 package com.capturecat.core.api.user;
 
 import static com.capturecat.test.api.RestDocsUtil.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -23,6 +18,7 @@ import io.restassured.http.ContentType;
 
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.test.api.RestDocsTest;
 
@@ -37,11 +33,12 @@ class UserControllerTest extends RestDocsTest {
 
 	private UserService userService;
 
+	private TokenService tokenService;
 
 	@BeforeEach
 	void setUp() {
 		userService = mock(UserService.class);
-		userController = new UserController(userService);
+		userController = new UserController(userService, tokenService);
 		mockMvc = mockController(userController);
 	}
 
