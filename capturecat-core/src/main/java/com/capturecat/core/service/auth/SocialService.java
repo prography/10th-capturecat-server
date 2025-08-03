@@ -17,6 +17,8 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -33,6 +35,7 @@ import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 import com.capturecat.core.config.auth.Oauth2Properties;
 import com.capturecat.core.config.auth.Oauth2Properties.Provider;
@@ -71,31 +74,35 @@ public class SocialService {
 			throw new CoreException(ErrorType.INVALID_ID_TOKEN);
 		}
 
-		// 최초 회원가입 시 소셜 연결 해제를 위한 정보를 얻어온다.
+		// 1. idToken, unlinkKey 요청
 		String unlinkKey = null;
 		if (provider.equals(APPLE)) {
 			//애플: authorization_code로 idToken과 refresh_token(최초 1회)를 얻어온다.
 			if (!StringUtils.hasText(authToken)) {
-				throw new CoreException(ErrorType.INVALID_AUTH_TOKEN);
+				throw new CoreException(ErrorType.INVALID_AUTH_TOKEN, "apple authorization_code 누락");
 			}
 			Map<String, Object> response = fetchAppleToken(authToken);
 			idToken = (String)response.get(ID_TOKEN);
 			unlinkKey = (String)response.get(REFRESH_TOKEN);
+			log.info("fetch apple refreshToken = {}", unlinkKey);
 		} else if (provider.equals(KAKAO) && StringUtils.hasText(authToken)) {
 			//카카오: 최초 회원가입 시 userId를 얻어온다.
 			unlinkKey = fetchKakaoUserId(authToken);
+			log.info("fetch kakao userId = {}", unlinkKey);
 		}
 
+		// 2. 유저 정보 추출
 		try {
-			// 1. idToken(JWT) 파싱
+			// 1) idToken(JWT) 파싱
 			SignedJWT jwt = SignedJWT.parse(idToken);
-			// 2. 클레임(issuer, audience, exp 등) 검증
+
+			// 2) 클레임(issuer, audience, exp 등) 검증
 			JWTClaimsSet claims = extractClaims(jwt, providerInfo, registrationInfo);
 
-			// 3. 공개키(JWK)로 서명 검증.
+			// 3) 공개키(JWK)로 서명 검증.
 			verifyJwtSignature(jwt, providerInfo);
 
-			// 5. 유저 정보 반환 (provider, sub, email, nickname, email_verified)
+			// 4) 유저 정보 반환 (provider, sub, email, nickname, email_verified)
 			return new OidcUserPayload(
 				provider,
 				claims.getSubject(),
@@ -138,13 +145,14 @@ public class SocialService {
 	Map fetchAppleToken(String authorizationCode) {
 		String url = socialApiProperties.getApple().getTokenUrl();
 
-		// application/x-www-form-urlencoded 파라미터 구성
-		String params = String.format(
-			"grant_type=authorization_code&code=%s&client_id=%s&client_secret=%s",
-			authorizationCode,
-			oauth2Properties.getRegistration().get(APPLE).getClientId(),
-			generateAppleClientSecret()
-		);
+		// 파라미터 Map 생성
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("grant_type", "authorization_code");
+		params.add("code", authorizationCode);
+		params.add("client_id", oauth2Properties.getRegistration().get(APPLE).getClientId());
+		params.add("client_secret", generateAppleClientSecret());
+		log.info("Apple /token params: {}", params.get("client_secret"));
+
 
 		// 토큰 요청
 		return webClient.post()
@@ -152,6 +160,14 @@ public class SocialService {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 			.bodyValue(params)
 			.retrieve()
+			.onStatus(
+				status -> status.is4xxClientError() || status.is5xxServerError(),
+				clientResponse -> clientResponse.bodyToMono(String.class)
+					.flatMap(errorBody -> {
+						log.error("[AppleToken] error response: {}", errorBody); // 이 줄로 body 출력
+						return Mono.error(new RuntimeException("Apple Token API error: " + errorBody));
+					})
+			)
 			.bodyToMono(Map.class)
 			.block();
 	}
@@ -251,7 +267,34 @@ public class SocialService {
 	public void unlink(String provider, String unlinkKey) {
 		switch (provider) {
 			case KAKAO -> unlinkKaKaoUser(unlinkKey);
-			// case APPLE -> revokeAppleUser(unlinkKey);
+			case APPLE -> revokeAppleUser(unlinkKey);
+		}
+	}
+
+	private void revokeAppleUser(String refreshToken) {
+		String url = socialApiProperties.getApple().getRevokeUrl();
+
+		// Apple client_id, client_secret(=JWT)는 반드시 서버에서 동적으로 생성
+		String clientId = oauth2Properties.getRegistration().get(APPLE).getClientId();
+		String clientSecret = generateAppleClientSecret();
+
+		// 파라미터 구성 (x-www-form-urlencoded)
+		String params = String.format(
+			"client_id=%s&client_secret=%s&token=%s&token_type_hint=refresh_token",
+			clientId, clientSecret, refreshToken
+		);
+
+		// API 호출
+		Map response = webClient.post()
+			.uri(url)
+			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+			.bodyValue(params)
+			.retrieve()
+			.bodyToMono(Map.class)
+			.block();
+
+		if (response == null) {
+			throw new CoreException(ErrorType.UNLINK_SOCIAL_FAIL, "Apple revoke 응답이 없습니다.");
 		}
 	}
 
