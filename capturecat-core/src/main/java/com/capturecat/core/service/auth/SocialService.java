@@ -22,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
@@ -122,22 +123,28 @@ public class SocialService {
 	 */
 	String fetchKakaoUserId(String accessToken) {
 		String url = socialApiProperties.getKakao().getUserinfoUrl();
-		// WebClient로 API 호출
-		Map response = webClient.post()
-			.uri(url)
-			.header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
-			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-			.retrieve()
-			.bodyToMono(Map.class)
-			.block();
+		try {
+			// WebClient로 API 호출
+			Map response = webClient.post()
+				.uri(url)
+				.header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken)
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+				.retrieve()
+				.bodyToMono(Map.class)
+				.block();
 
-		if (response == null || !response.containsKey("id")) {
-			throw new CoreException(ErrorType.INVALID_AUTH_TOKEN);
+			if (response == null || !response.containsKey("id")) {
+				throw new CoreException(ErrorType.FETCH_SOCIAL_TOKEN_FAIL,
+					response != null ? "[kakaoUserId] error response: " + response : "No response");
+			}
+
+			// Kakao의 userId는 Long(숫자)이므로 String 변환
+			Object id = response.get("id");
+			return String.valueOf(id);
+		} catch (WebClientResponseException e) {
+			// 실제 에러 body 추출해서 그대로 전달
+			throw new CoreException(ErrorType.SOCIAL_API_ERROR, e.getResponseBodyAsString());
 		}
-
-		// Kakao의 userId는 Long(숫자)이므로 String 변환
-		Object id = response.get("id");
-		return String.valueOf(id);
 	}
 
 	/**
@@ -154,7 +161,6 @@ public class SocialService {
 		params.add("client_secret", generateAppleClientSecret());
 		log.info("Apple /token params: {}", params.get("client_secret"));
 
-
 		// 토큰 요청
 		return webClient.post()
 			.uri(url)
@@ -164,11 +170,8 @@ public class SocialService {
 			.onStatus(
 				status -> status.is4xxClientError() || status.is5xxServerError(),
 				clientResponse -> clientResponse.bodyToMono(String.class)
-					.flatMap(errorBody -> {
-						log.error("[AppleToken] error response: {}", errorBody); // 이 줄로 body 출력
-						return Mono.error(new RuntimeException("Apple Token API error: " + errorBody));
-					})
-			)
+					.flatMap(errorBody -> Mono.error(new CoreException(ErrorType.FETCH_SOCIAL_TOKEN_FAIL,
+						"[AppleToken] error response: " + errorBody))))
 			.bodyToMono(Map.class)
 			.block();
 	}
@@ -249,8 +252,6 @@ public class SocialService {
 		}
 		return claims;
 	}
-
-
 
 	private String extractNickname(JWTClaimsSet claims, String provider, String nickname) throws ParseException {
 		return switch (provider) {
