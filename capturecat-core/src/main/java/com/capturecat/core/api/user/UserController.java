@@ -44,7 +44,7 @@ public class UserController {
 	 */
 	@DeleteMapping("/withdraw")
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser) {
-		userService.withdraw(loginUser);
-		return ApiResponse.success();
+		String resultMessage = userService.withdraw(loginUser);
+		return ApiResponse.success(resultMessage);
 	}
 }

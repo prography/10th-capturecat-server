@@ -89,21 +89,28 @@ public class UserService {
 
 	/**
 	 * 회원 탈퇴
+	 * 모든 소셜 서비스 연결 해제 시도
+	 * 회원 관련 데이터 삭제
 	 */
-	public void withdraw(LoginUser loginUser) {
+	public String withdraw(LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
-		//0. 소셜 로그인 연결 해제
-		//모든 소셜 로그인에 대해 연결 해제. userSocialAccountRepository에 id와 unlinkKey가 있는 경우
+		//0. 연결된 모든 소셜 로그인 해지
+		StringBuilder resultMessage = new StringBuilder();
 		List<UserSocialAccount> socialAccounts = userSocialAccountRepository.findByUser(user);
 		for (UserSocialAccount socialAccount : socialAccounts) {
 			try {
 				socialService.unlink(socialAccount.getProvider(), socialAccount.getUnlinkKey());
+				// 연결 해지 성공 메시지 추가
+				resultMessage.append(String.format("소셜(%s) 연결 해지 성공\n", socialAccount.getProvider()));
 			} catch (Exception e) {
-				log.warn("소셜 연결 해제 실패: provider={}, unlinkKey={}", socialAccount.getProvider(),
-					socialAccount.getUnlinkKey(), e);
-				// 필요시 알림/모니터링
+				// 연결 해지 실패 메시지 추가
+				String msg = String.format("소셜(%s) 연결 해지 실패: unlinkKey=%s, reason=%s\n",
+					socialAccount.getProvider(),
+					socialAccount.getUnlinkKey(),
+					e.getMessage());
+				resultMessage.append(msg);
 			}
 
 		}
@@ -118,6 +125,8 @@ public class UserService {
 
 		// 3. User 삭제 -> social account도 삭제됨
 		userRepository.delete(user);
+
+		return resultMessage.toString();
 	}
 
 	private User buildUser(OidcUserPayload payload) {

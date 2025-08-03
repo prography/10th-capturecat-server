@@ -292,6 +292,11 @@ public class SocialService {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 			.bodyValue(params)
 			.retrieve()
+			.onStatus(
+				status -> status.is4xxClientError() || status.is5xxServerError(),
+				clientResponse -> clientResponse.bodyToMono(String.class)
+					.flatMap(errorBody -> Mono.error(new CoreException(ErrorType.UNLINK_SOCIAL_FAIL, errorBody)))
+			)
 			.bodyToMono(Map.class)
 			.block();
 
@@ -314,12 +319,17 @@ public class SocialService {
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 			.bodyValue(params)
 			.retrieve()
+			.onStatus(
+				status -> status.is4xxClientError() || status.is5xxServerError(),
+				clientResponse -> clientResponse.bodyToMono(String.class)
+					.flatMap(errorBody -> Mono.error(new CoreException(ErrorType.UNLINK_SOCIAL_FAIL, errorBody)))
+			)
 			.bodyToMono(Map.class)
 			.block();
 
 		// 정상적으로 "id" 반환 시 성공, 아니면 예외 처리
 		if (response == null || !response.containsKey("id")) {
-			throw new CoreException(ErrorType.UNLINK_SOCIAL_FAIL, "카카오 연동 해제 실패: " + response);
+			throw new CoreException(ErrorType.UNLINK_SOCIAL_FAIL, String.valueOf(response));
 		}
 	}
 
