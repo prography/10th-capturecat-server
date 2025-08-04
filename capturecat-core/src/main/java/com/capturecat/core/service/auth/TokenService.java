@@ -122,4 +122,8 @@ public class TokenService {
 	public void deleteRefreshTokenByUsername(String username) {
 		redisTemplate.delete(getRefreshTokenKey(username));
 	}
+
+	public boolean isBlacklisted(String accessToken) {
+		return true;
+	}
 }

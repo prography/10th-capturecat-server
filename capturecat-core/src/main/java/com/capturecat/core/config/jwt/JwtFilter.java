@@ -48,7 +48,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		// 토큰 유효성 검사
 		if (!jwtUtil.isAccessToken(accessToken)
-			|| !jwtUtil.isValid(accessToken)) {
+			|| !jwtUtil.isValid(accessToken)
+			|| tokenService.isBlacklisted(accessToken)) {
 			//만료 시 client에 즉시 응답. client는 재발급 요청 수행.
 			rejectInvalidToken(response, ErrorType.INVALID_ACCESS_TOKEN);
 			return;
