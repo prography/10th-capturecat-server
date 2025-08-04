@@ -24,6 +24,8 @@ import com.capturecat.core.support.error.ErrorCode;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class UserApiTest {
 
+	public static final String URL_PREFIX = "/v1/user";
+
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -44,7 +46,7 @@ class UserApiTest {
 		String requestBody = objectMapper.writeValueAsString(joinReqDto);
 
 		//when & then
-		mockMvc.perform(post("/v1/user/join")
+		mockMvc.perform(post(URL_PREFIX + "/join")
 				.content(requestBody)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
@@ -68,7 +70,7 @@ class UserApiTest {
 		String requestBody = objectMapper.writeValueAsString(reqDto);
 
 		//when & then
-		mockMvc.perform(post("/v1/user/join")
+		mockMvc.perform(post(URL_PREFIX + "/join")
 				.content(requestBody)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
@@ -87,7 +89,7 @@ class UserApiTest {
 		String requestBody = objectMapper.writeValueAsString(reqDto);
 
 		//when & then
-		mockMvc.perform(post("/v1/user/join")
+		mockMvc.perform(post(URL_PREFIX + "/join")
 				.content(requestBody)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())

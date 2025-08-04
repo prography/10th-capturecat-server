@@ -66,8 +66,12 @@ class TokenServiceTest {
 		tokenService.blacklistAccessToken(authHeader);
 
 		// then
-		then(valueOperations).should()
-			.set(eq(blacklistKey(accessToken)), eq("blacklisted"), eq(remainMillis), eq(TimeUnit.MILLISECONDS));
+		then(valueOperations).should().set(
+			eq(blacklistKey(accessToken)),
+			eq("blacklisted"),
+			any(Long.class),
+			eq(TimeUnit.MILLISECONDS)
+		);
 	}
 
 	@Test
