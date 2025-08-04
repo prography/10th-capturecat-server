@@ -38,6 +38,7 @@ class UserControllerTest extends RestDocsTest {
 	@BeforeEach
 	void setUp() {
 		userService = mock(UserService.class);
+		tokenService = mock(TokenService.class);
 		userController = new UserController(userService, tokenService);
 		mockMvc = mockController(userController);
 	}

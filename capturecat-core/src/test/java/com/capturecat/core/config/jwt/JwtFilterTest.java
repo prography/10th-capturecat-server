@@ -1,6 +1,7 @@
 package com.capturecat.core.config.jwt;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 import jakarta.servlet.FilterChain;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -55,8 +57,9 @@ class JwtFilterTest {
 	@Test
 	void 만료된_토큰이면_401응답() throws Exception {
 		// given
-		request.addHeader("Authorization", "Bearer expired.token");
-		doThrow(new ExpiredJwtException(null, null, "토큰 만료")).when(jwtUtil).isExpired("expired.token");
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer expired.token");
+		when(jwtUtil.isAccessToken("expired.token")).thenReturn(true);
+		when(jwtUtil.isValid("expired.token")).thenReturn(false);
 
 		// when
 		jwtFilter.doFilterInternal(request, response, filterChain);
@@ -68,8 +71,9 @@ class JwtFilterTest {
 	@Test
 	void 서명이_잘못된_토큰이면_401응답() throws Exception {
 		// given
-		request.addHeader("Authorization", "Bearer invalid.token");
-		doThrow(new SignatureException("잘못된 서명")).when(jwtUtil).isExpired("invalid.token");
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer invalid.token");
+		when(jwtUtil.isAccessToken("invalid.token")).thenReturn(true);
+		when(jwtUtil.isValid("invalid.token")).thenReturn(false);
 
 		// when
 		jwtFilter.doFilterInternal(request, response, filterChain);
@@ -81,9 +85,9 @@ class JwtFilterTest {
 	@Test
 	void 정상_토큰이면_SecurityContext에_등록() throws Exception {
 		// given
-		request.addHeader("Authorization", "Bearer valid.token");
+		request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer valid.token");
 
-		when(jwtUtil.isExpired("valid.token")).thenReturn(false);
+		when(jwtUtil.isValid("valid.token")).thenReturn(true);
 		when(jwtUtil.isAccessToken("valid.token")).thenReturn(true);
 		when(jwtUtil.getUsername("valid.token")).thenReturn("user1");
 		when(jwtUtil.getRole("valid.token")).thenReturn("ROLE_USER");
