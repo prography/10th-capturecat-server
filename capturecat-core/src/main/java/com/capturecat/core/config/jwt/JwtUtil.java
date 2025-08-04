@@ -77,6 +77,19 @@ public class JwtUtil {
 		return true;
 	}
 
+	public String resolveToken(String header) {
+		return header != null && header.startsWith(BEARER_PREFIX)
+			? header.substring(BEARER_PREFIX.length()).trim()
+			: null;
+	}
+
+	// JWT 파싱하여 만료일자(ms) 반환
+	public long getExpiration(String token) {
+		Claims claims = extractClaims(token);
+		return claims.getExpiration().getTime();
+	}
+
+
 	// username(subject) 추출
 	public String getUsername(String token) {
 		return extractClaims(token).getSubject();

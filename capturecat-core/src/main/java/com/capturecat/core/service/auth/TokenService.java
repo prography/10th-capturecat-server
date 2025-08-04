@@ -32,10 +32,8 @@ public class TokenService {
 
 	@Value("${jwt.refresh-token-expiration}")
 	long refreshTokenExpiration;
-
-	private String getRefreshTokenKey(String username) {
-		return "refresh_token:" + username;
-	}
+	private static final String BLACKLIST_PREFIX = "blacklist:";
+	private static final String REFRESH_TOKEN_PREFIX = "refresh_token:";
 
 	/**
 	 * Access 토큰 만료시, Access/Refresh 토큰을 발행하고,
@@ -123,7 +121,28 @@ public class TokenService {
 		redisTemplate.delete(getRefreshTokenKey(username));
 	}
 
+	private String getRefreshTokenKey(String username) {
+		return REFRESH_TOKEN_PREFIX + username;
+	}
+
+	/**
+	 * header 에서 Access Token 파싱 후 블랙리스팅
+	 */
+	public void blacklistAccessToken(String authHeader) {
+		String accessToken = jwtUtil.resolveToken(authHeader);
+		long remainMillis = jwtUtil.getExpiration(accessToken) - System.currentTimeMillis();
+
+		if (remainMillis > 0) {
+			redisTemplate.opsForValue()
+				.set(blacklistKey(accessToken), "blacklisted", remainMillis, TimeUnit.MILLISECONDS);
+		}
+	}
+
 	public boolean isBlacklisted(String accessToken) {
-		return true;
+		return redisTemplate.hasKey(blacklistKey(accessToken));
+	}
+
+	private String blacklistKey(String token) {
+		return BLACKLIST_PREFIX + token;
 	}
 }

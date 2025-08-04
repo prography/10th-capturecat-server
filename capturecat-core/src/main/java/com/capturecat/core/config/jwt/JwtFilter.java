@@ -44,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response); // 다음 필터로 넘김 (비인증 요청 허용할 수 있음)
 			return;
 		}
-		String accessToken = authHeader.substring(JwtUtil.BEARER_PREFIX.length()); // "Bearer " 이후 토큰
+		String accessToken = jwtUtil.resolveToken(authHeader); // "Bearer " 이후 토큰
 
 		// 토큰 유효성 검사
 		if (!jwtUtil.isAccessToken(accessToken)

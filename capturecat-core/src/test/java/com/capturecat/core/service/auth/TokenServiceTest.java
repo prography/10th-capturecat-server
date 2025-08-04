@@ -47,6 +47,41 @@ class TokenServiceTest {
 		return "refresh_token:" + username;
 	}
 
+	private String blacklistKey(String token) {
+		return "blacklist:" + token;
+	}
+
+	@Test
+	@DisplayName("blacklistAccessToken(): accessToken을 남은 만료 시간 동안 블랙리스트로 저장한다")
+	void blacklistAccessToken_SavesToRedisWithTtl() {
+		// given
+		String authHeader = "auth Header";
+		String accessToken = "test-access-token";
+		long remainMillis = 300_000L; // 5분
+		given(jwtUtil.resolveToken(authHeader)).willReturn(accessToken);
+		given(jwtUtil.getExpiration(accessToken)).willReturn(System.currentTimeMillis() + remainMillis);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+
+		// when
+		tokenService.blacklistAccessToken(authHeader);
+
+		// then
+		then(valueOperations).should()
+			.set(eq(blacklistKey(accessToken)), eq("blacklisted"), eq(remainMillis), eq(TimeUnit.MILLISECONDS));
+	}
+
+	@Test
+	@DisplayName("isBlacklisted(): accessToken이 블랙리스트에 있으면 true, 없으면 false를 반환한다")
+	void isBlacklisted_ChecksExistenceInRedis() {
+		// given
+		String accessToken = "test-access-token";
+		given(redisTemplate.hasKey(blacklistKey(accessToken))).willReturn(true, false);
+
+		// when & then
+		assertThat(tokenService.isBlacklisted(accessToken)).isTrue();
+		assertThat(tokenService.isBlacklisted(accessToken)).isFalse();
+	}
+
 	@Test
 	@DisplayName("issue(): ACCESS, REFRESH 토큰을 생성하고 Redis에 저장한다")
 	void issue_ShouldGenerateAndSaveTokens() {
