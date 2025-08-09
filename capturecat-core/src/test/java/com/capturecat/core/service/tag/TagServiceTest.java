@@ -93,6 +93,7 @@ class TagServiceTest {
 		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
 		given(tagRepository.findById(eq(tag.getId()))).willReturn(Optional.of(tag));
 		willDoNothing().given(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		given(imageTagRepository.existsByTag(tag)).willReturn(true);
 
 		// when
 		var response = tagService.deleteTag(loginUser, tag.getId());
@@ -102,6 +103,30 @@ class TagServiceTest {
 		assertThat(response.name()).isEqualTo(tag.getName());
 
 		verify(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		verify(tagRepository, never()).delete(eq(tag));
+	}
+
+	@Test
+	void 태그를_삭제_시_더_이상_사용되지_않으면_Tag_엔티티도_함께_삭제한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var loginUser = new LoginUser(user);
+		var tag = TagFixture.createTag(1L, "java");
+
+		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
+		given(tagRepository.findById(eq(tag.getId()))).willReturn(Optional.of(tag));
+		willDoNothing().given(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		given(imageTagRepository.existsByTag(tag)).willReturn(false);
+
+		// when
+		var response = tagService.deleteTag(loginUser, tag.getId());
+
+		// then
+		assertThat(response.id()).isEqualTo(tag.getId());
+		assertThat(response.name()).isEqualTo(tag.getName());
+
+		verify(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		verify(tagRepository).delete(eq(tag));
 	}
 
 	@Test
@@ -120,6 +145,7 @@ class TagServiceTest {
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.USER_NOT_FOUND);
 
 		verify(imageTagRepository, never()).deleteTagAndUser(eq(tag), eq(user));
+		verify(tagRepository, never()).delete(eq(tag));
 	}
 
 	@Test
@@ -138,5 +164,6 @@ class TagServiceTest {
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.TAG_NOT_FOUND);
 
 		verify(imageTagRepository, never()).deleteTagAndUser(eq(tag), eq(user));
+		verify(tagRepository, never()).delete(eq(tag));
 	}
 }

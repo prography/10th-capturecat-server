@@ -54,6 +54,10 @@ public class TagService {
 
 		imageTagRepository.deleteTagAndUser(tag, user);
 
+		if (!imageTagRepository.existsByTag((tag))) {
+			tagRepository.delete(tag);
+		}
+
 		return TagResponse.from(tag);
 	}
 
