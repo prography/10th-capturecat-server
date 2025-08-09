@@ -52,7 +52,7 @@ public class TagService {
 		Tag tag = tagRepository.findById(tagId)
 			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
 
-		imageTagRepository.deleteTagAndUser(tag, user);
+		imageTagRepository.deleteByTagAndUser(tag, user);
 
 		if (!imageTagRepository.existsByTag((tag))) {
 			tagRepository.delete(tag);

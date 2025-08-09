@@ -92,7 +92,7 @@ class TagServiceTest {
 
 		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
 		given(tagRepository.findById(eq(tag.getId()))).willReturn(Optional.of(tag));
-		willDoNothing().given(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		willDoNothing().given(imageTagRepository).deleteByTagAndUser(eq(tag), eq(user));
 		given(imageTagRepository.existsByTag(tag)).willReturn(true);
 
 		// when
@@ -102,7 +102,7 @@ class TagServiceTest {
 		assertThat(response.id()).isEqualTo(tag.getId());
 		assertThat(response.name()).isEqualTo(tag.getName());
 
-		verify(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		verify(imageTagRepository).deleteByTagAndUser(eq(tag), eq(user));
 		verify(tagRepository, never()).delete(eq(tag));
 	}
 
@@ -115,7 +115,7 @@ class TagServiceTest {
 
 		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
 		given(tagRepository.findById(eq(tag.getId()))).willReturn(Optional.of(tag));
-		willDoNothing().given(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		willDoNothing().given(imageTagRepository).deleteByTagAndUser(eq(tag), eq(user));
 		given(imageTagRepository.existsByTag(tag)).willReturn(false);
 
 		// when
@@ -125,7 +125,7 @@ class TagServiceTest {
 		assertThat(response.id()).isEqualTo(tag.getId());
 		assertThat(response.name()).isEqualTo(tag.getName());
 
-		verify(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+		verify(imageTagRepository).deleteByTagAndUser(eq(tag), eq(user));
 		verify(tagRepository).delete(eq(tag));
 	}
 
@@ -144,7 +144,7 @@ class TagServiceTest {
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.USER_NOT_FOUND);
 
-		verify(imageTagRepository, never()).deleteTagAndUser(eq(tag), eq(user));
+		verify(imageTagRepository, never()).deleteByTagAndUser(eq(tag), eq(user));
 		verify(tagRepository, never()).delete(eq(tag));
 	}
 
@@ -163,7 +163,7 @@ class TagServiceTest {
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.TAG_NOT_FOUND);
 
-		verify(imageTagRepository, never()).deleteTagAndUser(eq(tag), eq(user));
+		verify(imageTagRepository, never()).deleteByTagAndUser(eq(tag), eq(user));
 		verify(tagRepository, never()).delete(eq(tag));
 	}
 }

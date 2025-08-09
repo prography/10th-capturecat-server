@@ -28,5 +28,5 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
 	@Modifying
 	@Query("DELETE FROM ImageTag it WHERE it.tag = :tag AND it.image.user = :user")
-	void deleteTagAndUser(Tag tag, User user);
+	void deleteByTagAndUser(Tag tag, User user);
 }

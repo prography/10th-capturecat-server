@@ -48,7 +48,7 @@ class ImageTagRepositoryTest {
 		entityManager.clear();
 
 		// when
-		imageTagRepository.deleteTagAndUser(tag, user);
+		imageTagRepository.deleteByTagAndUser(tag, user);
 
 		entityManager.flush();
 		entityManager.clear();
@@ -73,7 +73,7 @@ class ImageTagRepositoryTest {
 		entityManager.clear();
 
 		// when
-		imageTagRepository.deleteTagAndUser(tag, user);
+		imageTagRepository.deleteByTagAndUser(tag, user);
 
 		entityManager.flush();
 		entityManager.clear();
@@ -101,7 +101,7 @@ class ImageTagRepositoryTest {
 		entityManager.clear();
 
 		// when
-		imageTagRepository.deleteTagAndUser(tag, user1);
+		imageTagRepository.deleteByTagAndUser(tag, user1);
 
 		entityManager.flush();
 		entityManager.clear();
