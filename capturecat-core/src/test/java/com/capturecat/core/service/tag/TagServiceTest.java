@@ -136,8 +136,7 @@ class TagServiceTest {
 		var loginUser = new LoginUser(user);
 		var tag = TagFixture.createTag(1L, "java");
 
-		given(userRepository.findByUsername(loginUser.getUsername()))
-			.willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
+		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.empty());
 
 		// when & then
 		assertThatThrownBy(() -> tagService.deleteTag(loginUser, tag.getId()))
@@ -156,7 +155,7 @@ class TagServiceTest {
 		var tag = TagFixture.createTag(1L, "java");
 
 		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
-		given(tagRepository.findById(eq(tag.getId()))).willThrow(new CoreException(ErrorType.TAG_NOT_FOUND));
+		given(tagRepository.findById(eq(tag.getId()))).willReturn(Optional.empty());
 
 		// when & then
 		assertThatThrownBy(() -> tagService.deleteTag(loginUser, tag.getId()))
