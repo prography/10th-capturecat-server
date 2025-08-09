@@ -59,6 +59,31 @@ class ImageTagRepositoryTest {
 	}
 
 	@Test
+	void 한_사용자의_여러_이미지에서_해당_태그가_모두_삭제된다() {
+		// given
+		var user = userRepository.save(DummyObject.newUser("multiUser"));
+		var imageA = imageRepository.save(DummyObject.newMockUserImage(user));
+		var imageB = imageRepository.save(DummyObject.newMockUserImage(user));
+		var tag = tagRepository.save(TagFixture.createTag("java"));
+
+		imageTagRepository.save(new ImageTag(imageA, tag));
+		imageTagRepository.save(new ImageTag(imageB, tag));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when
+		imageTagRepository.deleteTagAndUser(tag, user);
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// then
+		assertThat(imageTagRepository.findByImage(imageA)).isEmpty();
+		assertThat(imageTagRepository.findByImage(imageB)).isEmpty();
+	}
+
+	@Test
 	void 다른_사용자의_태그는_삭제되지_않는다() {
 		// given
 		var user1 = userRepository.save(DummyObject.newUser("testUser1"));
