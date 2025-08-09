@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.User;
@@ -27,6 +28,7 @@ public class TagService {
 
 	private final TagRepository tagRepository;
 	private final UserRepository userRepository;
+	private final ImageTagRepository imageTagRepository;
 
 	@Transactional(readOnly = true)
 	public CursorResponse<TagResponse> getTags(LoginUser loginUser, Pageable pageable) {
@@ -41,6 +43,18 @@ public class TagService {
 	@Transactional(readOnly = true)
 	public CursorResponse<TagResponse> getMostUsedTags(LoginUser loginUser, Pageable pageable) {
 		return searchTagsWithCursor(loginUser, user -> tagRepository.searchMostUsedTagsByUser(user, pageable));
+	}
+
+	@Transactional
+	public TagResponse deleteTag(LoginUser loginUser, Long tagId) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Tag tag = tagRepository.findById(tagId)
+			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
+
+		imageTagRepository.deleteTagAndUser(tag, user);
+
+		return TagResponse.from(tag);
 	}
 
 	private CursorResponse<TagResponse> searchTagsWithCursor(LoginUser loginUser,

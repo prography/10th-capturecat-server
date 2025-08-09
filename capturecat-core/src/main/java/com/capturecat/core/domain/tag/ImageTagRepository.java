@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.capturecat.core.domain.image.Image;
+import com.capturecat.core.domain.user.User;
 
 public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
@@ -21,4 +23,8 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 	long countByImage(Image image);
 
 	void deleteAllByImage(Image image);
+
+	@Modifying
+	@Query("DELETE FROM ImageTag it WHERE it.tag = :tag AND it.image.user = :user")
+	void deleteTagAndUser(Tag tag, User user);
 }

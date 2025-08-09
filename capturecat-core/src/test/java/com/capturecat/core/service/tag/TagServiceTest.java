@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.data.domain.PageRequest.of;
 
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 
 import com.capturecat.core.DummyObject;
+import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.TagFixture;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.UserRepository;
@@ -36,6 +39,9 @@ class TagServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private ImageTagRepository imageTagRepository;
 
 	@InjectMocks
 	private TagService tagService;
@@ -75,5 +81,62 @@ class TagServiceTest {
 		assertThatThrownBy(() -> tagService.getMostUsedTags(loginUser, of(0, 10)))
 			.isInstanceOf(CoreException.class)
 			.hasFieldOrPropertyWithValue("errorType", ErrorType.USER_NOT_FOUND);
+	}
+
+	@Test
+	void 태그를_삭제한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var loginUser = new LoginUser(user);
+		var tag = TagFixture.createTag(1L, "java");
+
+		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
+		given(tagRepository.findById(eq(tag.getId()))).willReturn(Optional.of(tag));
+		willDoNothing().given(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+
+		// when
+		var response = tagService.deleteTag(loginUser, tag.getId());
+
+		// then
+		assertThat(response.id()).isEqualTo(tag.getId());
+		assertThat(response.name()).isEqualTo(tag.getName());
+
+		verify(imageTagRepository).deleteTagAndUser(eq(tag), eq(user));
+	}
+
+	@Test
+	void 태그_삭제_시_회원이_존재하지_않으면_실패한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var loginUser = new LoginUser(user);
+		var tag = TagFixture.createTag(1L, "java");
+
+		given(userRepository.findByUsername(loginUser.getUsername()))
+			.willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
+
+		// when & then
+		assertThatThrownBy(() -> tagService.deleteTag(loginUser, tag.getId()))
+			.isInstanceOf(CoreException.class)
+			.hasFieldOrPropertyWithValue("errorType", ErrorType.USER_NOT_FOUND);
+
+		verify(imageTagRepository, never()).deleteTagAndUser(eq(tag), eq(user));
+	}
+
+	@Test
+	void 태그_삭제_시_태그가_존재하지_않으면_실패한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var loginUser = new LoginUser(user);
+		var tag = TagFixture.createTag(1L, "java");
+
+		given(userRepository.findByUsername(loginUser.getUsername())).willReturn(Optional.of(user));
+		given(tagRepository.findById(eq(tag.getId()))).willThrow(new CoreException(ErrorType.TAG_NOT_FOUND));
+
+		// when & then
+		assertThatThrownBy(() -> tagService.deleteTag(loginUser, tag.getId()))
+			.isInstanceOf(CoreException.class)
+			.hasFieldOrPropertyWithValue("errorType", ErrorType.TAG_NOT_FOUND);
+
+		verify(imageTagRepository, never()).deleteTagAndUser(eq(tag), eq(user));
 	}
 }

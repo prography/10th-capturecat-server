@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,5 +46,10 @@ public class TagController {
 	public ApiResponse<CursorResponse<TagResponse>> getMostUsedTags(@AuthenticationPrincipal LoginUser loginUser,
 			@PageableDefault Pageable pageable) {
 		return ApiResponse.success(tagService.getMostUsedTags(loginUser, pageable));
+	}
+
+	@DeleteMapping("/{tagId}")
+	public ApiResponse<TagResponse> delete(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long tagId) {
+		return ApiResponse.success(tagService.deleteTag(loginUser, tagId));
 	}
 }
