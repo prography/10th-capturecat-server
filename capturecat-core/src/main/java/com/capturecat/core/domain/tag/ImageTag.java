@@ -33,5 +33,4 @@ public class ImageTag extends BaseTimeEntity {
 		this.image = image;
 		this.tag = tag;
 	}
-
 }

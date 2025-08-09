@@ -77,3 +77,7 @@ include::{snippets}/errorCode/withdraw/error-codes.adoc[]
 [[튜토리얼-완료-업데이트]]
 === 튜토리얼 완료 업데이트
 include::{snippets}/errorCode/tutorialComplete/error-codes.adoc[]
+
+[[태그-삭제]]
+=== 태그 삭제
+include::{snippets}/errorCode/deleteTag/error-codes.adoc[]

@@ -9,6 +9,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 
 import java.util.List;
@@ -118,6 +119,28 @@ class TagControllerTest extends RestDocsTest {
 					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("가장 많이 사용된 태그 목록"),
 					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 태그_삭제() {
+		// given
+		BDDMockito.given(tagService.deleteTag(any(), any()))
+			.willReturn(new TagResponse(1L, "tag"));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.when().delete("/v1/tags/{tagId}", 1L)
+			.then().status(HttpStatus.OK)
+			.apply(document("deleteTag", requestPreprocessor(), responsePreprocessor(),
+				pathParameters(
+					parameterWithName("tagId").description("삭제할 태그의 ID")
+				),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("삭제된 태그 정보"),
+					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.name").type(JsonFieldType.STRING).description("태그 이름"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 }
