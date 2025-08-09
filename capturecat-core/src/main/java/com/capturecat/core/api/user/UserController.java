@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.core.support.response.ApiResponse;
@@ -46,5 +49,14 @@ public class UserController {
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser) {
 		String resultMessage = userService.withdraw(loginUser);
 		return ApiResponse.success(resultMessage);
+	}
+
+	/**
+	 * 회원 정보 조회
+	 */
+	@GetMapping("/info")
+	public ApiResponse<InfoRespDto> join(@AuthenticationPrincipal LoginUser loginUser) {
+		InfoRespDto infoRespDto = userService.getUserInfo(loginUser.getUsername());
+		return ApiResponse.success(infoRespDto);
 	}
 }

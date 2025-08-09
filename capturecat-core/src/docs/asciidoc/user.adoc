@@ -24,3 +24,16 @@ operation::withdraw[snippets='curl-request,http-request,request-headers,http-res
 회원 탈퇴가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
 <<error-codes#회원탈퇴, 회원 탈퇴 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+
+[[사용자-정보-조회]]
+=== 사용자 정보 조회
+JWT 엑세스 토큰의 사용자 정보를 조회합니다.
+
+==== 성공
+operation::userInfo[snippets='curl-request,http-request,request-headers,http-response,response-fields']
+
+==== 실패
+사용자 정보 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#사용자정보조회, 회원 탈퇴 API에서 발생할 수 있는 에러>>를 살펴보세요.
