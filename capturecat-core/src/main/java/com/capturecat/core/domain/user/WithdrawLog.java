@@ -26,7 +26,7 @@ import com.capturecat.core.domain.BaseTimeEntity;
 	indexes = {
 		@Index(name = "idx_withdraw_log_user_id", columnList = "user_id"),
 		@Index(name = "idx_withdraw_log_created_date", columnList = "created_date"),
-		@Index(name = "idx_withdraw_log_s3_status", columnList = "s3_cleanup_status, created_date")
+		@Index(name = "idx_withdraw_log_cleanup_status", columnList = "image_cleanup_status, created_date")
 	})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -43,18 +43,18 @@ public class WithdrawLog extends BaseTimeEntity {
 	@Column(columnDefinition = "text")
 	private String reason;
 
-	/** S3 삭제 배치 처리 상태 */
+	/** S3 이미지 삭제 배치 처리 상태 */
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	@Builder.Default
-	private S3CleanupStatus s3CleanupStatus = S3CleanupStatus.PENDING;
+	private S3CleanupStatus imageCleanupStatus = S3CleanupStatus.PENDING;
 
 
 	public void markDone() {
-		this.s3CleanupStatus = S3CleanupStatus.DONE;
+		this.imageCleanupStatus = S3CleanupStatus.DONE;
 	}
 
 	public void markFailed() {
-		this.s3CleanupStatus = S3CleanupStatus.FAILED;
+		this.imageCleanupStatus = S3CleanupStatus.FAILED;
 	}
 }

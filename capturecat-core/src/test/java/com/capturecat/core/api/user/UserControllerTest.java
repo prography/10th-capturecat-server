@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.restassured.http.ContentType;
 
+import com.capturecat.core.api.user.dto.UserReqDto;
+import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
 import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.domain.user.User;
@@ -63,12 +65,15 @@ class UserControllerTest extends RestDocsTest {
 	@Test
 	void 회원_탈퇴() {
 		// given
+		WithdrawReqDto requestBody = new WithdrawReqDto();
+		requestBody.setReason("test reason");
 		willReturn("소셜(google) 연결 해지 성공").given(userService).withdraw(any(LoginUser.class), any());
 
 		// when & then
 		given()
 			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
 			.contentType(ContentType.JSON)
+			.body(requestBody)
 			.when()
 			.delete(URL_PREFIX + "/withdraw")
 			.then()
@@ -78,6 +83,8 @@ class UserControllerTest extends RestDocsTest {
 				requestHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION)
 						.description("유효한 Access 토큰")),
+				requestFields(
+					fieldWithPath("reason").type(JsonFieldType.STRING).description("탈퇴 사유")),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과 (예: SUCCESS)"),
 					fieldWithPath("data").type(JsonFieldType.STRING).description("소셜 서비스 해지 요청 결과")

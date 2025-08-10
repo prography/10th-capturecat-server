@@ -45,8 +45,8 @@ public class UserController {
 	/**
 	 * 탈퇴 API
 	 * 1) 소셜 로그인 연결 해제
-	 * 2) 회원 정보 삭제
-	 * 3) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
+	 * 2) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
+	 * 3) 회원 및 관련 데이터 삭제
 	 */
 	@DeleteMapping("/withdraw")
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,

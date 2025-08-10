@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
