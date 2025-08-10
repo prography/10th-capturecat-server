@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -127,6 +128,15 @@ public class UserService {
 		userRepository.delete(user);
 
 		return resultMessage.toString();
+	}
+
+	/**
+	 * 사용자 정보 조회
+	 */
+	public UserRespDto.InfoRespDto getUserInfo(String username) {
+		User user = userRepository.findByUsername(username)
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		return new UserRespDto.InfoRespDto(user);
 	}
 
 	private User buildUser(OidcUserPayload payload) {

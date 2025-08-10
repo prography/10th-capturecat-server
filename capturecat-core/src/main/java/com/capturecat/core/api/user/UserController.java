@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
@@ -65,5 +67,14 @@ public class UserController {
 		tokenService.blacklistAccessToken(authHeader);
 
 		return ApiResponse.success(resultMessage);
+	}
+
+	/**
+	 * 회원 정보 조회
+	 */
+	@GetMapping("/info")
+	public ApiResponse<InfoRespDto> getUserInfo(@AuthenticationPrincipal LoginUser loginUser) {
+		InfoRespDto infoRespDto = userService.getUserInfo(loginUser.getUsername());
+		return ApiResponse.success(infoRespDto);
 	}
 }

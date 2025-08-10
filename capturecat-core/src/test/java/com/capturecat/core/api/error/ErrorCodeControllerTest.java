@@ -146,6 +146,12 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/withdraw", errorCodeDescriptors);
 	}
 
+	@Test
+	void 사용자_정보_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/userInfo", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")

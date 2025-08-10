@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.restassured.http.ContentType;
 
+import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.config.jwt.JwtUtil;
+import com.capturecat.core.domain.user.User;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
@@ -49,7 +51,8 @@ class UserControllerTest extends RestDocsTest {
 		willDoNothing().given(userService).updateTutorialCompleted(any(LoginUser.class));
 
 		// when & then
-		given().header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
 			.contentType(ContentType.JSON)
 			.when().post(URL_PREFIX + "/tutorialComplete")
 			.then().status(HttpStatus.OK)
@@ -64,13 +67,17 @@ class UserControllerTest extends RestDocsTest {
 	@Test
 	void 회원_탈퇴() {
 		// given
-		willReturn("").given(userService).withdraw(any(LoginUser.class));
+		willReturn("소셜(google) 연결 해지 성공").given(userService).withdraw(any(LoginUser.class));
 
 		// when & then
-		given().header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
 			.contentType(ContentType.JSON)
-			.when().delete(URL_PREFIX + "/withdraw")
-			.then().status(HttpStatus.OK)
+			.when()
+			.delete(URL_PREFIX + "/withdraw")
+			.then()
+			.log().all() //요청/응답 전체 출력
+			.status(HttpStatus.OK)
 			.apply(document("withdraw", requestPreprocessor(), responsePreprocessor(),
 				requestHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION)
@@ -81,4 +88,34 @@ class UserControllerTest extends RestDocsTest {
 				)));
 	}
 
+	@Test
+	void 사용자_정보_조회() {
+		// given
+		User user = User.builder()
+			.username("test@email.com")
+			.nickname("testNickname")
+			.build();
+		user.tutorialComplete();
+		UserRespDto.InfoRespDto infoRespDto = new UserRespDto.InfoRespDto(user);
+		willReturn(infoRespDto).given(userService).getUserInfo(any());
+
+		// when & then
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.contentType(ContentType.JSON)
+			.when()
+			.get(URL_PREFIX + "/info")
+			.then()
+			.status(HttpStatus.OK)
+			.apply(document("userInfo", requestPreprocessor(), responsePreprocessor(),
+				requestHeaders(
+					headerWithName(HttpHeaders.AUTHORIZATION)
+						.description("유효한 Access 토큰")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (예: SUCCESS)"),
+					fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
+					fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("닉네임"),
+					fieldWithPath("data.tutorialCompleted").type(JsonFieldType.BOOLEAN).description("튜토리얼(시작하기) 완료 여부")
+				)));
+	}
 }
