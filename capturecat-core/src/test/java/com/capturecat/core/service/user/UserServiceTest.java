@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +19,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -51,6 +51,9 @@ class UserServiceTest {
 
 	@Mock
 	private UserSocialAccountRepository userSocialAccountRepository;
+
+	@Mock
+	private WithdrawLogService withdrawLogService;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -107,7 +110,7 @@ class UserServiceTest {
 		when(imageRepository.findByUser(savedUser)).thenReturn(userImages);
 
 		// when
-		userService.withdraw(new LoginUser(savedUser));
+		userService.withdraw(new LoginUser(savedUser), "test reason");
 
 		// then
 		verify(bookmarkRepository).deleteByUser(savedUser);
@@ -119,6 +122,9 @@ class UserServiceTest {
 
 		// 이미지 전체 삭제
 		verify(imageRepository).deleteAll(userImages);
+
+		// 탈퇴 사유 저장
+		verify(withdrawLogService).save(savedUser.getId(), "test reason");
 
 		// 마지막으로 user 삭제
 		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -136,10 +142,10 @@ class UserServiceTest {
 		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.empty());
 
 		// when & then
-		assertThatThrownBy(() -> userService.withdraw(new LoginUser(savedUser)))
+		assertThatThrownBy(() -> userService.withdraw(new LoginUser(savedUser), "test reason"))
 			.isInstanceOf(CoreException.class)
 			.satisfies(e -> {
-				CoreException ce = (CoreException) e;
+				CoreException ce = (CoreException)e;
 				assertThat(ce.getErrorType()).isEqualTo(ErrorType.USER_NOT_FOUND);
 			});
 	}

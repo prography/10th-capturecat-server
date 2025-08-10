@@ -2,12 +2,10 @@ package com.capturecat.core.api.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -45,19 +43,6 @@ public class UserReqDto {
 		}
 	}
 
-	/** 회원 가입 응답 DTO */
-	@Getter
-	@Setter
-	public static class JoinRespDto {
-		private Long id;
-		private String username;
-
-		public JoinRespDto(User user) {
-			this.id = user.getId();
-			this.username = user.getUsername();
-		}
-	}
-
 	/** 로그인 요청 DTO */
 	@Getter
 	@Setter
@@ -66,12 +51,10 @@ public class UserReqDto {
 		private String password;
 	}
 
-	/** 로그인 응답 DTO */
+	/** 탈퇴 사유 DTO */
 	@Getter
 	@Setter
-	@AllArgsConstructor
-	public static class LoginRespDto {
-		private String accessToken;
-		private String refreshToken;
+	public static class WithdrawReqDto {
+		private String reason;
 	}
 }

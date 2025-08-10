@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
-import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -39,6 +39,7 @@ public class UserService {
 	private final ImageTagRepository imageTagRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final SocialService socialService;
+	private final WithdrawLogService withdrawLogService;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -90,10 +91,11 @@ public class UserService {
 
 	/**
 	 * 회원 탈퇴
-	 * 모든 소셜 서비스 연결 해제 시도
-	 * 회원 관련 데이터 삭제
+	 * 1) 모든 소셜 서비스 연결 해제 시도
+	 * 2) 회원 관련 데이터 삭제
+	 * 3) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
 	 */
-	public String withdraw(LoginUser loginUser) {
+	public String withdraw(LoginUser loginUser, String reason) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
@@ -124,7 +126,14 @@ public class UserService {
 		byUser.forEach(imageTagRepository::deleteAllByImage);
 		imageRepository.deleteAll(byUser);
 
-		// 3. User 삭제 -> social account도 삭제됨
+		// 3. 탈퇴 사유 저장
+		try {
+			withdrawLogService.save(user.getId(), reason);
+		} catch (Exception e) {
+			log.error("Withdraw log save failed. userId={}", user.getId(), e);
+		}
+
+		// 4. User 삭제 -> social account도 삭제됨
 		userRepository.delete(user);
 
 		return resultMessage.toString();

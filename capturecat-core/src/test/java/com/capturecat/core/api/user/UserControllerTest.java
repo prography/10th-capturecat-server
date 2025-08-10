@@ -63,7 +63,7 @@ class UserControllerTest extends RestDocsTest {
 	@Test
 	void 회원_탈퇴() {
 		// given
-		willReturn("소셜(google) 연결 해지 성공").given(userService).withdraw(any(LoginUser.class));
+		willReturn("소셜(google) 연결 해지 성공").given(userService).withdraw(any(LoginUser.class), any());
 
 		// when & then
 		given()
