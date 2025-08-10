@@ -56,6 +56,7 @@ public class UserReqDto {
 	@Getter
 	@Setter
 	public static class WithdrawReqDto {
+		@Size(max = 500, message = "탈퇴 사유는 500자 이내로 작성해주세요.")
 		private String reason;
 	}
 }

@@ -106,7 +106,7 @@ public class UserService {
 		String resultMessage = unlinkSocials(user);
 
 		// 2. 탈퇴 사유 저장
-		saveWithdrawReason(reason, user);
+		withdrawLogService.save(user.getId(), reason);
 
 		// 3. 회원 관련 데이터 삭제
 		deleteUserAndRelated(user);
@@ -126,14 +126,6 @@ public class UserService {
 
 		// 3. User 삭제 -> social account도 삭제됨
 		userRepository.delete(user);
-	}
-
-	private void saveWithdrawReason(String reason, User user) {
-		try {
-			withdrawLogService.save(user.getId(), reason);
-		} catch (Exception e) {
-			log.error("Withdraw log save failed. userId={}", user.getId(), e);
-		}
 	}
 
 	private String unlinkSocials(User user) {
