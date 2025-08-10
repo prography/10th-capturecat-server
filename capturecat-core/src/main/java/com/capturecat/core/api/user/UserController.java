@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
-import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.user.UserService;
@@ -55,7 +54,7 @@ public class UserController {
 	 * 회원 정보 조회
 	 */
 	@GetMapping("/info")
-	public ApiResponse<InfoRespDto> join(@AuthenticationPrincipal LoginUser loginUser) {
+	public ApiResponse<InfoRespDto> getUserInfo(@AuthenticationPrincipal LoginUser loginUser) {
 		InfoRespDto infoRespDto = userService.getUserInfo(loginUser.getUsername());
 		return ApiResponse.success(infoRespDto);
 	}
