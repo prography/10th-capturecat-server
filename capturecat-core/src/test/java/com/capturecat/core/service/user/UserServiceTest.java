@@ -99,37 +99,23 @@ class UserServiceTest {
 		//given
 		//기 회원 만들기
 		User savedUser = newMockUser(1L);
-
 		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.of(savedUser));
-
-		// User가 소유한 이미지 2개라고 가정
-		Image image1 = mock(Image.class);
-		Image image2 = mock(Image.class);
-		List<Image> userImages = List.of(image1, image2);
-
-		when(imageRepository.findByUser(savedUser)).thenReturn(userImages);
 
 		// when
 		userService.withdraw(new LoginUser(savedUser), "test reason");
 
 		// then
-		verify(bookmarkRepository).deleteByUser(savedUser);
-		verify(imageRepository).findByUser(savedUser);
-
-		// 각 이미지에 대해 imageTagRepository.deleteAllByImage 호출
-		verify(imageTagRepository).deleteAllByImage(image1);
-		verify(imageTagRepository).deleteAllByImage(image2);
-
-		// 이미지 전체 삭제
-		verify(imageRepository).deleteAll(userImages);
-
 		// 탈퇴 사유 저장
 		verify(withdrawLogService).save(savedUser.getId(), "test reason");
 
-		// 마지막으로 user 삭제
-		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-		verify(userRepository).delete(captor.capture());
-		assertThat(captor.getValue()).isSameAs(savedUser);
+		// 즐겨찾기, 이미지, 회원 삭제
+		verify(bookmarkRepository).deleteByUserId(savedUser.getId());
+		verify(imageTagRepository).deleteAllTagsByUserId(savedUser.getId());
+		verify(imageRepository).deleteAllImagesByUserId(savedUser.getId());
+
+		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+		verify(userRepository).deleteById(captor.capture());
+		assertThat(captor.getValue()).isSameAs(savedUser.getId());
 	}
 
 	@Test

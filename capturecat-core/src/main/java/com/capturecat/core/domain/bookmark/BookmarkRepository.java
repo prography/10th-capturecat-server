@@ -15,5 +15,5 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, Bookm
 
 	void deleteByUserAndImage(User user, Image image);
 
-	void deleteByUser(User user);
+	void deleteByUserId(Long userId);
 }

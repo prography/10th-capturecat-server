@@ -28,6 +28,5 @@ public class WithdrawLogService {
 		} catch (Exception e) {
 			log.error("Failed to persist withdraw log. userId={}, reason={}", userId, reason, e);
 		}
-
 	}
 }

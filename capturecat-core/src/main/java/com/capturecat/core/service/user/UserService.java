@@ -109,23 +109,22 @@ public class UserService {
 		withdrawLogService.save(user.getId(), reason);
 
 		// 3. 회원 관련 데이터 삭제
-		deleteUserAndRelated(user);
+		deleteUserAndRelated(user.getId());
 
 		return resultMessage;
 	}
 
 	@Transactional
-	protected void deleteUserAndRelated(User user) {
+	protected void deleteUserAndRelated(Long userId) {
 		//1. 즐겨찾기 삭제
-		bookmarkRepository.deleteByUser(user);
+		bookmarkRepository.deleteByUserId(userId);
 
-		// 2. 해당 User가 소유한 이미지 모두 삭제
-		List<Image> byUser = imageRepository.findByUser(user);
-		byUser.forEach(imageTagRepository::deleteAllByImage);
-		imageRepository.deleteAll(byUser);
+		// 2. 해당 User가 소유한 이미지모두 삭제
+		imageTagRepository.deleteAllTagsByUserId(userId);
+		imageRepository.deleteAllImagesByUserId(userId);
 
 		// 3. User 삭제 -> social account도 삭제됨
-		userRepository.delete(user);
+		userRepository.deleteById(userId);
 	}
 
 	private String unlinkSocials(User user) {
