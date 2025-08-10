@@ -50,7 +50,7 @@ public class UserController {
 	 */
 	@DeleteMapping("/withdraw")
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,
-		@RequestBody WithdrawReqDto req, BindingResult bindingResult) {
+		@RequestBody @Valid WithdrawReqDto req, BindingResult bindingResult) {
 		String resultMessage = userService.withdraw(loginUser, req.getReason().trim());
 		return ApiResponse.success(resultMessage);
 	}
