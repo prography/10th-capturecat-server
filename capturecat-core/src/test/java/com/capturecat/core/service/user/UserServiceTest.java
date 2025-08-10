@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +19,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
@@ -51,6 +51,9 @@ class UserServiceTest {
 
 	@Mock
 	private UserSocialAccountRepository userSocialAccountRepository;
+
+	@Mock
+	private WithdrawLogService withdrawLogService;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -96,34 +99,23 @@ class UserServiceTest {
 		//given
 		//기 회원 만들기
 		User savedUser = newMockUser(1L);
-
 		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.of(savedUser));
 
-		// User가 소유한 이미지 2개라고 가정
-		Image image1 = mock(Image.class);
-		Image image2 = mock(Image.class);
-		List<Image> userImages = List.of(image1, image2);
-
-		when(imageRepository.findByUser(savedUser)).thenReturn(userImages);
-
 		// when
-		userService.withdraw(new LoginUser(savedUser));
+		userService.withdraw(new LoginUser(savedUser), "test reason");
 
 		// then
-		verify(bookmarkRepository).deleteByUser(savedUser);
-		verify(imageRepository).findByUser(savedUser);
+		// 탈퇴 사유 저장
+		verify(withdrawLogService).save(savedUser.getId(), "test reason");
 
-		// 각 이미지에 대해 imageTagRepository.deleteAllByImage 호출
-		verify(imageTagRepository).deleteAllByImage(image1);
-		verify(imageTagRepository).deleteAllByImage(image2);
+		// 즐겨찾기, 이미지, 회원 삭제
+		verify(bookmarkRepository).deleteByUserId(savedUser.getId());
+		verify(imageTagRepository).deleteAllTagsByUserId(savedUser.getId());
+		verify(imageRepository).deleteAllImagesByUserId(savedUser.getId());
 
-		// 이미지 전체 삭제
-		verify(imageRepository).deleteAll(userImages);
-
-		// 마지막으로 user 삭제
-		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-		verify(userRepository).delete(captor.capture());
-		assertThat(captor.getValue()).isSameAs(savedUser);
+		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+		verify(userRepository).deleteById(captor.capture());
+		assertThat(captor.getValue()).isSameAs(savedUser.getId());
 	}
 
 	@Test
@@ -136,10 +128,10 @@ class UserServiceTest {
 		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.empty());
 
 		// when & then
-		assertThatThrownBy(() -> userService.withdraw(new LoginUser(savedUser)))
+		assertThatThrownBy(() -> userService.withdraw(new LoginUser(savedUser), "test reason"))
 			.isInstanceOf(CoreException.class)
 			.satisfies(e -> {
-				CoreException ce = (CoreException) e;
+				CoreException ce = (CoreException)e;
 				assertThat(ce.getErrorType()).isEqualTo(ErrorType.USER_NOT_FOUND);
 			});
 	}

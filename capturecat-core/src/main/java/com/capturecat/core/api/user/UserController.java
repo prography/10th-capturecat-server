@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+import com.capturecat.core.api.user.dto.UserReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
-import com.capturecat.core.api.user.dto.UserReqDto.JoinRespDto;
+import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
+import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
@@ -37,7 +40,6 @@ public class UserController {
 	@PostMapping("/join")
 	public ApiResponse<JoinRespDto> join(@RequestBody @Valid JoinReqDto joinReqDto, BindingResult bindingResult) {
 		JoinRespDto joinRespDto = userService.join(joinReqDto);
-
 		return ApiResponse.success(joinRespDto);
 	}
 
@@ -47,12 +49,14 @@ public class UserController {
 	@PostMapping("/tutorialComplete")
 	public ApiResponse<?> tutorialCompleted(@AuthenticationPrincipal LoginUser loginUser) {
 		userService.updateTutorialCompleted(loginUser);
-
 		return ApiResponse.success();
 	}
 
 	/**
 	 * 탈퇴 API
+	 * 1) 소셜 로그인 연결 해제
+	 * 2) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
+	 * 3) 회원 및 관련 데이터 삭제
 	 */
 	@DeleteMapping("/withdraw")
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,
@@ -66,6 +70,9 @@ public class UserController {
 		//3. Access Token 블랙리스트 등록
 		tokenService.blacklistAccessToken(authHeader);
 
+	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,
+		@RequestBody @Valid WithdrawReqDto req, BindingResult bindingResult) {
+		String resultMessage = userService.withdraw(loginUser, req.getReason().trim());
 		return ApiResponse.success(resultMessage);
 	}
 
