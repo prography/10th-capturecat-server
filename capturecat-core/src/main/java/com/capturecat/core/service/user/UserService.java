@@ -29,7 +29,6 @@ import com.capturecat.core.support.error.ErrorType;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -46,6 +45,7 @@ public class UserService {
 	/**
 	 * 일반 회원 가입
 	 */
+	@Transactional
 	public JoinRespDto join(JoinReqDto joinReqDto) {
 		// 기 가입 여부 검사
 		if (userRepository.existsByUsername(joinReqDto.getUsername())) {
@@ -61,6 +61,7 @@ public class UserService {
 	/**
 	 * 소셜 로그인 및 신규 회원가입 처리
 	 */
+	@Transactional
 	public LoginUser upsertSocialUser(OidcUserPayload payload) {
 		User user = userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
 			.map(UserSocialAccount::getUser)
@@ -83,6 +84,7 @@ public class UserService {
 	/**
 	 * 튜토리얼(시작하기) 완료 상태 저장
 	 */
+	@Transactional
 	public void updateTutorialCompleted(LoginUser loginUser) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
@@ -92,14 +94,49 @@ public class UserService {
 	/**
 	 * 회원 탈퇴
 	 * 1) 모든 소셜 서비스 연결 해제 시도
-	 * 2) 회원 관련 데이터 삭제
-	 * 3) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
+	 * 2) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
+	 * 3) 회원 관련 데이터 삭제
 	 */
+	@Transactional
 	public String withdraw(LoginUser loginUser, String reason) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 
-		//0. 연결된 모든 소셜 로그인 해지
+		//1. 모든 소셜 서비스 연결 해제 시도
+		String resultMessage = unlinkSocials(user);
+
+		// 2. 탈퇴 사유 저장
+		saveWithdrawReason(reason, user);
+
+		// 3. 회원 관련 데이터 삭제
+		deleteUserAndRelated(user);
+
+		return resultMessage;
+	}
+
+	@Transactional
+	protected void deleteUserAndRelated(User user) {
+		//1. 즐겨찾기 삭제
+		bookmarkRepository.deleteByUser(user);
+
+		// 2. 해당 User가 소유한 이미지 모두 삭제
+		List<Image> byUser = imageRepository.findByUser(user);
+		byUser.forEach(imageTagRepository::deleteAllByImage);
+		imageRepository.deleteAll(byUser);
+
+		// 3. User 삭제 -> social account도 삭제됨
+		userRepository.delete(user);
+	}
+
+	private void saveWithdrawReason(String reason, User user) {
+		try {
+			withdrawLogService.save(user.getId(), reason);
+		} catch (Exception e) {
+			log.error("Withdraw log save failed. userId={}", user.getId(), e);
+		}
+	}
+
+	private String unlinkSocials(User user) {
 		StringBuilder resultMessage = new StringBuilder();
 		List<UserSocialAccount> socialAccounts = userSocialAccountRepository.findByUser(user);
 		for (UserSocialAccount socialAccount : socialAccounts) {
@@ -115,27 +152,7 @@ public class UserService {
 					e.getMessage());
 				resultMessage.append(msg);
 			}
-
 		}
-
-		//1. 즐겨찾기 삭제
-		bookmarkRepository.deleteByUser(user);
-
-		// 2. 해당 User가 소유한 이미지 모두 삭제
-		List<Image> byUser = imageRepository.findByUser(user);
-		byUser.forEach(imageTagRepository::deleteAllByImage);
-		imageRepository.deleteAll(byUser);
-
-		// 3. 탈퇴 사유 저장
-		try {
-			withdrawLogService.save(user.getId(), reason);
-		} catch (Exception e) {
-			log.error("Withdraw log save failed. userId={}", user.getId(), e);
-		}
-
-		// 4. User 삭제 -> social account도 삭제됨
-		userRepository.delete(user);
-
 		return resultMessage.toString();
 	}
 

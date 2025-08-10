@@ -14,6 +14,7 @@ import com.capturecat.core.domain.user.WithdrawLogRepository;
 public class WithdrawLogService {
 	private final WithdrawLogRepository withdrawLogRepository;
 
+	// 전파 시 실패해도 록백하지 않도록
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void save(Long userId, String reason) {
 		WithdrawLog log = WithdrawLog.builder()
