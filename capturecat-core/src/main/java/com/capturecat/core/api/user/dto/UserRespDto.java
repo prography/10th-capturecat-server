@@ -1,5 +1,6 @@
 package com.capturecat.core.api.user.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +21,28 @@ public class UserRespDto {
 			this.email = user.getUsername();
 			this.nickname = user.getNickname();
 			this.tutorialCompleted = user.isTutorialCompleted();
+		}
+	}
+
+	/** 로그인 응답 DTO */
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	public static class LoginRespDto {
+		private String accessToken;
+		private String refreshToken;
+	}
+
+	/** 회원 가입 응답 DTO */
+	@Getter
+	@Setter
+	public static class JoinRespDto {
+		private Long id;
+		private String username;
+
+		public JoinRespDto(User user) {
+			this.id = user.getId();
+			this.username = user.getUsername();
 		}
 	}
 }
