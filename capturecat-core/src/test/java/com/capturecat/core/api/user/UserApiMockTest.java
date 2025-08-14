@@ -13,12 +13,17 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.capturecat.core.api.user.dto.UserReqDto;
+import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
@@ -40,6 +45,9 @@ public class UserApiMockTest {
 	@MockitoBean
 	private JwtUtil jwtUtil;
 
+	@Autowired
+	private ObjectMapper om;
+
 	@BeforeEach
 	void setUp() {
 		LoginUser loginUser = new LoginUser("testUser", "ROLE_USER");
@@ -60,23 +68,27 @@ public class UserApiMockTest {
 	@DisplayName("회원 탈퇴 시 userService, tokenService가 정상 호출되고 성공 응답을 반환한다")
 	void withdraw_IntegrationTest() throws Exception {
 		// given
-		String accessToken = "Bearer test.access.token";
+		String accessTokenHeader = "Bearer test.access.token";
+		String refreshTokenHeader = "Bearer test.refresh.token";
 		String resultMessage = "소셜 서비스 해지 요청 결과";
-
+		WithdrawReqDto requestBody = new WithdrawReqDto();
+		requestBody.setReason("test reason");
 		// userService가 호출되면 반환할 메시지
-		given(userService.withdraw(Mockito.any(LoginUser.class))).willReturn(resultMessage);
+		given(userService.withdraw(Mockito.any(LoginUser.class), any())).willReturn(resultMessage);
 
 		// when & then
 		mockMvc.perform(delete(URL_PREFIX + "/withdraw")
 				.with(csrf())
-				.header(HttpHeaders.AUTHORIZATION, accessToken))
+				.header(HttpHeaders.AUTHORIZATION, accessTokenHeader)
+				.header(JwtUtil.REFRESH_TOKEN_HEADER, refreshTokenHeader)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(om.writeValueAsString(requestBody)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result").value("SUCCESS"))
 			.andExpect(jsonPath("$.data").value(resultMessage));
 
 		// 내부 서비스 호출 검증 (MockBean으로 대체했으므로)
-		then(userService).should().withdraw(Mockito.any(LoginUser.class));
-		then(tokenService).should().deleteRefreshTokenByUsername("testUser");
-		then(tokenService).should().blacklistAccessToken(accessToken);
+		then(userService).should().withdraw(Mockito.any(LoginUser.class), any());
+		then(tokenService).should().revokeUserTokens(anyString(), anyString());
 	}
 }

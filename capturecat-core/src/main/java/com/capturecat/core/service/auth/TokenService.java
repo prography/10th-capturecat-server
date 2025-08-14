@@ -105,12 +105,21 @@ public class TokenService {
 	}
 
 	/**
+	 * 로그아웃, 회원 탈퇴 시
+	 * Refresh Token 삭제 및 Access Token 블랙리스트 등록
+	 */
+	public void revokeUserTokens(String accessTokenHeader, String refreshTokenHeader) {
+		blacklistAccessToken(accessTokenHeader);
+		deleteValidRefreshToken(refreshTokenHeader);
+	}
+
+	/**
 	 * 유효성 검사 후 Redis에서 Refresh token 삭제
 	 */
-	public String deleteValidRefreshToken(String authHeader) {
-		log.info("deleteRefreshToken: {}", authHeader);
+	public String deleteValidRefreshToken(String refreshTokenHeader) {
+		log.info("deleteRefreshToken: {}", refreshTokenHeader);
 		//Refresh token parsing 및 유효성 검사
-		String refreshToken = parseRefreshToken(authHeader);
+		String refreshToken = parseRefreshToken(refreshTokenHeader);
 		String username = jwtUtil.getUsername(refreshToken);
 		//기존 Refresh 토큰 삭제
 		redisTemplate.delete(getRefreshTokenKey(username));

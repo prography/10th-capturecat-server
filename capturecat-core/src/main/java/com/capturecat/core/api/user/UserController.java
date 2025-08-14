@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.capturecat.core.api.user.dto.UserReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
-import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
+import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
@@ -59,20 +58,16 @@ public class UserController {
 	 * 3) 회원 및 관련 데이터 삭제
 	 */
 	@DeleteMapping("/withdraw")
-	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,
-		@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser, @RequestHeader HttpHeaders headers,
+		@RequestBody @Valid WithdrawReqDto reqDto, BindingResult bindingResult) {
 		//1. 소셜 계정 연동 해제 및 회원 정보 삭제
-		String resultMessage = userService.withdraw(loginUser);
+		String resultMessage = userService.withdraw(loginUser, reqDto.getReason().trim());
 
-		//2. Refresh Token 삭제
-		tokenService.deleteRefreshTokenByUsername(loginUser.getUsername());
+		//2. Refresh Token 삭제 및 Access Token 블랙리스트 등록
+		String accessHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		String refreshHeader = headers.getFirst(JwtUtil.REFRESH_TOKEN_HEADER);
+		tokenService.revokeUserTokens(accessHeader, refreshHeader);
 
-		//3. Access Token 블랙리스트 등록
-		tokenService.blacklistAccessToken(authHeader);
-
-	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,
-		@RequestBody @Valid WithdrawReqDto req, BindingResult bindingResult) {
-		String resultMessage = userService.withdraw(loginUser, req.getReason().trim());
 		return ApiResponse.success(resultMessage);
 	}
 

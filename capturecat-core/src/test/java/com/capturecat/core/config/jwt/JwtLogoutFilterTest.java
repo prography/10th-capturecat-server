@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -73,18 +74,20 @@ class JwtLogoutFilterTest {
 	void logout_request_blacklist_exception() throws Exception {
 		// given
 		request.setRequestURI("/logout");
-		String refreshToken = "invalid refresh-token";
+		String accessToken = "invalid-refresh-token";
+		String refreshToken = "invalid-refresh-token";
+		request.addHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken);
 		request.addHeader(REFRESH_TOKEN_HEADER, BEARER_PREFIX + refreshToken);
 
 		doThrow(new CoreException(ErrorType.INVALID_REFRESH_TOKEN))
-			.when(tokenService).deleteValidRefreshToken(anyString());
+			.when(tokenService).revokeUserTokens(anyString(), anyString());
 
 		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
 
 		// then
 		assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
-		verify(tokenService).deleteValidRefreshToken(anyString());
+		verify(tokenService).revokeUserTokens(anyString(), anyString());
 		verify(filterChain, never()).doFilter(any(), any());
 	}
 
@@ -93,18 +96,21 @@ class JwtLogoutFilterTest {
 	void logout_request_with_valid_token() throws Exception {
 		// given
 		request.setRequestURI("/logout");
+		String accessToken = "valid-refresh-token";
 		String refreshToken = "valid-refresh-token";
+		request.addHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken);
 		request.addHeader(REFRESH_TOKEN_HEADER, BEARER_PREFIX + refreshToken);
 
+
 		// 토큰 서비스 mock: 항상 정상 처리
-		when(tokenService.deleteValidRefreshToken(anyString())).thenReturn(refreshToken);
+		willDoNothing().given(tokenService).revokeUserTokens(anyString(), anyString());
 
 		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
 
 		// then
 		assertEquals(HttpStatus.SC_OK, response.getStatus());
-		verify(tokenService).deleteValidRefreshToken(anyString());
+		verify(tokenService).revokeUserTokens(anyString(), anyString());
 		verify(filterChain, never()).doFilter(any(), any());
 	}
 }
