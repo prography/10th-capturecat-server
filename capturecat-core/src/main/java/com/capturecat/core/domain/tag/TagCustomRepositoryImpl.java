@@ -25,11 +25,12 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 	@Override
 	public Slice<Tag> searchUserTagsByUser(User user, Pageable pageable) {
 		List<Tag> tags = queryFactory
-			.selectFrom(tag)
-			.leftJoin(imageTag).on(imageTag.tag.eq(tag))
-			.leftJoin(image).on(imageTag.tag.eq(tag))
+			.select(tag)
+			.from(imageTag)
+			.join(imageTag.image, image)
+			.join(imageTag.tag, tag)
 			.where(image.user.eq(user))
-			.orderBy(tag.id.desc())
+			.orderBy(imageTag.id.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize() + 1)
 			.fetch();

@@ -3,6 +3,8 @@
 
 [[태그-목록-조회]]
 === 태그 목록 조회
+태그 목록 조회는 사용자가 최근에 사용한 태그를 기준으로 정렬합니다.
+
 ==== 성공
 operation::getTags[snippets='curl-request,http-request,query-parameters,http-response,response-fields']
 

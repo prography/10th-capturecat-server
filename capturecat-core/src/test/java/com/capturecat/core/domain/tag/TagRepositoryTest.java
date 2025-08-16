@@ -1,5 +1,6 @@
 package com.capturecat.core.domain.tag;
 
+import static com.capturecat.core.domain.tag.TagFixture.createTag;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -55,6 +56,32 @@ class TagRepositoryTest {
 		image1 = imageRepository.save(DummyObject.newMockUserImage(user));
 		image2 = imageRepository.save(DummyObject.newMockUserImage(user));
 		image3 = imageRepository.save(DummyObject.newMockUserImage(user));
+	}
+
+	@Test
+	void 태그_목록_조회() {
+		// given
+		var tag1 = tagRepository.save(createTag("tag1"));
+		var tag2 = tagRepository.save(createTag("tag2"));
+		var tag3 = tagRepository.save(createTag("tag3"));
+		var tag4 = tagRepository.save(createTag("tag4"));
+		var tag5 = tagRepository.save(createTag("tag5"));
+
+		saveImageTags(image1, List.of(tag1, tag2, tag3));
+		saveImageTags(image2, List.of(tag1, tag2, tag4));
+		saveImageTags(image3, List.of(tag5));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when
+		var tags = tagRepository.searchUserTagsByUser(user, PageRequest.of(0, 10));
+
+		// then
+		assertThat(tags.getContent()).hasSize(5);
+		assertThat(tags.hasNext()).isFalse();
+		assertThat(tags.getContent()).extracting(Tag::getName)
+			.containsExactly(tag5.getName(), tag4.getName(), tag2.getName(), tag1.getName(), tag3.getName());
 	}
 
 	@Test
