@@ -2,6 +2,7 @@ package com.capturecat.core.support.handler;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -34,6 +35,13 @@ public class CoreExceptionHandler {
 		MethodArgumentNotValidException exception) {
 		log.warn("Validation error occurred: {}", exception.getMessage(), exception);
 		return ResponseEntity.badRequest().body(ApiResponse.error(ErrorType.INVALID_REQUEST));
+	}
+
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<ApiResponse<?>> handle(MissingServletRequestParameterException ex) {
+		log.warn("Missing request parameter: {}", ex.getMessage(), ex);
+		return ResponseEntity.badRequest()
+			.body(ApiResponse.error(ErrorType.MISSING_PARAMETER, ex.getParameterName()));
 	}
 
 	@ExceptionHandler(Exception.class)

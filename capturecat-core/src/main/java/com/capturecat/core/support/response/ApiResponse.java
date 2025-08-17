@@ -20,6 +20,10 @@ public record ApiResponse<T>(ResultType result, T data, ErrorMessage error) {
 		return new ApiResponse<>(ResultType.ERROR, null, new ErrorMessage(error));
 	}
 
+	public static ApiResponse<?> error(ErrorType error, Object... args) {
+		return new ApiResponse<>(ResultType.ERROR, null, new ErrorMessage(error, args));
+	}
+
 	public static ApiResponse<?> error(ErrorType error, String rawResponseBody) {
 		return new ApiResponse<>(ResultType.ERROR, rawResponseBody, new ErrorMessage(error));
 	}
