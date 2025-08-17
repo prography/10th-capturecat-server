@@ -41,7 +41,7 @@ public class CoreExceptionHandler {
 	public ResponseEntity<ApiResponse<?>> handle(MissingServletRequestParameterException ex) {
 		log.warn("Missing request parameter: {}", ex.getMessage(), ex);
 		return ResponseEntity.badRequest()
-			.body(ApiResponse.error(ErrorType.MISSING_PARAMETER, ex.getParameterName()));
+			.body(ApiResponse.error(ErrorType.MISSING_PARAMETER, (Object) ex.getParameterName()));
 	}
 
 	@ExceptionHandler(Exception.class)
