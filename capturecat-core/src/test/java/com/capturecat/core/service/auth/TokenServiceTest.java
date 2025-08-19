@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -37,7 +37,7 @@ class TokenServiceTest {
 	private JwtUtil jwtUtil;
 
 	@Mock
-	private RedisTemplate<String, String> redisTemplate;
+	private StringRedisTemplate redisTemplate;
 
 	@Mock
 	private ValueOperations<String, String> valueOperations;
