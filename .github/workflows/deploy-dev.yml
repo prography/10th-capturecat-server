@@ -9,27 +9,27 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Github Repository 파일 불러오기
         uses: actions/checkout@v4
 
-      - name: Setup JDK 21
+      - name: JDK 21버전 설치
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      - name: Create application-dev.yml
+      - name: application.yml 파일 만들기
         run: |
           mkdir -p ./capturecat-core/src/main/resources
           echo "${{ secrets.DEV_APPLICATION_PROPERTIES }}" > ./capturecat-core/src/main/resources/application-dev.yml
 
-      - name: Build (core only)
+      - name: 테스트 및 빌드하기 (core만 빌드)
         run: ./gradlew :capturecat-core:clean :capturecat-core:build
 
-      - name: Rename build artifact
+      - name: 빌드된 파일 이름 변경하기
         run: mv ./capturecat-core/build/libs/capturecat-core-*.jar ./project.jar
 
-      - name: Upload JAR to DEV EC2 via SCP
+      - name: SCP로 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEV_EC2_HOST }}
@@ -38,7 +38,7 @@ jobs:
           source: project.jar
           target: /home/ubuntu/capturecat-server/tobe
 
-      - name: Restart DEV service over SSH
+      - name: SSH로 EC2에 접속하여 서비스 재기동
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_EC2_HOST }}
@@ -57,7 +57,7 @@ jobs:
             sleep 3
 
             # 교체 배포
-            rm -rf /home/ubuntu/capturecat-server/current
+            sudo rm -rf /home/ubuntu/capturecat-server/current
             mkdir /home/ubuntu/capturecat-server/current
             mv /home/ubuntu/capturecat-server/tobe/project.jar /home/ubuntu/capturecat-server/current/project.jar
             cd /home/ubuntu/capturecat-server/current
@@ -66,33 +66,32 @@ jobs:
             # export JAVA_OPTS="-Xms512m -Xmx1024m"
 
             # dev 프로필로 실행
-            nohup java ${JAVA_OPTS} -jar project.jar --spring.profiles.active=dev > output.log 2>&1 &
+            sudo nohup java ${JAVA_OPTS} -jar project.jar --spring.profiles.active=dev > output.log 2>&1 &
 
             # 실행 확인
             sleep 2
             if [ ! -f output.log ]; then
-              echo "output.log not found -> JAR did not start"
+              echo "output.log 파일이 없음! (jar 실행조차 안됨, 권한 등 문제)"
               exit 1
             fi
             if grep -q "Permission denied" output.log; then
-              echo "Permission denied found in output.log"
+              echo "output.log Permission denied 에러 발견, 배포 실패!"
               exit 1
             fi
 
-            # 헬스체크 (EC2 내부에서 localhost로 확인)
+            # 최대 30초 대기하며 헬스 체크
             for i in {1..30}; do
               if ps -ef | grep '[p]roject.jar' > /dev/null; then
-                echo "Process is running. Start health check..."
+                echo "프로세스 실행됨, 헬스체크 진입!"
                 for j in {1..30}; do
-                  # 개발계는 내부 로컬 확인
                   if curl -sf https://dev.capture-cat.com/health | grep -q '"status":"UP"'; then
-                    echo "Health check OK"
+                    echo "헬스체크 성공!"
                     break 2
                   fi
                   echo "Waiting for health... ($j sec)"
                   sleep 1
                   if [ $j -eq 30 ]; then
-                    echo "Health check failed."
+                    echo "헬스체크 실패! 배포 실패!"
                     tail -n 80 output.log || true
                     exit 1
                   fi
@@ -100,10 +99,10 @@ jobs:
               fi
               sleep 1
               if [ $i -eq 30 ]; then
-                echo "Process not started."
+                echo "실행 실패!"
                 exit 1
               fi
             done
 
             # 잔여 tobe 폴더 정리
-            rm -rf /home/ubuntu/capturecat-server/tobe
+            sudo rm -rf /home/ubuntu/capturecat-server/tobe
