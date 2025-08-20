@@ -143,6 +143,29 @@ class TagRepositoryTest {
 		assertThat(tags.get(2).getName()).isEqualTo(tag3.getName());
 	}
 
+	@Test
+	void 키워드_추천() {
+		// given
+		var tag1 = tagRepository.save(new Tag("자바"));
+		var tag2 = tagRepository.save(new Tag("스프링"));
+		var tag3 = tagRepository.save(new Tag("자바스크립트"));
+
+		saveImageTags(image1, List.of(tag1));
+		saveImageTags(image2, List.of(tag1, tag3));
+		saveImageTags(image3, List.of(tag1, tag2, tag3));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when
+		List<Tag> tags = tagRepository.searchByKeyword("자", user.getId(), 10);
+
+		// then
+		assertThat(tags).hasSize(2);
+		assertThat(tags).extracting(Tag::getName)
+			.containsExactlyInAnyOrder(tag1.getName(), tag3.getName());
+	}
+
 	private void saveImageTags(Image image1, List<Tag> tags) {
 		for (Tag tag : tags) {
 			imageTagRepository.save(new ImageTag(image1, tag));

@@ -85,3 +85,7 @@ include::{snippets}/errorCode/tutorialComplete/error-codes.adoc[]
 [[태그-삭제]]
 === 태그 삭제
 include::{snippets}/errorCode/deleteTag/error-codes.adoc[]
+
+[[검색어-자동완성]]
+=== 검색어 자동완성
+include::{snippets}/errorCode/autocomplete/error-codes.adoc[]

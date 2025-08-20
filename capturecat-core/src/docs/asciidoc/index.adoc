@@ -21,6 +21,8 @@ include::{adocPath}/tag.adoc[]
 
 include::{adocPath}/bookmark.adoc[]
 
+include::{adocPath}/search.adoc[]
+
 include::{adocPath}/health.adoc[]
 
 == xref:error-codes.adoc[에러 코드]

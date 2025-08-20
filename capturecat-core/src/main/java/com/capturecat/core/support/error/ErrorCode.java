@@ -35,7 +35,8 @@ public enum ErrorCode {
 	GENERATE_CLIENT_SECRET_FAIL("Apple client_secret 생성에 실패했습니다."),
 	UNLINK_SOCIAL_FAIL("소셜 로그인 연결 해제에 실패했습니다."),
 	FETCH_SOCIAL_TOKEN_FAIL("소셜 서비스로부터 idToken 혹은 unlinkKey 획득에 실패했습니다."),
-	SOCIAL_API_ERROR("소셜 서비스 API 호출 결과 실패를 응답받았습니다.");
+	SOCIAL_API_ERROR("소셜 서비스 API 호출 결과 실패를 응답받았습니다."),
+	MISSING_PARAMETER("필수 파라미터 %s(이)가 누락되었습니다.");
 
 	private final String message;
 
@@ -43,4 +44,12 @@ public enum ErrorCode {
 		this.message = message;
 	}
 
+	/**
+	 * 동적 인자를 받아 포맷팅된 메시지를 생성합니다.
+	 * @param args 메시지 포맷에 들어갈 인자
+	 * @return 포맷팅된 최종 오류 메시지
+	 */
+	public String generateMessage(Object... args) {
+		return String.format(this.message, args);
+	}
 }

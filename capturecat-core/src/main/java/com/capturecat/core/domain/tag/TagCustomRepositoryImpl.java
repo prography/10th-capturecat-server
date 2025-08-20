@@ -74,4 +74,17 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 
 		return SliceUtil.toSlice(tags, pageable);
 	}
+
+	@Override
+	public List<Tag> searchByKeyword(String keyword, Long userId, int size) {
+		return queryFactory
+			.select(tag)
+			.distinct()
+			.from(imageTag)
+			.join(imageTag.tag, tag)
+			.join(imageTag.image, image)
+			.where(image.user.id.eq(userId), tag.name.startsWithIgnoreCase(keyword))
+			.limit(size)
+			.fetch();
+	}
 }
