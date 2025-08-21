@@ -117,10 +117,10 @@ public class TokenService {
 	 * 유효성 검사 후 Redis에서 Refresh token 삭제
 	 */
 	public String deleteValidRefreshToken(String refreshTokenHeader) {
-		log.info("deleteRefreshToken: {}", refreshTokenHeader);
 		//Refresh token parsing 및 유효성 검사
 		String refreshToken = parseRefreshToken(refreshTokenHeader);
 		String username = jwtUtil.getUsername(refreshToken);
+		log.debug("Deleting refresh token for user {}", username);
 		//기존 Refresh 토큰 삭제
 		redisTemplate.delete(getRefreshTokenKey(username));
 		return refreshToken;

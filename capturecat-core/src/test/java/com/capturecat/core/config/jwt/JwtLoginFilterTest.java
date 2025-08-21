@@ -64,7 +64,7 @@ class JwtLoginFilterTest {
 		);
 
 		// 블랙리스트 관련: hasKey(..) 기본 false, delete(..) no-op
-		given(redisTemplate.hasKey(startsWith("blacklist:").toString())).willReturn(false);
+		given(redisTemplate.hasKey(argThat(key -> key != null && key.startsWith("blacklist:")))).willReturn(false);
 		willReturn(true).given(redisTemplate).delete(anyString());
 	}
 

@@ -61,7 +61,7 @@ public class UserController {
 	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser, @RequestHeader HttpHeaders headers,
 		@RequestBody @Valid WithdrawReqDto reqDto, BindingResult bindingResult) {
 		//1. 소셜 계정 연동 해제 및 회원 정보 삭제
-		String resultMessage = userService.withdraw(loginUser, reqDto.getReason().trim());
+		String resultMessage = userService.withdraw(loginUser, reqDto.getReason());
 
 		//2. Refresh Token 삭제 및 Access Token 블랙리스트 등록
 		String accessHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);

@@ -60,7 +60,7 @@ class TokenApiTest {
 			.set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 
 		// 블랙리스트 관련: 기본 false / 삭제는 no-op
-		given(redisTemplate.hasKey(startsWith("blacklist:").toString())).willReturn(false);
+		given(redisTemplate.hasKey(argThat(key -> key != null && key.startsWith("blacklist:")))).willReturn(false);
 		willReturn(true).given(redisTemplate).delete(anyString());
 
 		// --- 실제 서비스로 토큰 발급 (여기서 saveRefreshToken이 호출되어도 위에서 no-op 처리됨) ---
