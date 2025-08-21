@@ -1,7 +1,5 @@
 package com.capturecat.client.upload;
 
-import java.io.IOException;
-
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,15 +36,9 @@ public class S3FileUploader extends AbstractFileUploader {
 
 		try {
 			s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
-		} catch (IOException e) {
-			log.error("S3FileUploader.upload error = {}", e.getMessage());
-			throw new UploadException(ErrorCode.S3_UPLOAD_FAILED_IO, e);
-		} catch (SdkException e) {
-			log.error("S3FileUploader.upload error = {}", e.getMessage());
-			throw new UploadException(ErrorCode.S3_DOWNLOAD_FAILED_SDK, e);
 		} catch (Exception e) {
-			log.error("S3FileUploader.upload error = {}", e.getMessage());
-			throw new RuntimeException();
+			log.error("S3FileUploader.upload error,", e);
+			throw new UploadException(ErrorCode.S3_UPLOAD_FAILED, e);
 		}
 
 		return String.join("/", s3Properties.urlPrefix(), key);
@@ -62,7 +54,7 @@ public class S3FileUploader extends AbstractFileUploader {
 			s3Client.deleteObject(deleteRequest);
 		} catch (SdkException e) {
 			log.error("S3FileUploader.delete error = {}", e.getMessage());
-			throw new DeleteException(ErrorCode.S3_UPLOAD_FAILED_IO, e);
+			throw new DeleteException(ErrorCode.S3_DELETE_FAILED, e);
 		}
 	}
 }
