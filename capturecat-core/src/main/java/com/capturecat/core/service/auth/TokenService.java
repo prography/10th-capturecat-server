@@ -109,8 +109,12 @@ public class TokenService {
 	 * Refresh Token 삭제 및 Access Token 블랙리스트 등록
 	 */
 	public void revokeUserTokens(String accessTokenHeader, String refreshTokenHeader) {
-		blacklistAccessToken(accessTokenHeader);
-		deleteValidRefreshToken(refreshTokenHeader);
+		try {
+			blacklistAccessToken(accessTokenHeader);
+			deleteValidRefreshToken(refreshTokenHeader);
+		} catch (Exception e) {
+			throw new CoreException(ErrorType.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	/**

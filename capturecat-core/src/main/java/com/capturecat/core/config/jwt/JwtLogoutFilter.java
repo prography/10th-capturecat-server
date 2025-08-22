@@ -52,7 +52,7 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
 			String accessHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 			String refreshHeader = request.getHeader(JwtUtil.REFRESH_TOKEN_HEADER);
 			if (!StringUtils.hasText(accessHeader) || !StringUtils.hasText(refreshHeader)) {
-				throw new CoreException(ErrorType.INVALID_AUTH_TOKEN);
+				throw new CoreException(ErrorType.INVALID_LOGOUT_AUTH_TOKEN);
 			}
 			log.info("LogoutFilter hit: dispatcher={}, path={}", request.getDispatcherType(), request.getServletPath());
 
