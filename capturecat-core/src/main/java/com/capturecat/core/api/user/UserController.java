@@ -2,24 +2,26 @@ package com.capturecat.core.api.user;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.capturecat.core.api.user.dto.UserReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
-import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
+import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.core.support.response.ApiResponse;
 
@@ -29,13 +31,20 @@ import com.capturecat.core.support.response.ApiResponse;
 public class UserController {
 
 	private final UserService userService;
+	private final TokenService tokenService;
 
+	/**
+	 * 일반 회원 가입 (소셜 로그인 x)
+	 */
 	@PostMapping("/join")
 	public ApiResponse<JoinRespDto> join(@RequestBody @Valid JoinReqDto joinReqDto, BindingResult bindingResult) {
 		JoinRespDto joinRespDto = userService.join(joinReqDto);
 		return ApiResponse.success(joinRespDto);
 	}
 
+	/**
+	 * 튜토리얼(시작하기) 완료 업데이트
+	 */
 	@PostMapping("/tutorialComplete")
 	public ApiResponse<?> tutorialCompleted(@AuthenticationPrincipal LoginUser loginUser) {
 		userService.updateTutorialCompleted(loginUser);
@@ -49,9 +58,16 @@ public class UserController {
 	 * 3) 회원 및 관련 데이터 삭제
 	 */
 	@DeleteMapping("/withdraw")
-	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser,
-		@RequestBody @Valid WithdrawReqDto req, BindingResult bindingResult) {
-		String resultMessage = userService.withdraw(loginUser, req.getReason().trim());
+	public ApiResponse<?> withdraw(@AuthenticationPrincipal LoginUser loginUser, @RequestHeader HttpHeaders headers,
+		@RequestBody @Valid WithdrawReqDto reqDto, BindingResult bindingResult) {
+		//1. 소셜 계정 연동 해제 및 회원 정보 삭제
+		String resultMessage = userService.withdraw(loginUser, reqDto.getReason());
+
+		//2. Refresh Token 삭제 및 Access Token 블랙리스트 등록
+		String accessHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
+		String refreshHeader = headers.getFirst(JwtUtil.REFRESH_TOKEN_HEADER);
+		tokenService.revokeUserTokens(accessHeader, refreshHeader);
+
 		return ApiResponse.success(resultMessage);
 	}
 

@@ -9,8 +9,10 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,13 +50,14 @@ public class JwtLogoutFilter extends GenericFilterBean {
 			return;
 		}
 
-		String refreshHeader = request.getHeader(JwtUtil.REFRESH_TOKEN_HEADER);
 		// 로그아웃
 		try {
-			if (refreshHeader == null || refreshHeader.isEmpty()) {
-				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
+			String accessHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+			String refreshHeader = request.getHeader(JwtUtil.REFRESH_TOKEN_HEADER);
+			if (!StringUtils.hasText(accessHeader) || !StringUtils.hasText(refreshHeader)) {
+				throw new CoreException(ErrorType.INVALID_AUTH_TOKEN);
 			}
-			tokenService.deleteRefreshToken(refreshHeader);
+			tokenService.revokeUserTokens(accessHeader, refreshHeader);
 		} catch (CoreException e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);

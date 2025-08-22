@@ -22,6 +22,7 @@ import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.service.auth.LoginUser;
+import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
 import com.capturecat.test.api.RestDocsTest;
 
@@ -36,10 +37,13 @@ class UserControllerTest extends RestDocsTest {
 
 	private UserService userService;
 
+	private TokenService tokenService;
+
 	@BeforeEach
 	void setUp() {
 		userService = mock(UserService.class);
-		userController = new UserController(userService);
+		tokenService = mock(TokenService.class);
+		userController = new UserController(userService, tokenService);
 		mockMvc = mockController(userController);
 	}
 

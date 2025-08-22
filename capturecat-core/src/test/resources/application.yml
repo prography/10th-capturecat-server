@@ -30,6 +30,11 @@ spring:
     ansi:
       enabled: always
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 image:
   local:
     base-path: ${user.home}/Desktop/capturecat/upload

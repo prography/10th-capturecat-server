@@ -6,6 +6,7 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,17 +39,22 @@ class LogInOutTest extends RestDocsTest {
 	@Test
 	void 로그아웃() {
 		//given
-		String refreshToken = "valid-refresh-token";
-		willReturn(refreshToken).given(tokenService).deleteRefreshToken(anyString());
+		String accessTokenHeader = "valid-access-token-header";
+		String refreshTokenHeader = "valid-refresh-token-header";
+		willDoNothing().given(tokenService).revokeUserTokens(anyString(), anyString());
 
 		//when & then
-		given().header(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + refreshToken)
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + accessTokenHeader)
+			.header(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + refreshTokenHeader)
 			.when().post("/logout")
 			.then().statusCode(HttpStatus.SC_OK)
 			.apply(document("logout", requestPreprocessor(), responsePreprocessor(),
 				requestHeaders(
+					headerWithName(HttpHeaders.AUTHORIZATION)
+						.description("엑세스 토큰 (Bearer prefix 포함)"),
 					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
-						.description("삭제할 리프레시 토큰 (Bearer prefix 포함)")),
+						.description("리프레시 토큰 (Bearer prefix 포함)")),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
 	}

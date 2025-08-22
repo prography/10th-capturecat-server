@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 
 @Component
 public class JwtUtil {
@@ -62,11 +65,30 @@ public class JwtUtil {
 			.getPayload();
 	}
 
-	// 만료 여부 검증 (예외 던짐)
-	public boolean isExpired(String token) {
-		extractClaims(token); // parseSignedClaims 호출 시 자동 만료 검증
-		return false;
+	/**
+	 * 만료 여부 및 유효성 검증
+	 */
+	public boolean isValid(String token) {
+		try {
+			extractClaims(token); // parseSignedClaims 호출 시 자동 만료 검증 (예외 던짐)
+		} catch (ExpiredJwtException | SignatureException | MalformedJwtException | IllegalArgumentException e) {
+			return false;
+		}
+		return true;
 	}
+
+	public String resolveToken(String header) {
+		return header != null && header.startsWith(BEARER_PREFIX)
+			? header.substring(BEARER_PREFIX.length()).trim()
+			: null;
+	}
+
+	// JWT 파싱하여 만료일자(ms) 반환
+	public long getExpiration(String token) {
+		Claims claims = extractClaims(token);
+		return claims.getExpiration().getTime();
+	}
+
 
 	// username(subject) 추출
 	public String getUsername(String token) {
