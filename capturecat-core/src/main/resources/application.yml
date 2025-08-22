@@ -28,7 +28,6 @@ logging:
       springframework.security: DEBUG
 
 jwt:
-  secret: capture_cat_jwt_secret_key_capture_cat_jwt_secret_key
   access-token-expiration: 3600000
   refresh-token-expiration: 2592000000
 

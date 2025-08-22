@@ -67,6 +67,7 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
 			objectMapper.writeValue(response.getWriter(), ApiResponse.error(e.getErrorType()));
 		} catch (Exception e) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			objectMapper.writeValue(response.getWriter(),
 				ApiResponse.error(ErrorType.INTERNAL_SERVER_ERROR));
 		}
