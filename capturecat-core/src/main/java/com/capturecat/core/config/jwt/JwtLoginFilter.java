@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.api.user.dto.UserReqDto.LoginReqDto;
 import com.capturecat.core.domain.user.UserRole;
@@ -32,6 +33,7 @@ import com.capturecat.core.support.response.ApiResponse;
  * 소셜 로그인/회원가입이 아닌,
  * 일반 회원가입 후 /login 경로로, id, password로 로그인한 경우 (개발 용도)
  */
+@Slf4j
 @RequiredArgsConstructor
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -64,6 +66,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 		//토큰 발급
 		Map<TokenType, String> tokenMap = tokenIssueService.issue(username, UserRole.fromRoleString(role));
+		log.info("[JwtLoginFilter.successfulAuthentication] 사용자 로그인({}), 토큰 발급", username);
 
 		//Header에 실어 응답
 		response.setHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + tokenMap.get(TokenType.ACCESS));

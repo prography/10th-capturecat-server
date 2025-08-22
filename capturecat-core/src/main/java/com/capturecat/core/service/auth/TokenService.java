@@ -145,6 +145,7 @@ public class TokenService {
 			redisTemplate.opsForValue()
 				.set(blacklistKey(accessToken), "blacklisted", remainMillis, TimeUnit.MILLISECONDS);
 		}
+		log.info("Blacklist Token: {}", accessToken);
 	}
 
 	public boolean isBlacklisted(String accessToken) {

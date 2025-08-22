@@ -2,10 +2,8 @@ package com.capturecat.core.config.jwt;
 
 import java.io.IOException;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -13,61 +11,65 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.ApiResponse;
 
+@Slf4j
 @RequiredArgsConstructor
-public class JwtLogoutFilter extends GenericFilterBean {
+public class JwtLogoutFilter extends OncePerRequestFilter {
 
 	private static final String LOGOUT_PATH = "/logout";
 	private final TokenService tokenService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override
-	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-		throws IOException, ServletException {
-		doFilter((HttpServletRequest)servletRequest, (HttpServletResponse)servletResponse, filterChain);
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		// 1) ERROR/ASYNC 등 요청 아닌 디스패치 스킵
+		if (request.getDispatcherType() != DispatcherType.REQUEST) {
+			return true;
+		}
+		// 2) POST만 허용
+		if (!"POST".equalsIgnoreCase(request.getMethod())) {
+			return true;
+		}
+		// 3) /logout 경로만 통과 (컨텍스트 경로 영향 없는 servletPath 사용)
+		return !LOGOUT_PATH.equals(request.getRequestURI());
 	}
 
-	/** 로그아웃
-	 *  Refresh 토큰을 받아 DB에서 삭제 후 쿠키 null로 초기화하여 응답
-	 *  (모든 기기에서 로그아웃 시 username 기반으로 모든 refresh 토큰 삭제)
-	 */
-	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-		throws IOException, ServletException {
-
-		// 로그아웃 요청일 때
-		if (!request.getRequestURI().equals(LOGOUT_PATH)) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-
-		// 로그아웃
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+		throws IOException {
 		try {
 			String accessHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 			String refreshHeader = request.getHeader(JwtUtil.REFRESH_TOKEN_HEADER);
 			if (!StringUtils.hasText(accessHeader) || !StringUtils.hasText(refreshHeader)) {
 				throw new CoreException(ErrorType.INVALID_AUTH_TOKEN);
 			}
+			log.info("LogoutFilter hit: dispatcher={}, path={}", request.getDispatcherType(), request.getServletPath());
+
 			tokenService.revokeUserTokens(accessHeader, refreshHeader);
+
+			response.setStatus(HttpStatus.OK.value());
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+			objectMapper.writeValue(response.getWriter(), ApiResponse.success());
 		} catch (CoreException e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			objectMapper.writeValue(response.getWriter(), ApiResponse.error(e.getErrorType()));
-			return;
+		} catch (Exception e) {
+			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			objectMapper.writeValue(response.getWriter(),
+				ApiResponse.error(ErrorType.INTERNAL_SERVER_ERROR));
 		}
-
-		// 성공 응답
-		response.setStatus(HttpStatus.OK.value());
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		objectMapper.writeValue(response.getWriter(), ApiResponse.success());
+		// 체인 종료 (추가 필터로 넘기지 않음)
 	}
 }

@@ -72,4 +72,9 @@ public class JwtFilter extends OncePerRequestFilter {
 		objectMapper.writeValue(response.getWriter(), ApiResponse.error(errorType));
 	}
 
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String path = request.getServletPath();
+		return "/logout".equals(path);      // 로그아웃은 스킵
+	}
 }
