@@ -97,6 +97,7 @@ public class UserService {
 	 * 2) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
 	 * 3) 회원 관련 데이터 삭제
 	 */
+	@Transactional
 	public String withdraw(LoginUser loginUser, String reason) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
@@ -113,7 +114,6 @@ public class UserService {
 		return resultMessage;
 	}
 
-	@Transactional
 	protected void deleteUserAndRelated(Long userId) {
 		//1. 즐겨찾기 삭제
 		bookmarkRepository.deleteByUserId(userId);
