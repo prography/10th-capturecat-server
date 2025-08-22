@@ -33,7 +33,6 @@ class JwtLogoutFilterTest {
 	@Mock
 	private TokenService tokenService;
 
-	// ✅ OncePerRequestFilter 버전의 JwtLogoutFilter를 주입한다고 가정
 	@InjectMocks
 	private JwtLogoutFilter jwtLogoutFilter;
 
@@ -54,7 +53,7 @@ class JwtLogoutFilterTest {
 	void non_logout_request() throws Exception {
 		// given
 		request.setMethod("GET");
-		request.setServletPath("/not-logout");
+		request.setRequestURI("/not-logout");
 
 		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
@@ -69,7 +68,7 @@ class JwtLogoutFilterTest {
 	void logout_request_without_token() throws Exception {
 		// given
 		request.setMethod("POST");
-		request.setServletPath("/logout");
+		request.setRequestURI("/logout");
 
 		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
@@ -85,7 +84,7 @@ class JwtLogoutFilterTest {
 	void logout_request_blacklist_exception() throws Exception {
 		// given
 		request.setMethod("POST");
-		request.setServletPath("/logout");
+		request.setRequestURI("/logout");
 		String accessToken = "invalid-access-token";
 		String refreshToken = "invalid-refresh-token";
 		request.addHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken);
@@ -108,7 +107,7 @@ class JwtLogoutFilterTest {
 	void logout_request_with_valid_token() throws Exception {
 		// given
 		request.setMethod("POST");
-		request.setServletPath("/logout");
+		request.setRequestURI("/logout");
 		String accessToken = "valid-access-token";
 		String refreshToken = "valid-refresh-token";
 		request.addHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken);
