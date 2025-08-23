@@ -17,6 +17,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
+import com.capturecat.core.support.error.CoreException;
+import com.capturecat.core.support.error.ErrorType;
+
 @Component
 public class JwtUtil {
 
@@ -77,10 +80,11 @@ public class JwtUtil {
 		return true;
 	}
 
-	public String resolveToken(String header) {
-		return header != null && header.startsWith(BEARER_PREFIX)
-			? header.substring(BEARER_PREFIX.length()).trim()
-			: null;
+	public String resolveToken(String authHeader) {
+		if (authHeader == null || !authHeader.startsWith(JwtUtil.BEARER_PREFIX)) {
+			throw new CoreException(ErrorType.INVALID_ACCESS_TOKEN);
+		}
+		return authHeader.substring(BEARER_PREFIX.length()).trim();
 	}
 
 	// JWT 파싱하여 만료일자(ms) 반환
@@ -88,7 +92,6 @@ public class JwtUtil {
 		Claims claims = extractClaims(token);
 		return claims.getExpiration().getTime();
 	}
-
 
 	// username(subject) 추출
 	public String getUsername(String token) {

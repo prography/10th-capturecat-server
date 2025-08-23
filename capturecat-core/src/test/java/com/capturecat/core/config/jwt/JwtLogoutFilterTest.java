@@ -3,6 +3,11 @@ package com.capturecat.core.config.jwt;
 import static com.capturecat.core.config.jwt.JwtUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.anyString;
+import static org.mockito.BDDMockito.doThrow;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.*;
 
 import jakarta.servlet.FilterChain;
 
@@ -27,8 +32,10 @@ class JwtLogoutFilterTest {
 
 	@Mock
 	private TokenService tokenService;
+
 	@InjectMocks
 	private JwtLogoutFilter jwtLogoutFilter;
+
 	@Mock
 	private FilterChain filterChain;
 
@@ -42,22 +49,25 @@ class JwtLogoutFilterTest {
 	}
 
 	@Test
-	@DisplayName("/logout 요청이 아닐 경우 무시")
+	@DisplayName("/logout 요청이 아니면 체인을 그대로 통과")
 	void non_logout_request() throws Exception {
-		//given
+		// given
+		request.setMethod("GET");
 		request.setRequestURI("/not-logout");
 
-		//when
+		// when
 		jwtLogoutFilter.doFilter(request, response, filterChain);
 
-		//then
+		// then
 		verify(filterChain).doFilter(request, response);
+		verify(tokenService, never()).revokeUserTokens(anyString(), anyString());
 	}
 
 	@Test
-	@DisplayName("리프레시 토큰이 없는 경우 UNAUTHORIZED 응답")
+	@DisplayName("POST /logout 이지만 토큰 헤더가 없으면 401")
 	void logout_request_without_token() throws Exception {
 		// given
+		request.setMethod("POST");
 		request.setRequestURI("/logout");
 
 		// when
@@ -65,16 +75,17 @@ class JwtLogoutFilterTest {
 
 		// then
 		assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatus());
-		verify(tokenService, never()).deleteValidRefreshToken(anyString());
+		verify(tokenService, never()).revokeUserTokens(anyString(), anyString());
 		verify(filterChain, never()).doFilter(any(), any());
 	}
 
 	@Test
-	@DisplayName("토큰 검증 도중 예외 발생 시 INVALID_REFRESH_TOKEN 에러 발생")
+	@DisplayName("POST /logout 중 revokeUserTokens 에서 예외 발생 시 401")
 	void logout_request_blacklist_exception() throws Exception {
 		// given
+		request.setMethod("POST");
 		request.setRequestURI("/logout");
-		String accessToken = "invalid-refresh-token";
+		String accessToken = "invalid-access-token";
 		String refreshToken = "invalid-refresh-token";
 		request.addHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken);
 		request.addHeader(REFRESH_TOKEN_HEADER, BEARER_PREFIX + refreshToken);
@@ -92,17 +103,16 @@ class JwtLogoutFilterTest {
 	}
 
 	@Test
-	@DisplayName("유효한 리프레시 토큰이 있는 경우 정상 처리")
+	@DisplayName("POST /logout + 유효한 토큰 헤더면 200")
 	void logout_request_with_valid_token() throws Exception {
 		// given
+		request.setMethod("POST");
 		request.setRequestURI("/logout");
-		String accessToken = "valid-refresh-token";
+		String accessToken = "valid-access-token";
 		String refreshToken = "valid-refresh-token";
 		request.addHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + accessToken);
 		request.addHeader(REFRESH_TOKEN_HEADER, BEARER_PREFIX + refreshToken);
 
-
-		// 토큰 서비스 mock: 항상 정상 처리
 		willDoNothing().given(tokenService).revokeUserTokens(anyString(), anyString());
 
 		// when

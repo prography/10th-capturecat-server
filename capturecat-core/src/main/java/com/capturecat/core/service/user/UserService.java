@@ -113,7 +113,6 @@ public class UserService {
 		return resultMessage;
 	}
 
-	@Transactional
 	protected void deleteUserAndRelated(Long userId) {
 		//1. 즐겨찾기 삭제
 		bookmarkRepository.deleteByUserId(userId);

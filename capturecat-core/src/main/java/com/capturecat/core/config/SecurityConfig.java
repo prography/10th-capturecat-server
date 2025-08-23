@@ -46,15 +46,16 @@ public class SecurityConfig {
 		http.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.formLogin(AbstractHttpConfigurer::disable)
+			.logout(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
-			.addFilterBefore(new JwtFilter(jwtUtil, tokenService), JwtLoginFilter.class)
+			.addFilterBefore(new JwtFilter(jwtUtil, tokenService), UsernamePasswordAuthenticationFilter.class)
 			.addFilterAt(
 				new JwtLoginFilter(authenticationManager(authenticationConfiguration), tokenService),
 				UsernamePasswordAuthenticationFilter.class)
-			.addFilterAt(new JwtLogoutFilter(tokenService), LogoutFilter.class)
+			.addFilterBefore(new JwtLogoutFilter(tokenService), LogoutFilter.class)
 			.authorizeHttpRequests(
 				authorizeRequests -> authorizeRequests
-					.requestMatchers("/health", "/docs/**", "/token/reissue", "/v1/auth/**", "/v1/user/join")
+					.requestMatchers("/health", "/docs/**", "/token/reissue", "/v1/auth/**", "/v1/user/join", "/logout")
 					.permitAll()
 					.anyRequest()
 					.hasRole("USER"));

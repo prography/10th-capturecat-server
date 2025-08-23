@@ -82,8 +82,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 
 	@Test
 	void 로그아웃_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_REFRESH_TOKEN,
-			REFRESH_TOKEN_EXPIRED);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_LOGOUT_AUTH_TOKEN,
+			INTERNAL_SERVER_ERROR);
 		generateErrorDocs("errorCode/logout", errorCodeDescriptors);
 	}
 
@@ -142,7 +142,7 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 회원탈퇴_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
-			UNLINK_SOCIAL_FAIL);
+			UNLINK_SOCIAL_FAIL, INVALID_ACCESS_TOKEN, INVALID_REFRESH_TOKEN, INTERNAL_SERVER_ERROR);
 		generateErrorDocs("errorCode/withdraw", errorCodeDescriptors);
 	}
 

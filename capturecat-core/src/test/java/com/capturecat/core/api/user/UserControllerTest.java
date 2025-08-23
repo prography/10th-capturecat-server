@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.restassured.http.ContentType;
 
-import com.capturecat.core.api.user.dto.UserReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
 import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.config.jwt.JwtUtil;
@@ -30,6 +29,7 @@ class UserControllerTest extends RestDocsTest {
 
 	private static final String URL_PREFIX = "/v1/user";
 	private static final String ACCESS_TOKEN = "valid-access-token";
+	private static final String REFRESH_TOKEN = "valid-refresh-token";
 
 	private final ObjectMapper om = new ObjectMapper();
 
@@ -76,6 +76,7 @@ class UserControllerTest extends RestDocsTest {
 		// when & then
 		given()
 			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.header(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + REFRESH_TOKEN)
 			.contentType(ContentType.JSON)
 			.body(requestBody)
 			.when()
@@ -86,7 +87,9 @@ class UserControllerTest extends RestDocsTest {
 			.apply(document("withdraw", requestPreprocessor(), responsePreprocessor(),
 				requestHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION)
-						.description("유효한 Access 토큰")),
+						.description("유효한 Access 토큰"),
+					headerWithName(JwtUtil.REFRESH_TOKEN_HEADER)
+						.description("유효한 Refresh 토큰")),
 				requestFields(
 					fieldWithPath("reason").type(JsonFieldType.STRING).description("탈퇴 사유")),
 				responseFields(
