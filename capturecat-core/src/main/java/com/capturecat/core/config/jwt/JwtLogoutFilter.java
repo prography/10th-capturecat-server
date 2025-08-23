@@ -41,7 +41,7 @@ public class JwtLogoutFilter extends OncePerRequestFilter {
 		if (!"POST".equalsIgnoreCase(request.getMethod())) {
 			return true;
 		}
-		// 3) /logout 경로만 통과 (컨텍스트 경로 영향 없는 servletPath 사용)
+		// 3) /logout 경로만 통과
 		return !LOGOUT_PATH.equals(request.getRequestURI());
 	}
 
