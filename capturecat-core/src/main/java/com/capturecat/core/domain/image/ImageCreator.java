@@ -35,7 +35,7 @@ public class ImageCreator {
 	 * 이미지와 태그를 함께 저장합니다.
 	 */
 	@Transactional
-	public List<Image> save(LoginUser loginUser, List<ImageRequestDto.ImageCreateData> requests) {
+	public List<Image> createAll(LoginUser loginUser, List<ImageRequestDto.ImageCreateData> requests) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
 

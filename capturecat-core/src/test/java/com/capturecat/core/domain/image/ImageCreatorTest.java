@@ -55,7 +55,7 @@ class ImageCreatorTest {
 
 	@Test
 	@DisplayName("이미지와 태그 정보 저장에 성공한다")
-	void save_success() {
+	void createAll_success() {
 		// given
 		User user = DummyObject.newMockUser(1L);
 		LoginUser loginUser = new LoginUser(user);
@@ -83,7 +83,7 @@ class ImageCreatorTest {
 		given(imageTagFactory.create(savedImage2, of(tag2))).willReturn(of(imageTag2));
 
 		// when
-		List<Image> result = imageCreator.save(loginUser, requests);
+		List<Image> result = imageCreator.createAll(loginUser, requests);
 
 		// then
 		assertThat(result).hasSize(2);
@@ -99,7 +99,7 @@ class ImageCreatorTest {
 
 	@Test
 	@DisplayName("사용자를 찾지 못하면 CoreException 예외가 발생한다")
-	void save_fail_userNotFound() {
+	void createAll_fail_userNotFound() {
 		// given
 		User user = DummyObject.newMockUser(1L);
 		LoginUser loginUser = new LoginUser(user);
@@ -107,7 +107,7 @@ class ImageCreatorTest {
 		given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
 
 		// when & then
-		assertThatThrownBy(() -> imageCreator.save(loginUser, Collections.emptyList()))
+		assertThatThrownBy(() -> imageCreator.createAll(loginUser, Collections.emptyList()))
 			.isInstanceOf(CoreException.class);
 
 		verify(imageRepository, never()).saveAll(anyList());

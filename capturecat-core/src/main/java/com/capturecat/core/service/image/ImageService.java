@@ -101,7 +101,7 @@ public class ImageService {
 		imageTagRepository.saveAll(allImageTags);
 	}
 
-	public void save(List<ImageRequestDto.UploadItem> uploadItems, LoginUser loginUser) {
+	public void createImages(List<ImageRequestDto.UploadItem> uploadItems, LoginUser loginUser) {
 		// 1. 태그 등록
 		List<String> allTagNames = uploadItems.stream()
 			.flatMap(item -> item.tagNames().stream())
@@ -131,7 +131,7 @@ public class ImageService {
 			}).toList();
 
 		// 3. 이미지 및 이미지 태그 저장
-		imageCreator.save(loginUser, requests);
+		imageCreator.createAll(loginUser, requests);
 
 		// TODO: 응답 리턴(생성된 이미지 + pre-signed URL)
 	}
