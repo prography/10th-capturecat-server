@@ -2,6 +2,9 @@ package com.capturecat.core.service.image;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -14,11 +17,14 @@ import lombok.RequiredArgsConstructor;
 import com.capturecat.client.upload.DeleteException;
 import com.capturecat.client.upload.FileUploader;
 import com.capturecat.client.upload.UploadException;
+import com.capturecat.core.api.image.dto.ImageRequestDto;
 import com.capturecat.core.api.image.dto.UploadItemRequest;
 import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
+import com.capturecat.core.domain.image.ImageCreator;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.image.dto.ImageSaveRequest;
 import com.capturecat.core.domain.tag.ImageTag;
 import com.capturecat.core.domain.tag.ImageTagFactory;
 import com.capturecat.core.domain.tag.ImageTagRepository;
@@ -48,6 +54,7 @@ public class ImageService {
 	private final TagRepository tagRepository;
 	private final UserRepository userRepository;
 	private final BookmarkRepository bookmarkRepository;
+	private final ImageCreator imageCreator;
 
 	@Transactional
 	// TODO: UploadItemRequest의 api 패키지 의존성 제거 고민하기 및 트랜잭션 분리
@@ -92,6 +99,41 @@ public class ImageService {
 			allImageTags.addAll(imageTagFactory.create(savedImage, result));
 		}
 		imageTagRepository.saveAll(allImageTags);
+	}
+
+	public void save(List<ImageRequestDto.UploadItem> uploadItems, LoginUser loginUser) {
+		// 1. 태그 등록
+		List<String> allTagNames = uploadItems.stream()
+			.flatMap(item -> item.tagNames().stream())
+			.distinct()
+			.toList();
+
+		Map<String, Tag> registeredTags = tagRegister.registerTagsFor(allTagNames).stream()
+			.collect(Collectors.toMap(Tag::getName, Function.identity()));
+
+		// 2. 이미지 정보와 태그 엔티티 매핑
+		List<ImageRequestDto.ImageCreateData> requests = uploadItems.stream()
+			.map(each -> {
+				// TODO: Pre-signed URL 및 fileURL 생성 필요
+				ImageSaveRequest imageSaveRequest = ImageSaveRequest.builder()
+					.fileName(each.fileName())
+					.fileUrl("")
+					.size(each.fileSize())
+					.captureDate(DateTimeConverter.convert(each.captureDate()))
+					.tagNames(each.tagNames())
+					.build();
+
+				List<Tag> tags = each.tagNames().stream()
+					.map(registeredTags::get)
+					.toList();
+
+				return new ImageRequestDto.ImageCreateData(imageSaveRequest, tags);
+			}).toList();
+
+		// 3. 이미지 및 이미지 태그 저장
+		imageCreator.save(loginUser, requests);
+
+		// TODO: 응답 리턴(생성된 이미지 + pre-signed URL)
 	}
 
 	@Transactional
