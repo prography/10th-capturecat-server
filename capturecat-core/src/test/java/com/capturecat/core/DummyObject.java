@@ -50,6 +50,16 @@ public class DummyObject {
 			.build();
 	}
 
+	public static Image newMockUserImage(Long id, String fileName, User user) {
+		return Image.builder()
+			.id(id)
+			.fileName(fileName)
+			.fileUrl("testUrl1")
+			.captureDate(LocalDate.now())
+			.user(user)
+			.build();
+	}
+
 	public static List<Image> newMockImages(int fromId, int toId) {
 		return IntStream.range(fromId, toId + 1).mapToObj(i -> {
 			Image image = Image.builder().id((long)i).fileName("test" + i).fileUrl("testUrl" + i).build();

@@ -13,7 +13,6 @@ import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
-import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
@@ -97,6 +96,7 @@ public class UserService {
 	 * 2) 탈퇴 사유 저장 - 실패해도 1,2 롤백 X (별도 TX)
 	 * 3) 회원 관련 데이터 삭제
 	 */
+	@Transactional
 	public String withdraw(LoginUser loginUser, String reason) {
 		User user = userRepository.findByUsername(loginUser.getUsername()) //email
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));

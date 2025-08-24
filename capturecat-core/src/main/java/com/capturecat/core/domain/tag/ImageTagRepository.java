@@ -24,6 +24,8 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 
 	boolean existsByTag(Tag tag);
 
+	boolean existsByImageAndTagIn(Image image, List<Tag> tags);
+
 	void deleteAllByImage(Image image);
 
 	@Modifying
