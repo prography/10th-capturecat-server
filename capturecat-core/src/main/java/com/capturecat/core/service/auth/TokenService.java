@@ -85,9 +85,9 @@ public class TokenService {
 				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
 			}
 		} catch (ExpiredJwtException e) {
-			throw new CoreException(ErrorType.REFRESH_TOKEN_EXPIRED);
+			throw new CoreException(ErrorType.REFRESH_TOKEN_EXPIRED, e.getMessage());
 		} catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
-			throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
+			throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN, e.getMessage());
 		}
 
 		return refreshToken;
@@ -112,7 +112,10 @@ public class TokenService {
 		try {
 			blacklistAccessToken(accessTokenHeader);
 			deleteValidRefreshToken(refreshTokenHeader);
+		} catch (CoreException e) {
+			throw e;
 		} catch (Exception e) {
+			log.error("[revokeUserTokens] Unexpected error", e);
 			throw new CoreException(ErrorType.INTERNAL_SERVER_ERROR);
 		}
 	}
