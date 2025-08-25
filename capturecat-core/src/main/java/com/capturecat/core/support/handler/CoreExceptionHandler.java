@@ -39,7 +39,7 @@ public class CoreExceptionHandler {
 
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<ApiResponse<?>> handle(MissingServletRequestParameterException ex) {
-		log.warn("Missing request parameter: {}", ex.getMessage(), ex);
+		log.warn("Missing imageSaveRequest parameter: {}", ex.getMessage(), ex);
 		return ResponseEntity.badRequest()
 			.body(ApiResponse.error(ErrorType.MISSING_PARAMETER, (Object) ex.getParameterName()));
 	}

@@ -13,7 +13,6 @@ import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
 import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
-import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;

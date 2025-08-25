@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import com.capturecat.core.domain.BaseTimeEntity;
+import com.capturecat.core.domain.image.dto.ImageSaveRequest;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -52,6 +53,16 @@ public class Image extends BaseTimeEntity {
 		this.size = size;
 		this.captureDate = captureDate;
 		this.user = user;
+	}
+
+	public static Image create(ImageSaveRequest imageSaveRequest, User user) {
+		return Image.builder()
+			.fileName(imageSaveRequest.fileName())
+			.fileUrl(imageSaveRequest.fileUrl())
+			.size(imageSaveRequest.size())
+			.captureDate(imageSaveRequest.captureDate())
+			.user(user)
+			.build();
 	}
 
 	public void validateOwnership(User user) {
