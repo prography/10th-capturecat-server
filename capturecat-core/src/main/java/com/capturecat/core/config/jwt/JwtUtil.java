@@ -70,11 +70,12 @@ public class JwtUtil {
 
 	/**
 	 * 만료 여부 및 유효성 검증
+	 * ExpiredJwtException 이 발생할 경우 호출 부에서 ACCESS or REFRESH TOKEN EXPIRED로 받아야한다.
 	 */
 	public boolean isValid(String token) {
 		try {
 			extractClaims(token); // parseSignedClaims 호출 시 자동 만료 검증 (예외 던짐)
-		} catch (ExpiredJwtException | SignatureException | MalformedJwtException | IllegalArgumentException e) {
+		} catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
 			return false;
 		}
 		return true;

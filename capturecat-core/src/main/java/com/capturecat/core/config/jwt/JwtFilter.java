@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,11 +48,16 @@ public class JwtFilter extends OncePerRequestFilter {
 		String accessToken = jwtUtil.resolveToken(authHeader); // "Bearer " 이후 토큰
 
 		// 토큰 유효성 검사
-		if (!jwtUtil.isAccessToken(accessToken)
-			|| !jwtUtil.isValid(accessToken)
-			|| tokenService.isBlacklisted(accessToken)) {
-			//만료 시 client에 즉시 응답. client는 재발급 요청 수행.
-			rejectInvalidToken(response, ErrorType.INVALID_ACCESS_TOKEN);
+		try {
+			if (!jwtUtil.isAccessToken(accessToken)
+				|| !jwtUtil.isValid(accessToken)
+				|| tokenService.isBlacklisted(accessToken)) {
+				//만료 시 client에 즉시 응답. client는 재발급 요청 수행.
+				rejectInvalidToken(response, ErrorType.INVALID_ACCESS_TOKEN);
+				return;
+			}
+		} catch (ExpiredJwtException e) {
+			rejectInvalidToken(response, ErrorType.ACCESS_TOKEN_EXPIRED);
 			return;
 		}
 

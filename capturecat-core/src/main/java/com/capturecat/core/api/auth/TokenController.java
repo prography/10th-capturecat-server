@@ -34,7 +34,7 @@ public class TokenController {
 			newTokenMap = tokenIssueService.reissue(authHeader);
 		} catch (CoreException e) {
 			return ResponseEntity
-				.badRequest()
+				.status(e.getErrorType().getStatus())
 				.body(ApiResponse.error(e.getErrorType()));
 		}
 
