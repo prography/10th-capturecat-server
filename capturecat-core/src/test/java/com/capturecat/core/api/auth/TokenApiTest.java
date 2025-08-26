@@ -92,7 +92,7 @@ class TokenApiTest {
 	void reissue_withInvalidRefreshToken_returnsBadRequest() throws Exception {
 		mockMvc.perform(post("/token/reissue")
 				.header(JwtUtil.REFRESH_TOKEN_HEADER, "Bearer invalid.token"))
-			.andExpect(status().isBadRequest())
+			.andExpect(status().isUnauthorized())
 			.andExpect(jsonPath("$.result").value("ERROR"))
 			.andExpect(jsonPath("$.error").exists());
 	}
