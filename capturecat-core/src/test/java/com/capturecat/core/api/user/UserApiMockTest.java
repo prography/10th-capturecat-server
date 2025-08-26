@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.capturecat.core.api.user.dto.UserReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.auth.LoginUser;
@@ -56,8 +55,8 @@ public class UserApiMockTest {
 		);
 		// JwtFilter를 통과시키는 stub
 		given(jwtUtil.resolveToken(anyString())).willReturn("valid.access.token");
-		given(jwtUtil.isAccessToken(anyString())).willReturn(true);
-		given(jwtUtil.isValid(anyString())).willReturn(true);
+		given(jwtUtil.isInValidToken(anyString(), any())).willReturn(false);
+		given(jwtUtil.isInValidToken(anyString(), any())).willReturn(false);
 		given(jwtUtil.getUsername(anyString())).willReturn("testUser");
 		given(jwtUtil.getRole(anyString())).willReturn("ROLE_USER");
 		given(tokenService.isBlacklisted(anyString())).willReturn(false);

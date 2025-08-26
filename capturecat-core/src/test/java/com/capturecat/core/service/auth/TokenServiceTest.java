@@ -123,7 +123,7 @@ class TokenServiceTest {
 		given(jwtUtil.getRole(oldRefresh)).willReturn(role);
 		given(jwtUtil.generateToken(username, role, TokenType.ACCESS)).willReturn(newAccess);
 		given(jwtUtil.generateToken(username, role, TokenType.REFRESH)).willReturn(newRefresh);
-		given(jwtUtil.isRefreshToken(oldRefresh)).willReturn(true);
+		given(jwtUtil.isInValidToken(oldRefresh, TokenType.REFRESH)).willReturn(false);
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 		given(valueOperations.get(refreshTokenKey(username))).willReturn(oldRefresh);
 
@@ -159,19 +159,19 @@ class TokenServiceTest {
 	}
 
 	@Test
-	@DisplayName("parseRefreshToken(): Redis에 토큰이 없으면 INVALID_REFRESH_TOKEN 예외 발생")
+	@DisplayName("parseRefreshToken(): Redis에 토큰이 없으면 REFRESH_TOKEN_EXPIRED 예외 발생")
 	void parseRefreshToken_NotInRedis_ThrowsInvalid() {
 		String token = "some-token";
 		String header = JwtUtil.BEARER_PREFIX + token;
 
-		given(jwtUtil.isRefreshToken(token)).willReturn(true);
+		given(jwtUtil.isInValidToken(token, TokenType.REFRESH)).willReturn(false);
 		given(jwtUtil.getUsername(token)).willReturn(username);
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 		given(valueOperations.get(refreshTokenKey(username))).willReturn(null);
 
 		assertThatThrownBy(() -> tokenService.parseRefreshToken(header))
 			.isInstanceOf(CoreException.class)
-			.hasFieldOrPropertyWithValue("errorType", ErrorType.INVALID_REFRESH_TOKEN);
+			.hasFieldOrPropertyWithValue("errorType", ErrorType.REFRESH_TOKEN_EXPIRED);
 	}
 
 	@Test
@@ -180,7 +180,7 @@ class TokenServiceTest {
 		String token = "expired-token";
 		String header = JwtUtil.BEARER_PREFIX + token;
 		willThrow(new ExpiredJwtException(null, null, "expired"))
-			.given(jwtUtil).isRefreshToken(token);
+			.given(jwtUtil).isInValidToken(token, TokenType.REFRESH);
 
 		assertThatThrownBy(() -> tokenService.parseRefreshToken(header))
 			.isInstanceOf(CoreException.class)
@@ -193,7 +193,7 @@ class TokenServiceTest {
 		String token = "valid-token";
 		String header = JwtUtil.BEARER_PREFIX + token;
 
-		given(jwtUtil.isRefreshToken(token)).willReturn(true);
+		given(jwtUtil.isInValidToken(token, TokenType.REFRESH)).willReturn(false);
 		given(jwtUtil.getUsername(token)).willReturn(username);
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 		given(valueOperations.get(refreshTokenKey(username))).willReturn(token);
