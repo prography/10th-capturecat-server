@@ -69,7 +69,8 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	@Test
 	void 소셜_로그인_회원가입_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(INVALID_ID_TOKEN,
-			INVALID_AUTH_TOKEN, FETCH_SOCIAL_TOKEN_FAIL, SOCIAL_API_ERROR, GENERATE_CLIENT_SECRET_FAIL);
+			INVALID_AUTH_TOKEN, FETCH_SOCIAL_TOKEN_FAIL, SOCIAL_API_ERROR, GENERATE_CLIENT_SECRET_FAIL,
+			ALREADY_REGISTERED_EMAIL);
 		generateErrorDocs("errorCode/socialLogin", errorCodeDescriptors);
 	}
 

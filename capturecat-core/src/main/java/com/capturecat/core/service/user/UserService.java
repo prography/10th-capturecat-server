@@ -1,6 +1,7 @@
 package com.capturecat.core.service.user;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,23 +62,18 @@ public class UserService {
 	 * 소셜 로그인 및 신규 회원가입 처리
 	 */
 	@Transactional
-	public LoginUser upsertSocialUser(OidcUserPayload payload) {
-		User user = userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
-			.map(UserSocialAccount::getUser)
-			.orElseGet(() -> {
-				// 1. User 생성/저장
-				User newUser = userRepository.save(buildUser(payload));
-				// 2. UserSocialAccount 생성/저장
-				UserSocialAccount newAccount = UserSocialAccount.builder()
-					.user(newUser)
-					.provider(payload.provider())
-					.socialId(payload.socialId())
-					.unlinkKey(payload.unlinkKey()) //최초 생성 시에만 존재
-					.build();
-				userSocialAccountRepository.save(newAccount);
-				return newUser;
-			});
-		return new LoginUser(user);
+	public LoginUser upsertSocialUser(OidcUserPayload payload, boolean accountLinking) {
+		User userEntity =
+			userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
+				.map(UserSocialAccount::getUser)
+				.orElseGet(() -> {
+					// 1. User 생성 or 조회 (중복이고, 연동이 아닐 경우 에러 응답)
+					User user = generateOrFetchUser(payload, accountLinking);
+					// 2. UserSocialAccount 생성/저장
+					saveSocialAccount(payload, user);
+					return user;
+				});
+		return new LoginUser(userEntity);
 	}
 
 	/**
@@ -143,6 +139,35 @@ public class UserService {
 			}
 		}
 		return resultMessage.toString();
+	}
+
+	// 소셜 서비스 계정 정보 저장
+	private void saveSocialAccount(OidcUserPayload payload, User user) {
+		UserSocialAccount newAccount = UserSocialAccount.builder()
+			.user(user)
+			.provider(payload.provider())
+			.socialId(payload.socialId())
+			.unlinkKey(payload.unlinkKey()) //최초 생성 시에만 존재
+			.build();
+		userSocialAccountRepository.save(newAccount);
+	}
+
+	// 이메일로 가입된 계정을 불러오거나 신규 계정 생성
+	private User generateOrFetchUser(OidcUserPayload payload, boolean accountLinking) {
+		User user = null;
+		Optional<User> byUsername = userRepository.findByUsername(payload.email());
+		// 해당 이메일로 가입된 유저가 있을 경우
+		if (byUsername.isPresent()) {
+			user = byUsername.get();
+			// 연동이 아닐 경우 에러 응답
+			if (!accountLinking) {
+				UserSocialAccount socialAccount = userSocialAccountRepository.findByUser(user).getFirst();
+				throw new CoreException(ErrorType.ALREADY_REGISTERED_EMAIL, socialAccount.getProvider());
+			}
+		} else { // 없을 경우 신규 생성
+			user = userRepository.save(buildUser(payload));
+		}
+		return user;
 	}
 
 	/**

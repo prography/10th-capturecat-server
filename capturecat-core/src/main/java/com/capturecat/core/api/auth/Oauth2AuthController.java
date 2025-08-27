@@ -40,7 +40,7 @@ public class Oauth2AuthController {
 			requestDto.idToken(), requestDto.nickname(), requestDto.authToken());
 
 		// 2. 유저 정보 추출/회원 처리
-		LoginUser user = userService.upsertSocialUser(payload);
+		LoginUser user = userService.upsertSocialUser(payload, requestDto.accountLinking());
 
 		//3. JWT 발급
 		Map<TokenType, String> tokenMap = tokenService.issue(user.getUsername(), user.getRole());

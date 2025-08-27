@@ -38,7 +38,8 @@ public enum ErrorCode {
 	SOCIAL_API_ERROR("소셜 서비스 API 호출 결과 실패를 응답받았습니다."),
 	MISSING_PARAMETER("필수 파라미터 %s(이)가 누락되었습니다."),
 	INTERNAL_SERVER_ERROR("서버에서 오류가 발생했습니다."),
-	INVALID_LOGOUT_AUTH_TOKEN("ACCESS 토큰 또는 REFRESH 토큰이 유효하지 않습니다.");
+	INVALID_LOGOUT_AUTH_TOKEN("ACCESS 토큰 또는 REFRESH 토큰이 유효하지 않습니다."),
+	ALREADY_REGISTERED_EMAIL("이미 가입된 이메일입니다.");
 
 	private final String message;
 

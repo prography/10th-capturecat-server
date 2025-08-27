@@ -51,7 +51,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 		// given
 		String provider = "google";
 		String idToken = "test-id-token";
-		SocialLoginRequest request = new SocialLoginRequest(idToken, null, null);
+		SocialLoginRequest request = new SocialLoginRequest(idToken, null, null, false);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
 		LoginUser user = buildUser(payload);
@@ -61,7 +61,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 		);
 
 		willReturn(payload).given(socialService).verifyAndExtract(provider, idToken, null, null);
-		willReturn(user).given(userService).upsertSocialUser(payload);
+		willReturn(user).given(userService).upsertSocialUser(payload, false);
 		willReturn(tokenMap).given(tokenService).issue(user.getUsername(), user.getRole());
 
 		// when & then
@@ -82,7 +82,10 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 						.description("apple 로그인 시 fullName 별도 전달"),
 					fieldWithPath("authToken").type(JsonFieldType.STRING)
 						.optional()
-						.description("apple 로그인 시 항상 authorization_code 전달, kakao 최초 로그인 시 accessToken 전달")
+						.description("apple 로그인 시 authorization_code 전달"),
+					fieldWithPath("accountLinking").type(JsonFieldType.BOOLEAN)
+						.optional()
+						.description("소셜 로그인 연동 여부")
 				),
 				responseHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer 액세스 토큰"),

@@ -58,7 +58,7 @@ class Oauth2AuthControllerSliceTest {
 		// given
 		String provider = "google";
 		String idToken = "test-id-token";
-		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null, false);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
 
@@ -73,7 +73,7 @@ class Oauth2AuthControllerSliceTest {
 		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
+		Mockito.when(userService.upsertSocialUser(payload, false)).thenReturn(user);
 		// tokenService.issue → tokenMap
 		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
 			.thenReturn(tokenMap);
@@ -97,7 +97,7 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "apple";
 		String authorization_code = "test_authorization_code";
 		String nickname = "최재량";
-		SocialLoginRequest req = new SocialLoginRequest(null, nickname, authorization_code);
+		SocialLoginRequest req = new SocialLoginRequest(null, nickname, authorization_code, false);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", nickname, "apple_refresh_token", true);
 
@@ -112,7 +112,7 @@ class Oauth2AuthControllerSliceTest {
 		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload)).thenReturn(user);
+		Mockito.when(userService.upsertSocialUser(payload, false)).thenReturn(user);
 		// tokenService.issue → tokenMap
 		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
 			.thenReturn(tokenMap);
@@ -136,7 +136,7 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "google";
 		String idToken = "bad-id-token";
 		String nickname = null;
-		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null, false);
 
 		Mockito.when(socialService.verifyAndExtract(any(), any(), any(), any()))
 			.thenThrow(new CoreException(ErrorType.INVALID_ID_TOKEN));
