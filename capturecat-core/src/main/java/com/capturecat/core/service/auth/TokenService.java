@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,21 +73,18 @@ public class TokenService {
 		log.info("Refresh Token: {}", refreshToken);
 
 		try {
-			if (refreshToken.isEmpty() || !jwtUtil.isRefreshToken(refreshToken)) { //토큰 만료 검사 포함
+			if (refreshToken.isEmpty() || jwtUtil.isInValidToken(refreshToken, TokenType.REFRESH)) { //토큰 만료 검사 포함
 				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
 			}
 			// Redis에 저장되어 있는 Refresh token 인지 확인
 			String username = jwtUtil.getUsername(refreshToken);
 			String savedToken = redisTemplate.opsForValue().get(getRefreshTokenKey(username));
 			if (savedToken == null || !savedToken.equals(refreshToken)) {
-				throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN);
+				throw new CoreException(ErrorType.REFRESH_TOKEN_EXPIRED);
 			}
 		} catch (ExpiredJwtException e) {
 			throw new CoreException(ErrorType.REFRESH_TOKEN_EXPIRED, e.getMessage());
-		} catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
-			throw new CoreException(ErrorType.INVALID_REFRESH_TOKEN, e.getMessage());
 		}
-
 		return refreshToken;
 	}
 

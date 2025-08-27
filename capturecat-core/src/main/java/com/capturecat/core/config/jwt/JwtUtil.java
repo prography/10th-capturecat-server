@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -68,19 +67,6 @@ public class JwtUtil {
 			.getPayload();
 	}
 
-	/**
-	 * 만료 여부 및 유효성 검증
-	 * ExpiredJwtException 이 발생할 경우 호출 부에서 ACCESS or REFRESH TOKEN EXPIRED로 받아야한다.
-	 */
-	public boolean isValid(String token) {
-		try {
-			extractClaims(token); // parseSignedClaims 호출 시 자동 만료 검증 (예외 던짐)
-		} catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
-			return false;
-		}
-		return true;
-	}
-
 	public String resolveToken(String authHeader) {
 		if (authHeader == null || !authHeader.startsWith(JwtUtil.BEARER_PREFIX)) {
 			throw new CoreException(ErrorType.INVALID_ACCESS_TOKEN);
@@ -109,15 +95,15 @@ public class JwtUtil {
 		return extractClaims(token).get("type", String.class);
 	}
 
-	public boolean isAccessToken(String accessToken) {
-		return getTokenType(accessToken).equals(TokenType.ACCESS.name());
-	}
-
-	public boolean isRefreshToken(String refreshToken) {
-		return getTokenType(refreshToken).equals(TokenType.REFRESH.name());
-	}
-
 	private long getExpirationForType(TokenType type) {
 		return (type == TokenType.ACCESS) ? accessTokenExpiration : refreshTokenExpiration;
+	}
+
+	public boolean isInValidToken(String token, TokenType tokenType) {
+		try {
+			return !getTokenType(token).equals(tokenType.name());
+		} catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
+			return true;
+		}
 	}
 }

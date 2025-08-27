@@ -18,6 +18,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 
@@ -59,8 +61,7 @@ class JwtFilterTest {
 		String token = "expired.token";
 		request.addHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + token);
 		when(jwtUtil.resolveToken(JwtUtil.BEARER_PREFIX + token)).thenReturn(token);
-		when(jwtUtil.isAccessToken(token)).thenReturn(true);
-		when(jwtUtil.isValid(token)).thenReturn(false);
+		when(jwtUtil.isInValidToken(token, TokenType.ACCESS)).thenThrow(ExpiredJwtException.class);
 
 		// when
 		jwtFilter.doFilterInternal(request, response, filterChain);
@@ -75,8 +76,7 @@ class JwtFilterTest {
 		String token = "invalid.token";
 		request.addHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + token);
 		when(jwtUtil.resolveToken(JwtUtil.BEARER_PREFIX + token)).thenReturn(token);
-		when(jwtUtil.isAccessToken(token)).thenReturn(true);
-		when(jwtUtil.isValid(token)).thenReturn(false);
+		when(jwtUtil.isInValidToken(token, TokenType.ACCESS)).thenReturn(true);
 
 		// when
 		jwtFilter.doFilterInternal(request, response, filterChain);
@@ -92,8 +92,7 @@ class JwtFilterTest {
 		request.addHeader(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + token);
 
 		when(jwtUtil.resolveToken(JwtUtil.BEARER_PREFIX + token)).thenReturn(token);
-		when(jwtUtil.isAccessToken(token)).thenReturn(true);
-		when(jwtUtil.isValid(token)).thenReturn(true);
+		when(jwtUtil.isInValidToken(token, TokenType.ACCESS)).thenReturn(false);
 		when(tokenService.isBlacklisted(token)).thenReturn(false);
 		when(jwtUtil.getUsername(token)).thenReturn("user1");
 		when(jwtUtil.getRole(token)).thenReturn("ROLE_USER");
