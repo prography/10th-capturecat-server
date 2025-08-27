@@ -23,11 +23,11 @@ public class CoreExceptionHandler {
 			case WARN -> log.warn("CoreException occurred: {}", exception.getMessage(), exception);
 			default -> log.info("CoreException occurred: {}", exception.getMessage(), exception);
 		}
-		if (exception.getRawResponseBody() != null) {
-			log.error("RawResponseBody: {}", exception.getRawResponseBody());
+		if (exception.getDetail() != null) {
+			log.error("detail: {}", exception.getDetail());
 		}
 		return ResponseEntity.status(exception.getErrorType().getStatus())
-			.body(ApiResponse.error(exception.getErrorType(), exception.getRawResponseBody()));
+			.body(ApiResponse.error(exception.getErrorType(), exception.getDetail()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
