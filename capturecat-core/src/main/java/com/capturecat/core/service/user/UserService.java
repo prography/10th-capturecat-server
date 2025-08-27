@@ -62,7 +62,7 @@ public class UserService {
 	 * 소셜 로그인 및 신규 회원가입 처리
 	 */
 	@Transactional
-	public LoginUser upsertSocialUser(OidcUserPayload payload, boolean accountLinking) {
+	public LoginUser upsertSocialUser(OidcUserPayload payload, boolean accountLinking, String linkToken) {
 		User userEntity =
 			userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
 				.map(UserSocialAccount::getUser)
@@ -70,7 +70,7 @@ public class UserService {
 					// 1. User 생성 or 조회 (중복이고, 연동이 아닐 경우 에러 응답)
 					User user = generateOrFetchUser(payload, accountLinking);
 					// 2. UserSocialAccount 생성/저장
-					saveSocialAccount(payload, user);
+					saveSocialAccount(payload, user, linkToken);
 					return user;
 				});
 		return new LoginUser(userEntity);
@@ -142,12 +142,12 @@ public class UserService {
 	}
 
 	// 소셜 서비스 계정 정보 저장
-	private void saveSocialAccount(OidcUserPayload payload, User user) {
+	private void saveSocialAccount(OidcUserPayload payload, User user, String unlinkToken) {
 		UserSocialAccount newAccount = UserSocialAccount.builder()
 			.user(user)
 			.provider(payload.provider())
 			.socialId(payload.socialId())
-			.unlinkKey(payload.unlinkKey()) //최초 생성 시에만 존재
+			.unlinkKey(unlinkToken != null ? unlinkToken : payload.unlinkKey()) //최초 생성 시에만 존재
 			.build();
 		userSocialAccountRepository.save(newAccount);
 	}
@@ -161,8 +161,9 @@ public class UserService {
 			user = byUsername.get();
 			// 연동이 아닐 경우 에러 응답
 			if (!accountLinking) {
-				UserSocialAccount socialAccount = userSocialAccountRepository.findByUser(user).getFirst();
-				throw new CoreException(ErrorType.ALREADY_REGISTERED_EMAIL, socialAccount.getProvider());
+				String provider = userSocialAccountRepository.findByUser(user).getFirst().getProvider();
+				throw new CoreException(ErrorType.ALREADY_REGISTERED_EMAIL,
+					new SocialLinkingInfo(provider, payload.unlinkKey()));
 			}
 		} else { // 없을 경우 신규 생성
 			user = userRepository.save(buildUser(payload));
@@ -186,5 +187,8 @@ public class UserService {
 			.email(payload.email())
 			.role(UserRole.USER)
 			.build();
+	}
+
+	record SocialLinkingInfo(String provider, String linkToken) {
 	}
 }

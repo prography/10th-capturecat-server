@@ -58,7 +58,7 @@ class Oauth2AuthControllerSliceTest {
 		// given
 		String provider = "google";
 		String idToken = "test-id-token";
-		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null, false);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null, false, null);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
 
@@ -73,7 +73,7 @@ class Oauth2AuthControllerSliceTest {
 		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload, false)).thenReturn(user);
+		Mockito.when(userService.upsertSocialUser(payload, false, null)).thenReturn(user);
 		// tokenService.issue → tokenMap
 		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
 			.thenReturn(tokenMap);
@@ -97,7 +97,7 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "apple";
 		String authorization_code = "test_authorization_code";
 		String nickname = "최재량";
-		SocialLoginRequest req = new SocialLoginRequest(null, nickname, authorization_code, false);
+		SocialLoginRequest req = new SocialLoginRequest(null, nickname, authorization_code, false, null);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", nickname, "apple_refresh_token", true);
 
@@ -112,7 +112,7 @@ class Oauth2AuthControllerSliceTest {
 		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload, false)).thenReturn(user);
+		Mockito.when(userService.upsertSocialUser(payload, false, null)).thenReturn(user);
 		// tokenService.issue → tokenMap
 		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
 			.thenReturn(tokenMap);
@@ -136,7 +136,7 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "google";
 		String idToken = "bad-id-token";
 		String nickname = null;
-		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null, false);
+		SocialLoginRequest req = new SocialLoginRequest(idToken, nickname, null, false, null);
 
 		Mockito.when(socialService.verifyAndExtract(any(), any(), any(), any()))
 			.thenThrow(new CoreException(ErrorType.INVALID_ID_TOKEN));
@@ -155,18 +155,17 @@ class Oauth2AuthControllerSliceTest {
 	void socialLogin_fail() throws Exception {
 		// given
 		String provider = "GOOGLE";
-		SocialLoginRequest req = new SocialLoginRequest("test-id-token", null, null, false);
+		SocialLoginRequest req = new SocialLoginRequest("test-id-token", null, null, false, null);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
-
 
 		// idTokenVerifierService.verifyAndExtract → payload
 		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload, false))
-			.thenThrow(new CoreException(ErrorType.ALREADY_REGISTERED_EMAIL, "KAKAO"));
-
+		Mockito.when(userService.upsertSocialUser(payload, false, null))
+			.thenThrow(new CoreException(ErrorType.ALREADY_REGISTERED_EMAIL,
+				new SocialLinkingInfo("KAKAO", "payload.unlinkKey()")));
 
 		// when & then
 		mockMvc.perform(post(REQUEST_PATH, provider)
@@ -175,7 +174,7 @@ class Oauth2AuthControllerSliceTest {
 			.andDo(print())
 			.andExpect(status().isConflict())
 			.andExpect(jsonPath("$.result").value("ERROR"))
-			.andExpect(jsonPath("$.data").value("KAKAO"))
+			.andExpect(jsonPath("$.data.provider").value("KAKAO"))
 			.andExpect(jsonPath("$.error.code").value("ALREADY_REGISTERED_EMAIL"));
 	}
 
@@ -186,7 +185,8 @@ class Oauth2AuthControllerSliceTest {
 		String provider = "google";
 		String idToken = "test-id-token";
 		boolean accountLinking = true;
-		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null, accountLinking);
+		String linkToken = "eyJhbGciOi...";
+		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null, accountLinking, linkToken);
 		OidcUserPayload payload =
 			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
 
@@ -201,7 +201,7 @@ class Oauth2AuthControllerSliceTest {
 		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
 			.thenReturn(payload);
 		// userService.upsertSocialUser → user
-		Mockito.when(userService.upsertSocialUser(payload, accountLinking)).thenReturn(user);
+		Mockito.when(userService.upsertSocialUser(payload, accountLinking, linkToken)).thenReturn(user);
 		// tokenService.issue → tokenMap
 		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
 			.thenReturn(tokenMap);
@@ -226,6 +226,9 @@ class Oauth2AuthControllerSliceTest {
 			.nickname(payload.nickname())
 			.build();
 		return new LoginUser(user);
+	}
+
+	record SocialLinkingInfo(String provider, String linkToken) {
 	}
 
 }

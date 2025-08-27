@@ -72,7 +72,7 @@ class SocialLoginLinkingTest {
 				.willReturn(Optional.of(linked));
 
 			// when
-			LoginUser result = service.upsertSocialUser(kakao, /*accountLinking*/ false);
+			LoginUser result = service.upsertSocialUser(kakao, false, null);
 
 			// then
 			assertThat(result).isNotNull();
@@ -100,13 +100,11 @@ class SocialLoginLinkingTest {
 			given(userSocialAccountRepository.findByUser(existed)).willReturn(List.of(anyExisting));
 
 			// when/then
-			assertThatThrownBy(() -> service.upsertSocialUser(kakao, /*accountLinking*/ false))
+			assertThatThrownBy(() -> service.upsertSocialUser(kakao, false, null))
 				.isInstanceOf(CoreException.class)
 				.satisfies(ex -> {
 					CoreException ce = (CoreException)ex;
 					assertThat(ce.getErrorType()).isEqualTo(ErrorType.ALREADY_REGISTERED_EMAIL);
-					// 메시지/인자 검증이 필요하면 아래를 활성화
-					// assertThat(ce.getArgs()).contains("apple");
 				});
 
 			then(userRepository).should(never()).save(any(User.class));
@@ -128,7 +126,7 @@ class SocialLoginLinkingTest {
 				.willReturn(Optional.of(existed));
 
 			// when
-			LoginUser result = service.upsertSocialUser(kakao, /*accountLinking*/ true);
+			LoginUser result = service.upsertSocialUser(kakao, true, kakao.unlinkKey());
 
 			// then
 			assertThat(result).isNotNull();
@@ -164,7 +162,7 @@ class SocialLoginLinkingTest {
 			given(userRepository.save(any(User.class))).willReturn(persisted);
 
 			// when
-			LoginUser result = service.upsertSocialUser(kakao, /*accountLinking*/ false);
+			LoginUser result = service.upsertSocialUser(kakao, false, null);
 
 			// then
 			assertThat(result).isNotNull();

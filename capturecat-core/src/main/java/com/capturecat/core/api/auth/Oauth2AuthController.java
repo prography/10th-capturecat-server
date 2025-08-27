@@ -4,8 +4,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +38,7 @@ public class Oauth2AuthController {
 			requestDto.idToken(), requestDto.nickname(), requestDto.authToken());
 
 		// 2. 유저 정보 추출/회원 처리
-		LoginUser user = userService.upsertSocialUser(payload, requestDto.accountLinking());
+		LoginUser user = userService.upsertSocialUser(payload, requestDto.accountLinking(), requestDto.linkToken());
 
 		//3. JWT 발급
 		Map<TokenType, String> tokenMap = tokenService.issue(user.getUsername(), user.getRole());
