@@ -85,7 +85,7 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 						.description("apple 로그인 시 authorization_code 전달"),
 					fieldWithPath("accountLinking").type(JsonFieldType.BOOLEAN)
 						.optional()
-						.description("소셜 로그인 연동 여부")
+						.description("소셜 로그인 연동 여부. default false, 계정 통합 시 true")
 				),
 				responseHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer 액세스 토큰"),

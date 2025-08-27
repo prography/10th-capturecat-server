@@ -150,6 +150,74 @@ class Oauth2AuthControllerSliceTest {
 			.andExpect(jsonPath("$.error").exists());
 	}
 
+	@DisplayName("이미 가입된 이메일일 경우 에러 응답")
+	@Test
+	void socialLogin_fail() throws Exception {
+		// given
+		String provider = "GOOGLE";
+		SocialLoginRequest req = new SocialLoginRequest("test-id-token", null, null, false);
+		OidcUserPayload payload =
+			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
+
+
+		// idTokenVerifierService.verifyAndExtract → payload
+		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
+			.thenReturn(payload);
+		// userService.upsertSocialUser → user
+		Mockito.when(userService.upsertSocialUser(payload, false))
+			.thenThrow(new CoreException(ErrorType.ALREADY_REGISTERED_EMAIL, "KAKAO"));
+
+
+		// when & then
+		mockMvc.perform(post(REQUEST_PATH, provider)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andDo(print())
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.result").value("ERROR"))
+			.andExpect(jsonPath("$.data").value("KAKAO"))
+			.andExpect(jsonPath("$.error.code").value("ALREADY_REGISTERED_EMAIL"));
+	}
+
+	@DisplayName("계정 통합을 선택한 후 이미 가입된 이메일로 가입 시도 시 성공")
+	@Test
+	void socialLogin_account_linking() throws Exception {
+		// given
+		String provider = "google";
+		String idToken = "test-id-token";
+		boolean accountLinking = true;
+		SocialLoginRequest req = new SocialLoginRequest(idToken, null, null, accountLinking);
+		OidcUserPayload payload =
+			new OidcUserPayload(provider, "1234", "test@test.com", "testNickname", null, true);
+
+		LoginUser user = buildUser(payload);
+
+		Map<TokenType, String> tokenMap = Map.of(
+			TokenType.ACCESS, "access.jwt.token",
+			TokenType.REFRESH, "refresh.jwt.token"
+		);
+
+		// idTokenVerifierService.verifyAndExtract → payload
+		Mockito.when(socialService.verifyAndExtract(anyString(), any(), any(), any()))
+			.thenReturn(payload);
+		// userService.upsertSocialUser → user
+		Mockito.when(userService.upsertSocialUser(payload, accountLinking)).thenReturn(user);
+		// tokenService.issue → tokenMap
+		Mockito.when(tokenService.issue(eq(user.getUsername()), eq(user.getRole())))
+			.thenReturn(tokenMap);
+
+		// when & then
+		mockMvc.perform(post(REQUEST_PATH, provider)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(req)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(header().string(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + "access.jwt.token"))
+			.andExpect(header().string(JwtUtil.REFRESH_TOKEN_HEADER, JwtUtil.BEARER_PREFIX + "refresh.jwt.token"))
+			.andExpect(jsonPath("$.result").value("SUCCESS"))
+			.andExpect(jsonPath("$.data").exists());
+	}
+
 	private LoginUser buildUser(SocialService.OidcUserPayload payload) {
 		User user = User.builder()
 			.email(payload.email())
