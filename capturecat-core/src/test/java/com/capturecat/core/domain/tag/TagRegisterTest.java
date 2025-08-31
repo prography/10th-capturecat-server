@@ -1,13 +1,16 @@
 package com.capturecat.core.domain.tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,5 +88,42 @@ class TagRegisterTest {
 		assertThat(resultTags).hasSize(tagNames.size());
 		assertThat(resultTags).extracting(Tag::getName)
 			.containsExactlyInAnyOrderElementsOf(tagNames);
+	}
+
+	@Test
+	void 태그가_저장되지_않은_경우_태그를_저장한다() {
+		// given
+		String tagName = "단일태그";
+
+		given(tagRepository.findByName(tagName)).willReturn(Optional.empty());
+		given(tagRepository.save(any())).willReturn(TagFixture.createTag(1L, tagName));
+
+		// when
+		Tag resultTag = tagRegister.registerTagsFor(tagName);
+
+		// then
+		assertThat(resultTag.getId()).isNotNull();
+		assertThat(resultTag.getName()).isEqualTo(tagName);
+
+		verify(tagRepository, times(1)).findByName(tagName);
+		verify(tagRepository, times(1)).save(any());
+	}
+
+	@Test
+	void 이미_저장된_태그인_경우_태그_엔티티를_반환한다() {
+		// given
+		String tagName = "기존태그";
+
+		given(tagRepository.findByName(tagName)).willReturn(Optional.of(TagFixture.createTag(1L, tagName)));
+
+		// when
+		Tag resultTag = tagRegister.registerTagsFor(tagName);
+
+		// then
+		assertThat(resultTag.getId()).isNotNull();
+		assertThat(resultTag.getName()).isEqualTo(tagName);
+
+		verify(tagRepository, times(1)).findByName(tagName);
+		verify(tagRepository, never()).save(any());
 	}
 }
