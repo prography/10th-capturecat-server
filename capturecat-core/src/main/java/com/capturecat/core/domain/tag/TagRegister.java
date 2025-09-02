@@ -38,4 +38,15 @@ public class TagRegister {
 		result.addAll(savedNewTags);
 		return result;
 	}
+
+	/**
+	 * 등록되지 않은 태그는 등록하고, 이미 존재하는 태그는 그대로 반환합니다.
+	 * @param tagName 태그 이름
+	 * @return 조회되거나 새로 생성된 {@link Tag} 엔티티
+	 */
+	@Transactional
+	public Tag registerTagsFor(String tagName) {
+		return tagRepository.findByName(tagName)
+			.orElseGet(() -> tagRepository.save(new Tag(tagName)));
+	}
 }

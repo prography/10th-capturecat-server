@@ -35,6 +35,9 @@ spring:
       host: localhost
       port: 6379
 
+  flyway:
+    enabled: false
+
 image:
   local:
     base-path: ${user.home}/Desktop/capturecat/upload
