@@ -49,6 +49,7 @@ operation::createUserTag[snippets='curl-request,http-request,request-headers,que
 
 <<error-codes#유저-태그-생성, 유저 태그 생성 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
+[[유저-태그-수정]]
 === 유저 태그 수정
 ==== 성공
 operation::updateUserTag[snippets='curl-request,http-request,request-headers,request-fields,http-response,response-fields']
