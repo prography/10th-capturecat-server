@@ -93,3 +93,7 @@ include::{snippets}/errorCode/autocomplete/error-codes.adoc[]
 [[유저-태그-생성]]
 === 유저 태그 생성
 include::{snippets}/errorCode/createUserTag/error-codes.adoc[]
+
+[[유저-태그-조회]]
+=== 유저 태그 조회
+include::{snippets}/errorCode/getUserTags/error-codes.adoc[]
