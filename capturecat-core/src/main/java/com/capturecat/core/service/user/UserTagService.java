@@ -1,6 +1,10 @@
 package com.capturecat.core.service.user;
 
+import java.util.List;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +21,8 @@ import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
+import com.capturecat.core.support.response.CursorResponse;
+import com.capturecat.core.support.util.CursorUtil;
 
 @Slf4j
 @Service
@@ -44,6 +50,19 @@ public class UserTagService {
 		} catch (DataIntegrityViolationException ex) {
 			throw new CoreException(ErrorType.USER_TAG_ALREADY_EXISTS);
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<TagResponse> getAll(LoginUser loginUser, Pageable pageable) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Slice<UserTag> userTags = userTagRepository.findAllByUser(user, pageable);
+
+		List<TagResponse> tags = userTags.stream()
+			.map(ut -> TagResponse.from(ut.getTag()))
+			.toList();
+
+		return CursorUtil.toCursorResponse(tags, userTags.hasNext(), TagResponse::id);
 	}
 
 	private void validate(User user, Tag tag) {

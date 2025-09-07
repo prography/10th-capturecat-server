@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.capturecat.core.domain.tag.Tag;
 
-public interface UserTagRepository extends JpaRepository<UserTag, Long> {
+public interface UserTagRepository extends JpaRepository<UserTag, Long>, UserTagCustomRepository {
 
 	boolean existsByUserAndTag(User user, Tag tag);
 

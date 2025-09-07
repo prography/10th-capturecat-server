@@ -19,4 +19,10 @@ class UserErrorCodeControllerTest extends ErrorCodeDocumentTest {
 			TOO_MANY_USER_TAGS, USER_NOT_FOUND);
 		generateErrorDocs("errorCode/createUserTag", errorCodeDescriptors);
 	}
+
+	@Test
+	void 유저_태그_조회_에러_코드_문서화() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getUserTags", errorCodeDescriptors);
+	}
 }
