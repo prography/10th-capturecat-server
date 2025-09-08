@@ -15,6 +15,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import io.restassured.http.ContentType;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.service.user.UserTagService;
+import com.capturecat.core.support.response.CursorResponse;
 import com.capturecat.test.api.RestDocsTest;
 
 class UserTagControllerTest extends RestDocsTest {
@@ -65,6 +67,30 @@ class UserTagControllerTest extends RestDocsTest {
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("사용자가 등록한 태그 정보"),
 					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.name").type(JsonFieldType.STRING).description("태그 이름"))));
+	}
+
+	@Test
+	void 유저_태그_조회() {
+		// given
+		BDDMockito.given(userTagService.getAll(any(), any())).willReturn(
+			new CursorResponse(false, 1L, List.of(new TagResponse(1L, "java"))));
+
+		// when & then
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.contentType(ContentType.JSON)
+			.when().get("/v1/user-tags")
+			.then().status(HttpStatus.OK)
+			.apply(document("getUserTags", requestPreprocessor(), responsePreprocessor(),
+				requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("유효한 Access 토큰")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("커서 페이지 응답"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("태그 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"))));
 	}
 
 	@Test

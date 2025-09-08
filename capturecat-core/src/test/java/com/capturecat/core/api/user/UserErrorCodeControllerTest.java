@@ -23,6 +23,12 @@ class UserErrorCodeControllerTest extends ErrorCodeDocumentTest {
 	}
 
 	@Test
+	void 유저_태그_조회_에러_코드_문서화() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getUserTags", errorCodeDescriptors);
+	}
+
+	@Test
 	void 유저_태그_수정_에러_코드_문서화() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_TAG_ALREADY_EXISTS,
 			USER_NOT_FOUND, TAG_NOT_FOUND, USER_TAG_NOT_FOUND);

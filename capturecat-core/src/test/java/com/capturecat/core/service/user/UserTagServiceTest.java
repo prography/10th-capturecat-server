@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -19,12 +20,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.SliceImpl;
 
 import com.capturecat.core.DummyObject;
 import com.capturecat.core.domain.tag.TagFixture;
 import com.capturecat.core.domain.tag.TagRegister;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.domain.user.UserTag;
 import com.capturecat.core.domain.user.UserTagFixture;
 import com.capturecat.core.domain.user.UserTagRepository;
 import com.capturecat.core.service.auth.LoginUser;
@@ -119,6 +123,37 @@ class UserTagServiceTest {
 			.hasMessage(ErrorType.TOO_MANY_USER_TAGS.getCode().getMessage());
 
 		verify(userTagRepository, never()).save(any());
+	}
+
+	@Test
+	void 유저_태그를_조회한다() {
+		// given
+		var user = DummyObject.newUser("test");
+		var tag = TagFixture.createTag(1L, "java");
+
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(userTagRepository.findAllByUser(eq(user), any()))
+			.willReturn(new SliceImpl<>(List.of(UserTag.create(user, tag))));
+
+		// when
+		var response = userTagService.getAll(new LoginUser(user), PageRequest.of(0, 10));
+
+		// then
+		assertThat(response.items()).hasSize(1);
+		assertThat(response.items().get(0).name()).isEqualTo(tag.getName());
+	}
+
+	@Test
+	void 유저_태그를_조회_시_사용자가_존재하지_않으면_실패한다() {
+		// given
+		var user = DummyObject.newUser("test");
+
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userTagService.getAll(new LoginUser(user), PageRequest.of(0, 10)))
+			.isInstanceOf(CoreException.class)
+			.hasMessage(ErrorType.USER_NOT_FOUND.getCode().getMessage());
 	}
 
 	@Test
