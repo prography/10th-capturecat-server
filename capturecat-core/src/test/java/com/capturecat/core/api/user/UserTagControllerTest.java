@@ -3,17 +3,20 @@ package com.capturecat.core.api.user;
 import static com.capturecat.test.api.RestDocsUtil.requestPreprocessor;
 import static com.capturecat.test.api.RestDocsUtil.responsePreprocessor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,5 +91,30 @@ class UserTagControllerTest extends RestDocsTest {
 					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("태그 목록"),
 					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("태그 이름"))));
+	}
+
+	@Test
+	void 유저_태그_수정() {
+		// given
+		BDDMockito.given(userTagService.update(any(), anyLong(), anyString())).willReturn(new TagResponse(1L, "java"));
+
+		// when & then
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.contentType(ContentType.JSON)
+			.body(Map.of("currentTagId", 1L, "newTagName", "spring"))
+			.when().patch("/v1/user-tags")
+			.then().status(HttpStatus.OK)
+			.apply(document("updateUserTag", requestPreprocessor(), responsePreprocessor(),
+				requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("유효한 Access 토큰")),
+				requestFields(
+					fieldWithPath("currentTagId").type(JsonFieldType.NUMBER).description("수정할 태그 ID"),
+					fieldWithPath("newTagName").type(JsonFieldType.STRING).description("새로운 태그 이름")
+				),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("수정된 태그 정보"),
+					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("data.name").type(JsonFieldType.STRING).description("태그 이름"))));
 	}
 }

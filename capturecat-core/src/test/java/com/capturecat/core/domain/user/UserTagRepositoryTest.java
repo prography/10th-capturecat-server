@@ -1,8 +1,6 @@
 package com.capturecat.core.domain.user;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
 
@@ -10,12 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 
 import com.capturecat.core.DummyObject;
 import com.capturecat.core.config.JpaAuditingConfig;
 import com.capturecat.core.config.QueryDslConfig;
+import com.capturecat.core.domain.tag.Tag;
 import com.capturecat.core.domain.tag.TagFixture;
 import com.capturecat.core.domain.tag.TagRepository;
 
@@ -36,30 +33,21 @@ class UserTagRepositoryTest {
 	UserTagRepository userTagRepository;
 
 	@Test
-	void findAllByUser_ShouldReturnUserTags() {
+	void findByUserAndTag() {
 		// given
-		var user = DummyObject.newUser("test");
-		userRepository.save(user);
-
-		var tag1 = TagFixture.createTag("tag1");
-		var tag2 = TagFixture.createTag("tag2");
-		tagRepository.saveAll(List.of(tag1, tag2));
-
-		UserTag userTag1 = UserTag.create(user, tag1);
-		UserTag userTag2 = UserTag.create(user, tag2);
-		userTagRepository.saveAll(List.of(userTag1, userTag2));
+		User user = userRepository.save(DummyObject.newUser("test"));
+		Tag tag = tagRepository.save(TagFixture.createTag("A"));
+		UserTag userTag = userTagRepository.save(UserTag.create(user, tag));
 
 		entityManager.flush();
 		entityManager.clear();
 
 		// when
-		Slice<UserTag> result = userTagRepository.findAllByUser(user, PageRequest.of(0, 10));
+		UserTag result = userTagRepository.findByUserAndTag(user, tag).orElseThrow();
 
 		// then
-		assertThat(result).isNotNull();
-		assertThat(result.getContent()).hasSize(2);
-		assertThat(result.getContent())
-			.extracting("tag.name")
-			.containsExactlyInAnyOrder("tag1", "tag2");
+		assertThat(result.getId()).isEqualTo(userTag.getId());
+		assertThat(result.getUser().getId()).isEqualTo(user.getId());
+		assertThat(result.getTag().getId()).isEqualTo(tag.getId());
 	}
 }

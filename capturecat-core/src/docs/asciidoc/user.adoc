@@ -60,3 +60,13 @@ operation::getUserTags[snippets='curl-request,http-request,request-headers,http-
 유저 태그 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
 <<error-codes#유저-태그-조회, 유저 태그 조회 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[유저-태그-수정]]
+=== 유저 태그 수정
+==== 성공
+operation::updateUserTag[snippets='curl-request,http-request,request-headers,request-fields,http-response,response-fields']
+
+==== 실패
+유저 태그 수정이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#유저-태그-수정, 유저 태그 수정 API에서 발생할 수 있는 에러>>를 살펴보세요.
