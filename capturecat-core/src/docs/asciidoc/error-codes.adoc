@@ -101,3 +101,7 @@ include::{snippets}/errorCode/getUserTags/error-codes.adoc[]
 [[유저-태그-수정]]
 === 유저 태그 수정
 include::{snippets}/errorCode/updateUserTag/error-codes.adoc[]
+
+[[유저-태그-삭제]]
+=== 유저 태그 삭제
+include::{snippets}/errorCode/deleteUserTag/error-codes.adoc[]

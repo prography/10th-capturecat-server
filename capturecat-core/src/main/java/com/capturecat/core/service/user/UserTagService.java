@@ -85,6 +85,18 @@ public class UserTagService {
 		return TagResponse.from(newTag);
 	}
 
+	@Transactional
+	public void delete(LoginUser loginUser, Long tagId) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Tag tag = tagRepository.findById(tagId)
+			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
+		UserTag userTag = userTagRepository.findByUserAndTag(user, tag)
+			.orElseThrow(() -> new CoreException(ErrorType.USER_TAG_NOT_FOUND));
+
+		userTagRepository.delete(userTag);
+	}
+
 	private void validate(User user, Tag tag) {
 		validateDuplicateUserTag(user, tag);
 		validateUserTagCountLimit(user);

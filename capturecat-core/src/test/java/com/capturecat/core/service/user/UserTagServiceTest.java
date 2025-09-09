@@ -230,4 +230,68 @@ class UserTagServiceTest {
 		verify(userTagRepository, never()).delete(any());
 		verify(userTagRepository, never()).save(any());
 	}
+
+	@Test
+	void 유저_태그를_삭제한다() {
+		// given
+		var user = DummyObject.newUser("test");
+		var tag = TagFixture.createTag(1L, "java");
+		var userTag = UserTagFixture.createUserTag(1L, user, tag);
+
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(tagRepository.findById(anyLong())).willReturn(Optional.of(tag));
+		given(userTagRepository.findByUserAndTag(eq(user), eq(tag))).willReturn(Optional.of(userTag));
+
+		// when
+		userTagService.delete(new LoginUser(user), 1L);
+
+		// then
+		verify(userTagRepository, times(1)).delete(eq(userTag));
+	}
+
+	@Test
+	void 유저_태그_삭제_시_회원이_없으면_실패한다() {
+		// given
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userTagService.delete(new LoginUser(DummyObject.newUser("test")), 1L))
+			.isInstanceOf(CoreException.class)
+			.hasMessage(ErrorType.USER_NOT_FOUND.getCode().getMessage());
+
+		verify(userTagRepository, never()).delete(any());
+	}
+
+	@Test
+	void 유저_태그_삭제_시_태그가_없으면_실패한다() {
+		// given
+		var user = DummyObject.newUser("test");
+
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(tagRepository.findById(anyLong())).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userTagService.delete(new LoginUser(DummyObject.newUser("test")), 1L))
+			.isInstanceOf(CoreException.class)
+			.hasMessage(ErrorType.TAG_NOT_FOUND.getCode().getMessage());
+
+		verify(userTagRepository, never()).delete(any());
+	}
+
+	@Test
+	void 유저_태그_삭제_시_유저_태그가_없으면_실패한다() {
+		// given
+		var user = DummyObject.newUser("test");
+		var tag = TagFixture.createTag(1L, "java");
+
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(tagRepository.findById(anyLong())).willReturn(Optional.of(tag));
+		given(userTagRepository.findByUserAndTag(eq(user), eq(tag))).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userTagService.delete(new LoginUser(DummyObject.newUser("test")), 1L))
+			.isInstanceOf(CoreException.class);
+
+		verify(userTagRepository, never()).delete(any());
+	}
 }

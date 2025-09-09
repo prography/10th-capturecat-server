@@ -117,4 +117,23 @@ class UserTagControllerTest extends RestDocsTest {
 					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("태그 ID"),
 					fieldWithPath("data.name").type(JsonFieldType.STRING).description("태그 이름"))));
 	}
+
+	@Test
+	void 유저_태그_삭제() {
+		// given
+		BDDMockito.given(userTagService.create(any(), anyString())).willReturn(new TagResponse(1L, "java"));
+
+		// when & then
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.contentType(ContentType.JSON)
+			.queryParam("tagId", 1L)
+			.when().delete("/v1/user-tags")
+			.then().status(HttpStatus.OK)
+			.apply(document("deleteUserTag", requestPreprocessor(), responsePreprocessor(),
+				requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("유효한 Access 토큰")),
+				queryParameters(parameterWithName("tagId").description("태그 ID")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"))));
+	}
 }

@@ -34,4 +34,11 @@ class UserErrorCodeControllerTest extends ErrorCodeDocumentTest {
 			USER_NOT_FOUND, TAG_NOT_FOUND, USER_TAG_NOT_FOUND);
 		generateErrorDocs("errorCode/updateUserTag", errorCodeDescriptors);
 	}
+
+	@Test
+	void 유저_태그_삭제_에러_코드_문서화() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND, TAG_NOT_FOUND,
+			USER_TAG_NOT_FOUND);
+		generateErrorDocs("errorCode/deleteUserTag", errorCodeDescriptors);
+	}
 }
