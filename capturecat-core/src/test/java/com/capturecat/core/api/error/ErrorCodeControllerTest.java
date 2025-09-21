@@ -1,7 +1,29 @@
 package com.capturecat.core.api.error;
 
-import static com.capturecat.core.support.error.ErrorType.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
+import static com.capturecat.core.support.error.ErrorType.ALREADY_REGISTERED_TAGS;
+import static com.capturecat.core.support.error.ErrorType.BOOKMARK_DUPLICATION;
+import static com.capturecat.core.support.error.ErrorType.DUPLICATE_TAG_NAMES;
+import static com.capturecat.core.support.error.ErrorType.FETCH_SOCIAL_TOKEN_FAIL;
+import static com.capturecat.core.support.error.ErrorType.GENERATE_CLIENT_SECRET_FAIL;
+import static com.capturecat.core.support.error.ErrorType.IMAGE_ACCESS_DENIED;
+import static com.capturecat.core.support.error.ErrorType.IMAGE_DELETE_FAILED;
+import static com.capturecat.core.support.error.ErrorType.IMAGE_NOT_FOUND;
+import static com.capturecat.core.support.error.ErrorType.IMAGE_TAG_NOT_FOUND;
+import static com.capturecat.core.support.error.ErrorType.IMAGE_UPLOAD_FAILED;
+import static com.capturecat.core.support.error.ErrorType.INTERNAL_SERVER_ERROR;
+import static com.capturecat.core.support.error.ErrorType.INVALID_ACCESS_TOKEN;
+import static com.capturecat.core.support.error.ErrorType.INVALID_AUTH_TOKEN;
+import static com.capturecat.core.support.error.ErrorType.INVALID_DATE_FORMAT;
+import static com.capturecat.core.support.error.ErrorType.INVALID_ID_TOKEN;
+import static com.capturecat.core.support.error.ErrorType.INVALID_LOGOUT_AUTH_TOKEN;
+import static com.capturecat.core.support.error.ErrorType.INVALID_REFRESH_TOKEN;
+import static com.capturecat.core.support.error.ErrorType.REFRESH_TOKEN_EXPIRED;
+import static com.capturecat.core.support.error.ErrorType.SOCIAL_API_ERROR;
+import static com.capturecat.core.support.error.ErrorType.TOO_MANY_TAGS;
+import static com.capturecat.core.support.error.ErrorType.UNLINK_SOCIAL_FAIL;
+import static com.capturecat.core.support.error.ErrorType.UPLOAD_METADATA_MISMATCH;
+import static com.capturecat.core.support.error.ErrorType.USER_NOT_FOUND;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 
 import java.util.List;
 import java.util.stream.Stream;
