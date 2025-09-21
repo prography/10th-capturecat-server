@@ -26,6 +26,8 @@ import com.capturecat.core.DummyObject;
 import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.tag.TagFixture;
+import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
@@ -42,6 +44,9 @@ class BookmarkServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private TagRepository tagRepository;
 
 	@InjectMocks
 	private BookmarkService bookmarkService;
@@ -225,5 +230,24 @@ class BookmarkServiceTest {
 			.isInstanceOf(CoreException.class);
 
 		verify(bookmarkRepository, never()).delete(any(Bookmark.class));
+	}
+
+	@Test
+	void 즐겨찾기한_이미지의_이미지태그를_조회한다() {
+		// given
+		var user = DummyObject.newMockUser(1L);
+		var image = DummyObject.newMockImage(1L);
+
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(tagRepository.searchTagsByMemberBookmark(eq(user), any()))
+			.willReturn(new SliceImpl<>(List.of(TagFixture.createTag(1L, "tag1")), PageRequest.of(0, 10), false));
+
+		// when
+		var responses = bookmarkService.getBookmarkImageTags(new LoginUser(user), PageRequest.of(0, 10));
+
+		// then
+		assertThat(responses.hasNext()).isFalse();
+		assertThat(responses.lastCursor()).isNotNull();
+		assertThat(responses.items()).hasSize(1);
 	}
 }

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.bookmark.BookmarkService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
+import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.core.support.response.CursorResponse;
 
@@ -36,6 +37,14 @@ public class BookmarkController {
 		@AuthenticationPrincipal LoginUser loginUser,
 		@PageableDefault Pageable pageable) {
 		return ApiResponse.success(bookmarkService.getBookmarkImages(loginUser, pageable));
+	}
+
+	@GetMapping("/tags")
+	public ApiResponse<CursorResponse<TagResponse>> getBookmarkImageTags(
+		@AuthenticationPrincipal LoginUser loginUser,
+		@PageableDefault Pageable pageable) {
+
+		return ApiResponse.success(bookmarkService.getBookmarkImageTags(loginUser, pageable));
 	}
 
 	@DeleteMapping

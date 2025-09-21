@@ -13,10 +13,13 @@ import com.capturecat.core.domain.bookmark.Bookmark;
 import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
+import com.capturecat.core.domain.tag.Tag;
+import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
+import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
 import com.capturecat.core.support.response.CursorResponse;
@@ -29,6 +32,7 @@ public class BookmarkService {
 	private final BookmarkRepository bookmarkRepository;
 	private final ImageRepository imageRepository;
 	private final UserRepository userRepository;
+	private final TagRepository tagRepository;
 
 	@Transactional
 	public void addBookmark(Long imageId, LoginUser loginUser) {
@@ -54,6 +58,19 @@ public class BookmarkService {
 			.toList();
 
 		return CursorUtil.toCursorResponse(responses, bookmarks.hasNext(), ImageWithTagsResponse::id);
+	}
+
+	@Transactional(readOnly = true)
+	public CursorResponse<TagResponse> getBookmarkImageTags(LoginUser loginUser, Pageable pageable) {
+		User user = userRepository.findByUsername(loginUser.getUsername())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+		Slice<Tag> tags = tagRepository.searchTagsByMemberBookmark(user, pageable);
+
+		List<TagResponse> responses = tags.getContent().stream()
+			.map(TagResponse::from)
+			.toList();
+
+		return CursorUtil.toCursorResponse(responses, tags.hasNext(), TagResponse::id);
 	}
 
 	@Transactional

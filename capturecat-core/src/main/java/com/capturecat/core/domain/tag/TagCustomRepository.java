@@ -16,4 +16,6 @@ public interface TagCustomRepository {
 	Slice<Tag> searchMostUsedTagsByUser(User user, Pageable pageable);
 
 	List<Tag> searchByKeyword(String keyword, Long userId, int size);
+
+	Slice<Tag> searchTagsByMemberBookmark(User user, Pageable pageable);
 }
