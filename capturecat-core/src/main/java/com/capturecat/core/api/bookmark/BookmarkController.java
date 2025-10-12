@@ -35,8 +35,9 @@ public class BookmarkController {
 	@GetMapping("/images")
 	public ApiResponse<CursorResponse<ImageWithTagsResponse>> getBookmarkImages(
 		@AuthenticationPrincipal LoginUser loginUser,
+		@RequestParam(required = false) Long tagId,
 		@PageableDefault Pageable pageable) {
-		return ApiResponse.success(bookmarkService.getBookmarkImages(loginUser, pageable));
+		return ApiResponse.success(bookmarkService.getBookmarkImages(loginUser, tagId, pageable));
 	}
 
 	@GetMapping("/tags")

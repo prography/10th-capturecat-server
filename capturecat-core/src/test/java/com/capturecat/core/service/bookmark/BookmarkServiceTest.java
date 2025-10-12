@@ -132,11 +132,11 @@ class BookmarkServiceTest {
 		PageRequest pageRequest = PageRequest.of(0, 10);
 
 		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
-		given(bookmarkRepository.searchBookmarksByUser(eq(user), any()))
+		given(bookmarkRepository.searchBookmarksByUser(eq(user), any(), any()))
 			.willReturn(new SliceImpl<>(List.of(bookmark), pageRequest, false));
 
 		// when
-		var responses = bookmarkService.getBookmarkImages(new LoginUser(user), pageRequest);
+		var responses = bookmarkService.getBookmarkImages(new LoginUser(user), null, pageRequest);
 
 		// then
 		assertThat(responses.hasNext()).isFalse();
@@ -154,7 +154,7 @@ class BookmarkServiceTest {
 		given(userRepository.findByUsername(anyString())).willThrow(new CoreException(ErrorType.USER_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> bookmarkService.getBookmarkImages(new LoginUser(user), pageRequest))
+		assertThatThrownBy(() -> bookmarkService.getBookmarkImages(new LoginUser(user), null, pageRequest))
 			.isInstanceOf(CoreException.class);
 	}
 

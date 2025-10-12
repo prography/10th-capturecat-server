@@ -63,7 +63,7 @@ class BookmarkControllerTest extends RestDocsTest {
 	@Test
 	void 즐겨찾기한_이미지를_조회한다() {
 		// given
-		BDDMockito.given(bookmarkService.getBookmarkImages(any(), any())).willReturn(
+		BDDMockito.given(bookmarkService.getBookmarkImages(any(), any(), any())).willReturn(
 			CursorUtil.toCursorResponse(
 				List.of(ImageWithTagsResponse.from(DummyObject.newMockImage(1L))),
 				false,
@@ -79,7 +79,9 @@ class BookmarkControllerTest extends RestDocsTest {
 			.apply(document("getBookmarkImages", requestPreprocessor(), responsePreprocessor(),
 				queryParameters(
 					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
-					parameterWithName("size").description("페이지 크기 (기본값: 10, 최대: 100)").optional()),
+					parameterWithName("size").description("페이지 크기 (기본값: 10, 최대: 100)").optional(),
+					parameterWithName("tagId").description("태그 ID (선택한 태그로 필터링)").optional()
+				),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),

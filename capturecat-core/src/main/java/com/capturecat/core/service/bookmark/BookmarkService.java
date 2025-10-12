@@ -47,10 +47,11 @@ public class BookmarkService {
 	}
 
 	@Transactional(readOnly = true)
-	public CursorResponse<ImageWithTagsResponse> getBookmarkImages(LoginUser loginUser, Pageable pageable) {
+	public CursorResponse<ImageWithTagsResponse> getBookmarkImages(LoginUser loginUser, Long tagId, Pageable pageable) {
 		User user = userRepository.findByUsername(loginUser.getUsername())
 			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
-		Slice<Bookmark> bookmarks = bookmarkRepository.searchBookmarksByUser(user, pageable);
+		Tag tag = getTagOrNull(tagId);
+		Slice<Bookmark> bookmarks = bookmarkRepository.searchBookmarksByUser(user, tag, pageable);
 
 		List<ImageWithTagsResponse> responses = bookmarks.getContent().stream()
 			.map(Bookmark::getImage)
@@ -89,5 +90,13 @@ public class BookmarkService {
 		if (bookmarkRepository.existsByUserAndImage(user, image)) {
 			throw new CoreException(ErrorType.BOOKMARK_DUPLICATION);
 		}
+	}
+
+	private Tag getTagOrNull(Long tagId) {
+		if (tagId == null) {
+			return null;
+		}
+		return tagRepository.findById(tagId)
+			.orElseThrow(() -> new CoreException(ErrorType.TAG_NOT_FOUND));
 	}
 }
