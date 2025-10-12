@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.domain.user.UserSettings;
 
 /** 회원 관련 응답 DTO */
 public class UserRespDto {
@@ -45,4 +46,17 @@ public class UserRespDto {
 			this.username = user.getUsername();
 		}
 	}
+
+	/** 회원 설정 정보 DTO */
+	@Getter
+	public static class UserSettingsRespDto {
+		private final Long userId;
+		private final boolean screenshotAutoDeleteEnabled;
+
+		public UserSettingsRespDto(UserSettings userSettings) {
+			this.userId = userSettings.getUserId();
+			this.screenshotAutoDeleteEnabled = userSettings.isScreenshotAutoDeleteEnabled();
+		}
+	}
+
 }

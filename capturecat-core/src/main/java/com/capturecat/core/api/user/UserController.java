@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 import com.capturecat.core.api.user.dto.UserReqDto.JoinReqDto;
+import com.capturecat.core.api.user.dto.UserReqDto.UserSettingsReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
 import com.capturecat.core.api.user.dto.UserRespDto.InfoRespDto;
 import com.capturecat.core.api.user.dto.UserRespDto.JoinRespDto;
+import com.capturecat.core.api.user.dto.UserRespDto.UserSettingsRespDto;
 import com.capturecat.core.config.jwt.JwtUtil;
+import com.capturecat.core.domain.user.UserSettings;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
@@ -39,6 +43,7 @@ public class UserController {
 	@PostMapping("/join")
 	public ApiResponse<JoinRespDto> join(@RequestBody @Valid JoinReqDto joinReqDto, BindingResult bindingResult) {
 		JoinRespDto joinRespDto = userService.join(joinReqDto);
+
 		return ApiResponse.success(joinRespDto);
 	}
 
@@ -77,6 +82,29 @@ public class UserController {
 	@GetMapping("/info")
 	public ApiResponse<InfoRespDto> getUserInfo(@AuthenticationPrincipal LoginUser loginUser) {
 		InfoRespDto infoRespDto = userService.getUserInfo(loginUser.getUsername());
+
 		return ApiResponse.success(infoRespDto);
+	}
+
+	/**
+	 * 회원 설정 정보 조회
+	 */
+	@GetMapping("/settings")
+	public ApiResponse<UserSettingsRespDto> getUserSettings(@AuthenticationPrincipal LoginUser loginUser) {
+		UserSettings settings = userService.getUserSettings(loginUser.getUsername());
+
+		return ApiResponse.success(new UserSettingsRespDto(settings));
+	}
+
+	/**
+	 * 회원 설정 정보 변경
+	 */
+	@PutMapping("/settings")
+	public ApiResponse<UserSettingsRespDto> updateUserSettings(@AuthenticationPrincipal LoginUser loginUser,
+		UserSettingsReqDto userSettingsReqDto) {
+		UserSettings settings = userService.setUserSettings(loginUser.getUsername(),
+			userSettingsReqDto.isScreenshotAutoDeleteEnabled());
+
+		return ApiResponse.success(new UserSettingsRespDto(settings));
 	}
 }

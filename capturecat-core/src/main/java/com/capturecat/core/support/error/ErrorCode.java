@@ -41,7 +41,8 @@ public enum ErrorCode {
 	INVALID_LOGOUT_AUTH_TOKEN("ACCESS 토큰 또는 REFRESH 토큰이 유효하지 않습니다."),
 	ALREADY_EXISTS_USER_TAG("이미 등록된 유저 태그입니다."),
 	EXCEED_MAX_USER_TAG_COUNT("태그는 한 계정당 최대 30개까지 추가할 수 있어요."),
-	NOT_FOUND_USER_TAG("유저 태그를 찾을 수 없습니다.");
+	NOT_FOUND_USER_TAG("유저 태그를 찾을 수 없습니다."),
+	NOT_FOUND_USER_SETTINGS("유저 설정 정보를 찾을 수 없습니다.");
 
 	private final String message;
 
