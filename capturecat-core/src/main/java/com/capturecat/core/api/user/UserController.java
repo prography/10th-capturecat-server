@@ -93,7 +93,7 @@ public class UserController {
 	public ApiResponse<UserSettingsRespDto> getUserSettings(@AuthenticationPrincipal LoginUser loginUser) {
 		UserSettings settings = userService.getUserSettings(loginUser.getUsername());
 
-		return ApiResponse.success(new UserSettingsRespDto(settings));
+		return ApiResponse.success(UserSettingsRespDto.of(settings));
 	}
 
 	/**
@@ -105,6 +105,6 @@ public class UserController {
 		UserSettings settings = userService.setUserSettings(loginUser.getUsername(),
 			userSettingsReqDto.isScreenshotAutoDeleteEnabled());
 
-		return ApiResponse.success(new UserSettingsRespDto(settings));
+		return ApiResponse.success(UserSettingsRespDto.of(settings));
 	}
 }

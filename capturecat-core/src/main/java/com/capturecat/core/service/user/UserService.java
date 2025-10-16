@@ -124,6 +124,36 @@ public class UserService {
 		return resultMessage;
 	}
 
+	@Transactional(readOnly = true)
+	public UserSettings getUserSettings(String username) {
+		User user = userRepository.findByUsername(username)
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		return userSettingsRepository.findById(user.getId())
+			.orElseThrow(() -> new CoreException(ErrorType.USER_SETTINGS_NOT_FOUND));
+	}
+
+	/**
+	 * 회원 설정 정보 upsert
+	 */
+	@Transactional
+	public UserSettings setUserSettings(long userId, boolean enabled) {
+		UserSettings settings = userSettingsRepository.findById(userId)
+			.orElseGet(() -> UserSettings.init(userId)); //없으면 신규 생성
+
+		settings.changeAutoDelete(enabled);
+
+		return userSettingsRepository.save(settings); //신규 케이스를 위해 persist 보장
+	}
+
+	@Transactional
+	public UserSettings setUserSettings(String username, boolean enabled) {
+		User user = userRepository.findByUsername(username)
+			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
+
+		return setUserSettings(user.getId(), enabled);
+	}
+
 	protected void deleteUserAndRelated(Long userId) {
 		//1. 즐겨찾기 삭제
 		bookmarkRepository.deleteByUserId(userId);
@@ -176,32 +206,4 @@ public class UserService {
 			.role(UserRole.USER)
 			.build();
 	}
-
-	@Transactional(readOnly = true)
-	public UserSettings getUserSettings(String username) {
-		User user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
-
-		return userSettingsRepository.findById(user.getId())
-			.orElseThrow(() -> new CoreException(ErrorType.USER_SETTINGS_NOT_FOUND));
-	}
-
-	@Transactional
-	public UserSettings setUserSettings(long userId, boolean enabled) {
-		UserSettings settings = userSettingsRepository.findById(userId)
-			.orElseGet(() -> UserSettings.init(userId)); //없으면 신규 생성
-
-		settings.changeAutoDelete(enabled);
-
-		return userSettingsRepository.save(settings); //신규 케이스를 위해 persist 보장
-	}
-
-	@Transactional
-	public UserSettings setUserSettings(String username, boolean enabled) {
-		User user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new CoreException(ErrorType.USER_NOT_FOUND));
-
-		return setUserSettings(user.getId(), enabled);
-	}
-
 }
