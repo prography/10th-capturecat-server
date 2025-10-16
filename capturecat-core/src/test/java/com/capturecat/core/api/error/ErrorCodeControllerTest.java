@@ -152,6 +152,19 @@ class ErrorCodeControllerTest extends RestDocsTest {
 		generateErrorDocs("errorCode/userInfo", errorCodeDescriptors);
 	}
 
+	@Test
+	void 사용자_설정_정보_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
+			USER_SETTINGS_NOT_FOUND);
+		generateErrorDocs("errorCode/getUserSettings", errorCodeDescriptors);
+	}
+
+	@Test
+	void 사용자_설정_정보_변경_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/updateUserSettings", errorCodeDescriptors);
+	}
+
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
 		given().contentType(ContentType.JSON)
 			.when().get("/v1/error-codes")
