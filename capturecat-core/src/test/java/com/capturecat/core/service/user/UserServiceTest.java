@@ -26,6 +26,8 @@ import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.domain.user.UserSettings;
+import com.capturecat.core.domain.user.UserSettingsRepository;
 import com.capturecat.core.domain.user.UserSocialAccountRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
@@ -55,6 +57,9 @@ class UserServiceTest {
 	@Mock
 	private WithdrawLogService withdrawLogService;
 
+	@Mock
+	private UserSettingsRepository userSettingsRepository;
+
 	@Spy
 	private PasswordEncoder passwordEncoder;
 
@@ -68,6 +73,7 @@ class UserServiceTest {
 
 		when(userRepository.existsByUsername(any())).thenReturn(false);
 		when(userRepository.save(any())).thenReturn(newMockUser(1L));
+		when(userSettingsRepository.findById(any())).thenReturn(Optional.empty());
 
 		//when
 		JoinRespDto joinRespDto = userService.join(joinReqDto);
@@ -108,7 +114,7 @@ class UserServiceTest {
 		// 탈퇴 사유 저장
 		verify(withdrawLogService).save(savedUser.getId(), "test reason");
 
-		// 즐겨찾기, 이미지, 회원 삭제
+		// 즐겨찾기, 이미지, 회원, 설정 정보 삭제
 		verify(bookmarkRepository).deleteByUserId(savedUser.getId());
 		verify(imageTagRepository).deleteAllTagsByUserId(savedUser.getId());
 		verify(imageRepository).deleteAllImagesByUserId(savedUser.getId());
@@ -116,13 +122,13 @@ class UserServiceTest {
 		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
 		verify(userRepository).deleteById(captor.capture());
 		assertThat(captor.getValue()).isSameAs(savedUser.getId());
+
+		verify(userSettingsRepository).deleteById(savedUser.getId());
 	}
 
 	@Test
 	void 존재하지_않는_회원_탈퇴시_예외() {
 		// given
-		//given
-		//기 회원 만들기
 		User savedUser = newMockUser(1L);
 
 		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.empty());
@@ -134,5 +140,32 @@ class UserServiceTest {
 				CoreException ce = (CoreException)e;
 				assertThat(ce.getErrorType()).isEqualTo(ErrorType.USER_NOT_FOUND);
 			});
+	}
+
+	@Test
+	void 설정_정보_조회() {
+		User savedUser = newMockUser(1L);
+		when(userRepository.findByUsername(savedUser.getUsername())).thenReturn(Optional.of(savedUser));
+		when(userSettingsRepository.findById(savedUser.getId()))
+			.thenReturn(Optional.of(UserSettings.init(savedUser.getId())));
+
+		UserSettings userSettings = userService.getUserSettings(savedUser.getUsername());
+
+		assertThat(userSettings.getUserId()).isEqualTo(savedUser.getId());
+		assertThat(userSettings.isScreenshotAutoDeleteEnabled()).isFalse();
+	}
+
+	@Test
+	void 설정_정보_변경() {
+		User savedUser = newMockUser(1L);
+		UserSettings settings = UserSettings.init(savedUser.getId());
+		when(userSettingsRepository.findById(savedUser.getId())).thenReturn(Optional.of(settings));
+		when(userSettingsRepository.save(settings)).thenReturn(settings);
+
+		assertThat(settings.isScreenshotAutoDeleteEnabled()).isFalse();
+
+		userService.setUserSettings(savedUser.getId(), true);
+
+		assertThat(settings.isScreenshotAutoDeleteEnabled()).isTrue();
 	}
 }
