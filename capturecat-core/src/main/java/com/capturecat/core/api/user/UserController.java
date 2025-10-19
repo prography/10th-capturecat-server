@@ -101,7 +101,7 @@ public class UserController {
 	 */
 	@PutMapping("/settings")
 	public ApiResponse<UserSettingsRespDto> updateUserSettings(@AuthenticationPrincipal LoginUser loginUser,
-		UserSettingsReqDto userSettingsReqDto) {
+		@RequestBody UserSettingsReqDto userSettingsReqDto) {
 		UserSettings settings = userService.setUserSettings(loginUser.getUsername(),
 			userSettingsReqDto.isScreenshotAutoDeleteEnabled());
 

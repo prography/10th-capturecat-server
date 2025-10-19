@@ -5,13 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import com.capturecat.core.domain.BaseTimeEntity;
 
 @Entity
 @Table(name = "user_settings")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSettings extends BaseTimeEntity {
 
 	@Id
