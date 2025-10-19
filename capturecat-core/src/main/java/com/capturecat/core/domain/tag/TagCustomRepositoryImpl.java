@@ -1,5 +1,6 @@
 package com.capturecat.core.domain.tag;
 
+import static com.capturecat.core.domain.bookmark.QBookmark.bookmark;
 import static com.capturecat.core.domain.image.QImage.image;
 import static com.capturecat.core.domain.tag.QImageTag.imageTag;
 import static com.capturecat.core.domain.tag.QTag.tag;
@@ -13,6 +14,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 
+import com.capturecat.core.domain.user.QUser;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.support.querydsl.CommonTagQueryConditions;
 import com.capturecat.core.support.util.SliceUtil;
@@ -86,5 +88,23 @@ public class TagCustomRepositoryImpl implements TagCustomRepository {
 			.where(image.user.id.eq(userId), tag.name.startsWithIgnoreCase(keyword))
 			.limit(size)
 			.fetch();
+	}
+
+	@Override
+	public Slice<Tag> searchTagsByMemberBookmark(User user, Pageable pageable) {
+		List<Tag> content = queryFactory
+			.select(tag)
+			.from(imageTag)
+			.join(imageTag.tag, tag)
+			.join(imageTag.image, image)
+			.join(bookmark).on(bookmark.image.eq(image))
+			.join(bookmark.user, QUser.user)
+			.where(QUser.user.eq(user))
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1)
+			.orderBy(imageTag.createdDate.desc())
+			.fetch();
+
+		return SliceUtil.toSlice(content, pageable);
 	}
 }

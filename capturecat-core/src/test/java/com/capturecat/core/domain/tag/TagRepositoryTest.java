@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import com.capturecat.core.DummyObject;
 import com.capturecat.core.config.JpaAuditingConfig;
 import com.capturecat.core.config.QueryDslConfig;
+import com.capturecat.core.domain.bookmark.Bookmark;
+import com.capturecat.core.domain.bookmark.BookmarkRepository;
 import com.capturecat.core.domain.image.Image;
 import com.capturecat.core.domain.image.ImageRepository;
 import com.capturecat.core.domain.user.User;
@@ -39,6 +41,9 @@ class TagRepositoryTest {
 	private TagRepository tagRepository;
 
 	@Autowired
+	private BookmarkRepository bookmarkRepository;
+
+	@Autowired
 	private EntityManager entityManager;
 
 	private User user;
@@ -56,6 +61,9 @@ class TagRepositoryTest {
 		image1 = imageRepository.save(DummyObject.newMockUserImage(user));
 		image2 = imageRepository.save(DummyObject.newMockUserImage(user));
 		image3 = imageRepository.save(DummyObject.newMockUserImage(user));
+
+		bookmarkRepository.save(new Bookmark(user, image1));
+		bookmarkRepository.save(new Bookmark(user, image2));
 	}
 
 	@Test
@@ -164,6 +172,25 @@ class TagRepositoryTest {
 		assertThat(tags).hasSize(2);
 		assertThat(tags).extracting(Tag::getName)
 			.containsExactlyInAnyOrder(tag1.getName(), tag3.getName());
+	}
+
+	@Test
+	void searchTagsByMemberBookmark() {
+		// given
+		var tag1 = tagRepository.save(new Tag("tag1"));
+		var tag2 = tagRepository.save(new Tag("tag2"));
+		var tag3 = tagRepository.save(new Tag("tag3"));
+
+		saveImageTags(image1, List.of(tag1));
+		saveImageTags(image2, List.of(tag2, tag3));
+
+		// when
+		var tags = tagRepository.searchTagsByMemberBookmark(user, PageRequest.of(0, 10));
+
+		// then
+		assertThat(tags.getContent()).hasSize(3);
+		assertThat(tags.getContent()).extracting(Tag::getName)
+			.containsExactlyInAnyOrder(tag1.getName(), tag2.getName(), tag3.getName());
 	}
 
 	private void saveImageTags(Image image1, List<Tag> tags) {
