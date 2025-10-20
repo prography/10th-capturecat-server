@@ -54,6 +54,10 @@ include::{snippets}/errorCode/addBookmark/error-codes.adoc[]
 === 즐겨찾기한 이미지 조회
 include::{snippets}/errorCode/getBookmarkImages/error-codes.adoc[]
 
+[[즐겨찾기한-이미지의-태그-조회]]
+=== 즐겨찾기한 이미지의 태그 조회
+include::{snippets}/errorCode/getBookmarkImageTags/error-codes.adoc[]
+
 [[즐겨찾기-삭제]]
 === 즐겨찾기 삭제
 include::{snippets}/errorCode/deleteBookmark/error-codes.adoc[]

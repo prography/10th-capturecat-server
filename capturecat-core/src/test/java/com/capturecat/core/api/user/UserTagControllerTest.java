@@ -83,6 +83,10 @@ class UserTagControllerTest extends RestDocsTest {
 			.then().status(HttpStatus.OK)
 			.apply(document("getUserTags", requestPreprocessor(), responsePreprocessor(),
 				requestHeaders(headerWithName(HttpHeaders.AUTHORIZATION).description("유효한 Access 토큰")),
+				queryParameters(
+					parameterWithName("page").description("페이지 번호").optional(),
+					parameterWithName("size").description("페이지 크기").optional()
+				),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("커서 페이지 응답"),
