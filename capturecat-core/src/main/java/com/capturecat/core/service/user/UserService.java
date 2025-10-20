@@ -162,11 +162,11 @@ public class UserService {
 		imageTagRepository.deleteAllTagsByUserId(userId);
 		imageRepository.deleteAllImagesByUserId(userId);
 
-		// 3. User 삭제 -> social account도 삭제됨
-		userRepository.deleteById(userId);
-
-		// 4. UserSettings 삭제
+		// 3. UserSettings 삭제
 		userSettingsRepository.deleteById(userId);
+
+		// 4. User 삭제 -> social account도 삭제됨
+		userRepository.deleteById(userId);
 	}
 
 	private String unlinkSocials(User user) {
