@@ -2,9 +2,11 @@ package com.capturecat.core.api.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.domain.user.UserSettings;
 
 /** 회원 관련 응답 DTO */
 public class UserRespDto {
@@ -45,4 +47,17 @@ public class UserRespDto {
 			this.username = user.getUsername();
 		}
 	}
+
+	/** 회원 설정 정보 DTO */
+	@Getter
+	@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+	public static class UserSettingsRespDto {
+		private final Long userId;
+		private final boolean screenshotAutoDeleteEnabled;
+
+		public static UserSettingsRespDto of(UserSettings userSettings) {
+			return new UserSettingsRespDto(userSettings.getUserId(), userSettings.isScreenshotAutoDeleteEnabled());
+		}
+	}
+
 }

@@ -3,37 +3,127 @@
 
 [[튜토리얼-완료-업데이트]]
 === 튜토리얼(시작하기) 완료 업데이트
+
 ==== 성공
+
 operation::tutorialComplete[snippets='curl-request,http-request,request-headers,http-response,response-fields']
 
 ==== 실패
+
 튜토리얼(시작하기) 완료 업데이트가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
 <<error-codes#튜토리얼-완료-업데이트, 튜토리얼 완료 업데이트 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
-
 [[회원-탈퇴]]
 === 회원 탈퇴
+
 소셜 서비스 연결 해제 후 회원 관련 데이터를 삭제 처리 합니다.
-소셜 서비스 연결 해제가 모종의 이유로 실패하더라도 삭제 처리는 롤백하지 않습니다. (별도 회원 안내 필요)
+소셜 서비스 연결 해제가 모종의 이유로 실패하더라도 삭제 처리는 롤백하지 않습니다.
+(별도 회원 안내 필요)
 
 ==== 성공
+
 operation::withdraw[snippets='curl-request,http-request,request-headers,request-fields,http-response,response-fields']
 
 ==== 실패
+
 회원 탈퇴가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
 <<error-codes#회원탈퇴, 회원 탈퇴 API에서 발생할 수 있는 에러>>를 살펴보세요.
 
+[[회원-정보-조회]]
+=== 회원 정보 조회
 
-[[사용자-정보-조회]]
-=== 사용자 정보 조회
-JWT 엑세스 토큰의 사용자 정보를 조회합니다.
+JWT 엑세스 토큰의 회원 정보를 조회합니다.
 
 ==== 성공
+
 operation::userInfo[snippets='curl-request,http-request,request-headers,http-response,response-fields']
 
 ==== 실패
-사용자 정보 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
 
-<<error-codes#사용자정보조회, 사용자 정보 조회 API에서 발생할 수 있는 에러>>를 살펴보세요.
+회원 정보 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원정보조회, 회원 정보 조회 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[회원-태그-생성]]
+=== 회원 태그 생성
+
+회원의 태그를 생성합니다.
+
+==== 성공
+
+operation::createUserTag[snippets='curl-request,http-request,request-headers,query-parameters,http-response,response-fields']
+
+==== 실패
+
+회원 태그 생성이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원-태그-생성, 회원 태그 생성 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[회원-태그-조회]]
+=== 회원 태그 조회
+
+회원의 태그를 조회합니다.
+
+==== 성공
+
+operation::getUserTags[snippets='curl-request,http-request,request-headers,http-response,response-fields']
+
+==== 실패
+
+회원 태그 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원-태그-조회, 회원 태그 조회 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[회원-태그-수정]]
+=== 회원 태그 수정
+
+==== 성공
+
+operation::updateUserTag[snippets='curl-request,http-request,request-headers,request-fields,http-response,response-fields']
+
+==== 실패
+
+회원 태그 수정이 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원-태그-수정, 회원 태그 수정 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[회원-태그-삭제]]
+=== 회원 태그 삭제
+
+==== 성공
+
+operation::deleteUserTag[snippets='curl-request,http-request,request-headers,query-parameters,http-response,response-fields']
+
+==== 실패
+
+회원 태그 삭제가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원-태그-삭제, 회원 태그 삭제 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[회원-설정-조회]]
+=== 회원 설정 조회
+
+==== 성공
+
+operation::getUserSettings[snippets='curl-request,http-request,request-headers,http-response,response-fields']
+
+==== 실패
+
+회원 설정 조회가 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원-설정-조회, 회원 설정 조회 API에서 발생할 수 있는 에러>>를 살펴보세요.
+
+[[회원-설정-변경]]
+=== 회원 설정 변경
+
+==== 성공
+
+operation::updateUserSettings[snippets='curl-request,http-request,request-headers,request-body,request-fields,http-response,response-fields']
+
+==== 실패
+
+회원 설정 변경에 실패했다면 HTTP 상태 코드와 함께 <<에러-객체-형식, 에러 객체>>가 돌아옵니다.
+
+<<error-codes#회원-설정-변경, 회원 설정 변경 API에서 발생할 수 있는 에러>>를 살펴보세요.

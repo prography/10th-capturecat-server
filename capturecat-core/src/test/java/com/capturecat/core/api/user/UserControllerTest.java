@@ -16,10 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.restassured.http.ContentType;
 
+import com.capturecat.core.api.user.dto.UserReqDto;
 import com.capturecat.core.api.user.dto.UserReqDto.WithdrawReqDto;
 import com.capturecat.core.api.user.dto.UserRespDto;
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.domain.user.User;
+import com.capturecat.core.domain.user.UserSettings;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.TokenService;
 import com.capturecat.core.service.user.UserService;
@@ -126,6 +128,60 @@ class UserControllerTest extends RestDocsTest {
 					fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
 					fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("닉네임"),
 					fieldWithPath("data.tutorialCompleted").type(JsonFieldType.BOOLEAN).description("튜토리얼(시작하기) 완료 여부")
+				)));
+	}
+
+	@Test
+	void 설정_정보_조회() {
+		willReturn(UserSettings.init(1L)).given(userService).getUserSettings(any());
+
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.contentType(ContentType.JSON)
+			.when()
+			.get(URL_PREFIX + "/settings")
+			.then()
+			.status(HttpStatus.OK)
+			.apply(document("getUserSettings", requestPreprocessor(), responsePreprocessor(),
+				requestHeaders(
+					headerWithName(HttpHeaders.AUTHORIZATION)
+						.description("유효한 Access 토큰")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (예: SUCCESS)"),
+					fieldWithPath("data.userId").type(JsonFieldType.NUMBER).description("사용자 ID"),
+					fieldWithPath("data.screenshotAutoDeleteEnabled").type(JsonFieldType.BOOLEAN)
+						.description("스크린샷 자동 삭제 활성화")
+				)));
+	}
+
+	@Test
+	void 설정_정보_변경() {
+		UserReqDto.UserSettingsReqDto requestBody = new UserReqDto.UserSettingsReqDto();
+		requestBody.setScreenshotAutoDeleteEnabled(true);
+		UserSettings userSettings = UserSettings.init(1L);
+		userSettings.changeAutoDelete(true);
+		willReturn(userSettings).given(userService).setUserSettings(nullable(String.class), anyBoolean());
+
+		given()
+			.header(HttpHeaders.AUTHORIZATION, JwtUtil.BEARER_PREFIX + ACCESS_TOKEN)
+			.contentType(ContentType.JSON)
+			.body(requestBody)
+			.when()
+			.put(URL_PREFIX + "/settings")
+			.then()
+			.status(HttpStatus.OK)
+			.apply(document("updateUserSettings", requestPreprocessor(), responsePreprocessor(),
+				requestHeaders(
+					headerWithName(HttpHeaders.AUTHORIZATION)
+						.description("유효한 Access 토큰")),
+				requestFields(
+					fieldWithPath("screenshotAutoDeleteEnabled").type(JsonFieldType.BOOLEAN)
+						.description("스크린샷 자동 삭제 활성화")),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("응답 결과 (예: SUCCESS)"),
+					fieldWithPath("data.userId").type(JsonFieldType.NUMBER).description("사용자 ID"),
+					fieldWithPath("data.screenshotAutoDeleteEnabled").type(JsonFieldType.BOOLEAN)
+						.description("스크린샷 자동 삭제 활성화")
 				)));
 	}
 }

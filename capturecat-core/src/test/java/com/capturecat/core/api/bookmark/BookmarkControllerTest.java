@@ -25,6 +25,7 @@ import io.restassured.http.ContentType;
 import com.capturecat.core.DummyObject;
 import com.capturecat.core.service.bookmark.BookmarkService;
 import com.capturecat.core.service.image.ImageWithTagsResponse;
+import com.capturecat.core.service.image.TagResponse;
 import com.capturecat.core.support.util.CursorUtil;
 import com.capturecat.test.api.RestDocsTest;
 
@@ -62,7 +63,7 @@ class BookmarkControllerTest extends RestDocsTest {
 	@Test
 	void 즐겨찾기한_이미지를_조회한다() {
 		// given
-		BDDMockito.given(bookmarkService.getBookmarkImages(any(), any())).willReturn(
+		BDDMockito.given(bookmarkService.getBookmarkImages(any(), any(), any())).willReturn(
 			CursorUtil.toCursorResponse(
 				List.of(ImageWithTagsResponse.from(DummyObject.newMockImage(1L))),
 				false,
@@ -78,7 +79,9 @@ class BookmarkControllerTest extends RestDocsTest {
 			.apply(document("getBookmarkImages", requestPreprocessor(), responsePreprocessor(),
 				queryParameters(
 					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
-					parameterWithName("size").description("페이지 크기 (기본값: 10, 최대: 100)").optional()),
+					parameterWithName("size").description("페이지 크기 (기본값: 10, 최대: 100)").optional(),
+					parameterWithName("tagId").description("태그 ID (선택한 태그로 필터링)").optional()
+				),
 				responseFields(
 					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
@@ -89,6 +92,35 @@ class BookmarkControllerTest extends RestDocsTest {
 					fieldWithPath("data.items[].url").type(JsonFieldType.STRING).description("이미지 URL"),
 					fieldWithPath("data.items[].captureDate").type(JsonFieldType.STRING).description("캡처한 날짜"),
 					fieldWithPath("data.items[].isBookmarked").type(JsonFieldType.BOOLEAN).description("즐겨찾기 여부"),
+					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
+	}
+
+	@Test
+	void 즐겨찾기한_이미지의_이미지태그를_조회한다() {
+		// given
+		BDDMockito.given(bookmarkService.getBookmarkImageTags(any(), any())).willReturn(
+			CursorUtil.toCursorResponse(List.of(new TagResponse(1L, "고양이"), new TagResponse(2L, "cat")),
+				false,
+				TagResponse::id));
+
+		// when & then
+		given().contentType(ContentType.JSON)
+			.accept(ContentType.JSON)
+			.queryParam("page", 0)
+			.queryParam("size", 10)
+			.when().get("/v1/bookmarks/tags")
+			.then().status(HttpStatus.OK).log().all()
+			.apply(document("getBookmarkImageTags", requestPreprocessor(), responsePreprocessor(),
+				queryParameters(
+					parameterWithName("page").description("페이지 번호 (0부터 시작)").optional(),
+					parameterWithName("size").description("페이지 크기 (기본값: 10, 최대: 100)").optional()),
+				responseFields(
+					fieldWithPath("result").type(JsonFieldType.STRING).description("요청 결과"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부"),
+					fieldWithPath("data.lastCursor").type(JsonFieldType.NUMBER).description("마지막 커서 ID"),
+					fieldWithPath("data.items").type(JsonFieldType.ARRAY).description("즐겨찾기한 이미지 태그 목록"),
+					fieldWithPath("data.items[].id").type(JsonFieldType.NUMBER).description("이미지 태그 ID"),
+					fieldWithPath("data.items[].name").type(JsonFieldType.STRING).description("이미지 태그 이름"),
 					fieldWithPath("error").type(JsonFieldType.NULL).optional().ignored())));
 	}
 

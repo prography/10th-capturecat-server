@@ -116,9 +116,14 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	}
 
 	@Test
+	void 즐겨찾기한_이미지의_이미지태그_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/getBookmarkImageTags", errorCodeDescriptors);
+	}
+
+	@Test
 	void 이미지_즐겨찾기_삭제_에러_코드_문서() {
-		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
-			IMAGE_NOT_FOUND, BOOKMARK_NOT_FOUND);
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/deleteBookmark", errorCodeDescriptors);
 	}
 
@@ -151,6 +156,19 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	void 사용자_정보_조회_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/userInfo", errorCodeDescriptors);
+	}
+
+	@Test
+	void 사용자_설정_정보_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
+			USER_SETTINGS_NOT_FOUND);
+		generateErrorDocs("errorCode/getUserSettings", errorCodeDescriptors);
+	}
+
+	@Test
+	void 사용자_설정_정보_변경_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/updateUserSettings", errorCodeDescriptors);
 	}
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {

@@ -39,6 +39,10 @@ public enum ErrorCode {
 	MISSING_PARAMETER("필수 파라미터 %s(이)가 누락되었습니다."),
 	INTERNAL_SERVER_ERROR("서버에서 오류가 발생했습니다."),
 	INVALID_LOGOUT_AUTH_TOKEN("ACCESS 토큰 또는 REFRESH 토큰이 유효하지 않습니다."),
+	ALREADY_EXISTS_USER_TAG("이미 등록된 유저 태그입니다."),
+	EXCEED_MAX_USER_TAG_COUNT("태그는 한 계정당 최대 30개까지 추가할 수 있어요."),
+	NOT_FOUND_USER_TAG("유저 태그를 찾을 수 없습니다."),
+	NOT_FOUND_USER_SETTINGS("유저 설정 정보를 찾을 수 없습니다."),
 	ALREADY_REGISTERED_EMAIL("이미 가입된 이메일입니다.");
 
 	private final String message;
