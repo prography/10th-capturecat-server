@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
+import com.capturecat.core.domain.user.UserSettingsRepository;
 import com.capturecat.core.domain.user.UserSocialAccount;
 import com.capturecat.core.domain.user.UserSocialAccountRepository;
 import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
@@ -35,6 +36,8 @@ class SocialLoginLinkingTest {
 
 	@Mock
 	UserRepository userRepository;
+	@Mock
+	UserSettingsRepository userSettingsRepository;
 	@Mock
 	UserSocialAccountRepository userSocialAccountRepository;
 

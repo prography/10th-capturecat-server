@@ -68,20 +68,14 @@ public class UserService {
 	 * 소셜 로그인 및 신규 회원가입 처리
 	 */
 	@Transactional
-	public LoginUser upsertSocialUser(OidcUserPayload payload) {
+	public LoginUser upsertSocialUser(OidcUserPayload payload, boolean accountLinking, String linkToken) {
 		User user = userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
 			.map(UserSocialAccount::getUser)
 			.orElseGet(() -> {
-				// 1. User 생성/저장
-				User newUser = userRepository.save(buildUser(payload));
+				// 1. User 생성 or 조회 (중복이고, 연동이 아닐 경우 에러 응답)
+				User newUser = generateOrFetchUser(payload, accountLinking);
 				// 2. UserSocialAccount 생성/저장
-				UserSocialAccount newAccount = UserSocialAccount.builder()
-					.user(newUser)
-					.provider(payload.provider())
-					.socialId(payload.socialId())
-					.unlinkKey(payload.unlinkKey()) //최초 생성 시에만 존재
-					.build();
-				userSocialAccountRepository.save(newAccount);
+				saveSocialAccount(payload, newUser, linkToken);
 
 				// 3. UserSettings 초기화
 				setUserSettings(newUser.getId(), false);
@@ -90,18 +84,6 @@ public class UserService {
 			});
 
 		return new LoginUser(user);
-	public LoginUser upsertSocialUser(OidcUserPayload payload, boolean accountLinking, String linkToken) {
-		User userEntity =
-			userSocialAccountRepository.findUserByProviderAndSocialId(payload.provider(), payload.socialId())
-				.map(UserSocialAccount::getUser)
-				.orElseGet(() -> {
-					// 1. User 생성 or 조회 (중복이고, 연동이 아닐 경우 에러 응답)
-					User user = generateOrFetchUser(payload, accountLinking);
-					// 2. UserSocialAccount 생성/저장
-					saveSocialAccount(payload, user, linkToken);
-					return user;
-				});
-		return new LoginUser(userEntity);
 	}
 
 	/**
