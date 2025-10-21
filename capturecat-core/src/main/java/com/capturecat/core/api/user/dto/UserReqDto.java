@@ -12,6 +12,7 @@ import lombok.Setter;
 
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRole;
+import com.capturecat.core.domain.user.UserSettings;
 
 /** 회원 관련 요청 DTO */
 public class UserReqDto {
@@ -58,5 +59,12 @@ public class UserReqDto {
 	public static class WithdrawReqDto {
 		@Size(max = 500, message = "탈퇴 사유는 500자 이내로 작성해주세요.")
 		private String reason;
+	}
+
+	/** 회원 설정 정보 DTO */
+	@Getter
+	@Setter
+	public static class UserSettingsReqDto {
+		private boolean screenshotAutoDeleteEnabled;
 	}
 }

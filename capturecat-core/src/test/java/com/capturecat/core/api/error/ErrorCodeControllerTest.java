@@ -1,29 +1,7 @@
 package com.capturecat.core.api.error;
 
-import static com.capturecat.core.support.error.ErrorType.ALREADY_REGISTERED_TAGS;
-import static com.capturecat.core.support.error.ErrorType.BOOKMARK_DUPLICATION;
-import static com.capturecat.core.support.error.ErrorType.DUPLICATE_TAG_NAMES;
-import static com.capturecat.core.support.error.ErrorType.FETCH_SOCIAL_TOKEN_FAIL;
-import static com.capturecat.core.support.error.ErrorType.GENERATE_CLIENT_SECRET_FAIL;
-import static com.capturecat.core.support.error.ErrorType.IMAGE_ACCESS_DENIED;
-import static com.capturecat.core.support.error.ErrorType.IMAGE_DELETE_FAILED;
-import static com.capturecat.core.support.error.ErrorType.IMAGE_NOT_FOUND;
-import static com.capturecat.core.support.error.ErrorType.IMAGE_TAG_NOT_FOUND;
-import static com.capturecat.core.support.error.ErrorType.IMAGE_UPLOAD_FAILED;
-import static com.capturecat.core.support.error.ErrorType.INTERNAL_SERVER_ERROR;
-import static com.capturecat.core.support.error.ErrorType.INVALID_ACCESS_TOKEN;
-import static com.capturecat.core.support.error.ErrorType.INVALID_AUTH_TOKEN;
-import static com.capturecat.core.support.error.ErrorType.INVALID_DATE_FORMAT;
-import static com.capturecat.core.support.error.ErrorType.INVALID_ID_TOKEN;
-import static com.capturecat.core.support.error.ErrorType.INVALID_LOGOUT_AUTH_TOKEN;
-import static com.capturecat.core.support.error.ErrorType.INVALID_REFRESH_TOKEN;
-import static com.capturecat.core.support.error.ErrorType.REFRESH_TOKEN_EXPIRED;
-import static com.capturecat.core.support.error.ErrorType.SOCIAL_API_ERROR;
-import static com.capturecat.core.support.error.ErrorType.TOO_MANY_TAGS;
-import static com.capturecat.core.support.error.ErrorType.UNLINK_SOCIAL_FAIL;
-import static com.capturecat.core.support.error.ErrorType.UPLOAD_METADATA_MISMATCH;
-import static com.capturecat.core.support.error.ErrorType.USER_NOT_FOUND;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static com.capturecat.core.support.error.ErrorType.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -177,6 +155,19 @@ class ErrorCodeControllerTest extends RestDocsTest {
 	void 사용자_정보_조회_에러_코드_문서() {
 		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
 		generateErrorDocs("errorCode/userInfo", errorCodeDescriptors);
+	}
+
+	@Test
+	void 사용자_설정_정보_조회_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND,
+			USER_SETTINGS_NOT_FOUND);
+		generateErrorDocs("errorCode/getUserSettings", errorCodeDescriptors);
+	}
+
+	@Test
+	void 사용자_설정_정보_변경_에러_코드_문서() {
+		List<ErrorCodeDescriptor> errorCodeDescriptors = generateErrorCodeDescriptors(USER_NOT_FOUND);
+		generateErrorDocs("errorCode/updateUserSettings", errorCodeDescriptors);
 	}
 
 	private void generateErrorDocs(String identifier, List<ErrorCodeDescriptor> errorCodeDescriptors) {
