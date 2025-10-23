@@ -23,6 +23,7 @@ import com.capturecat.core.domain.user.UserSettings;
 import com.capturecat.core.domain.user.UserSettingsRepository;
 import com.capturecat.core.domain.user.UserSocialAccount;
 import com.capturecat.core.domain.user.UserSocialAccountRepository;
+import com.capturecat.core.domain.user.UserTagRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.auth.SocialService;
 import com.capturecat.core.service.auth.SocialService.OidcUserPayload;
@@ -37,6 +38,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final UserSocialAccountRepository userSocialAccountRepository;
 	private final UserSettingsRepository userSettingsRepository;
+	private final UserTagRepository userTagRepository;
 	private final ImageRepository imageRepository;
 	private final ImageTagRepository imageTagRepository;
 	private final BookmarkRepository bookmarkRepository;
@@ -149,18 +151,22 @@ public class UserService {
 		return setUserSettings(user.getId(), enabled);
 	}
 
+	// TODO: user 관련된 것 삭제할 때 repository를 계속 추가할 순 없다.. 테스트코드가 변경된다. cascade?
 	protected void deleteUserAndRelated(Long userId) {
 		//1. 즐겨찾기 삭제
 		bookmarkRepository.deleteByUserId(userId);
 
-		// 2. 해당 User가 소유한 이미지모두 삭제
+		//2. 해당 User가 소유한 이미지모두 삭제
 		imageTagRepository.deleteAllTagsByUserId(userId);
 		imageRepository.deleteAllImagesByUserId(userId);
 
-		// 3. UserSettings 삭제
+		//3. UserSettings 삭제
 		userSettingsRepository.deleteById(userId);
 
-		// 4. User 삭제 -> social account도 삭제됨
+		//4. UserTag 삭제
+		userTagRepository.deleteAllByUserId(userId);
+
+		//5. User 삭제 -> social account도 삭제됨
 		userRepository.deleteById(userId);
 	}
 
