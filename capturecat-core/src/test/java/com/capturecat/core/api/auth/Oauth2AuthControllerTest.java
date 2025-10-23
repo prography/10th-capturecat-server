@@ -86,9 +86,10 @@ public class Oauth2AuthControllerTest extends RestDocsTest {
 					fieldWithPath("accountLinking").type(JsonFieldType.BOOLEAN)
 						.optional()
 						.description("소셜 로그인 연동 여부. default false, 계정 통합 시 true"),
-					fieldWithPath("linkToken").type(JsonFieldType.BOOLEAN)
+					fieldWithPath("linkToken").type(JsonFieldType.STRING)
 						.optional()
-						.description("소셜 로그인 연동 토큰. 응답받은 값 전달")
+						.description("소셜 로그인 연동 토큰.(unlink할때 사용할 토큰으로, 최초에만 발급된다고해서 이미 시도한 걸 재활용해야 하는데, "
+							+ "연동을 안할수도 있으므로 서버에 저장할 수가 없어서 응답으로 넘김)")
 				),
 				responseHeaders(
 					headerWithName(HttpHeaders.AUTHORIZATION).description("Bearer 액세스 토큰"),
