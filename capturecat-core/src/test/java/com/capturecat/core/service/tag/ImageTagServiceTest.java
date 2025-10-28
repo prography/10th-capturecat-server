@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.capturecat.core.domain.tag.ImageTagRepository;
+import com.capturecat.core.domain.tag.Tag;
+import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.service.auth.LoginUser;
@@ -29,6 +31,9 @@ class ImageTagServiceTest {
 
 	@Mock
 	UserRepository userRepository;
+
+	@Mock
+	TagRepository tagRepository;
 
 	@InjectMocks
 	ImageTagService imageTagService;
@@ -60,6 +65,53 @@ class ImageTagServiceTest {
 
 		// when / then
 		assertThrows(CoreException.class, () -> imageTagService.update(loginUser, 1L, 2L));
+		verifyNoInteractions(imageTagRepository);
+	}
+
+	@Test
+	void 삭제_사용자_태그_존재하면_레포지토리_호출한다() {
+		// given
+		LoginUser loginUser = mock(LoginUser.class);
+		when(loginUser.getUsername()).thenReturn("existingUser");
+
+		User user = mock(User.class);
+		when(userRepository.findByUsername("existingUser")).thenReturn(Optional.of(user));
+
+		Tag tag = mock(Tag.class);
+		when(tagRepository.findById(10L)).thenReturn(Optional.of(tag));
+
+		// when
+		imageTagService.delete(loginUser, 10L);
+
+		// then
+		verify(imageTagRepository, times(1)).deleteByTagAndUser(tag, user);
+	}
+
+	@Test
+	void 삭제_사용자_없으면_CoreException_던진다() {
+		// given
+		LoginUser loginUser = mock(LoginUser.class);
+		when(loginUser.getUsername()).thenReturn("noUser");
+		when(userRepository.findByUsername("noUser")).thenReturn(Optional.empty());
+
+		// when / then
+		assertThrows(CoreException.class, () -> imageTagService.delete(loginUser, 1L));
+		verifyNoInteractions(imageTagRepository, tagRepository);
+	}
+
+	@Test
+	void 삭제_태그_없으면_CoreException_던진다() {
+		// given
+		LoginUser loginUser = mock(LoginUser.class);
+		when(loginUser.getUsername()).thenReturn("existingUser");
+
+		User user = mock(User.class);
+		when(userRepository.findByUsername("existingUser")).thenReturn(Optional.of(user));
+
+		when(tagRepository.findById(2L)).thenReturn(Optional.empty());
+
+		// when / then
+		assertThrows(CoreException.class, () -> imageTagService.delete(loginUser, 2L));
 		verifyNoInteractions(imageTagRepository);
 	}
 }

@@ -130,6 +130,7 @@ class UserTagControllerTest extends RestDocsTest {
 	void 유저_태그_삭제() {
 		// given
 		BDDMockito.given(userTagService.create(any(), anyString())).willReturn(new TagResponse(1L, "java"));
+		BDDMockito.willDoNothing().given(imageTagService).delete(any(), anyLong());
 
 		// when & then
 		given()

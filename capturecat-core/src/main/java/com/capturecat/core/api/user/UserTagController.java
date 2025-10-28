@@ -59,6 +59,7 @@ public class UserTagController {
 	@DeleteMapping
 	public ApiResponse<?> delete(@AuthenticationPrincipal LoginUser loginUser, @RequestParam Long tagId) {
 		userTagService.delete(loginUser, tagId);
+		imageTagService.delete(loginUser, tagId);
 
 		return ApiResponse.success();
 	}
