@@ -1,11 +1,12 @@
 package com.capturecat.core.service.tag;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
@@ -15,8 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.capturecat.core.DummyObject;
 import com.capturecat.core.domain.tag.ImageTagRepository;
 import com.capturecat.core.domain.tag.Tag;
+import com.capturecat.core.domain.tag.TagFixture;
 import com.capturecat.core.domain.tag.TagRepository;
 import com.capturecat.core.domain.user.User;
 import com.capturecat.core.domain.user.UserRepository;
@@ -41,47 +44,43 @@ class ImageTagServiceTest {
 	@Test
 	void 업데이트_사용자_존재하면_레포지토리_호출한다() {
 		// given
-		LoginUser loginUser = mock(LoginUser.class);
-		when(loginUser.getUsername()).thenReturn("existingUser");
+		User user = DummyObject.newMockUser(123L);
 
-		User user = mock(User.class);
-		when(user.getId()).thenReturn(123L);
-
-		when(userRepository.findByUsername("existingUser")).thenReturn(Optional.of(user));
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
 
 		// when
-		imageTagService.update(loginUser, 10L, 20L);
+		imageTagService.update(new LoginUser(user), 10L, 20L);
 
 		// then
-		verify(imageTagRepository, times(1)).updateImageTagsForUser(123L, 10L, 20L);
+		verify(imageTagRepository, times(1))
+			.updateImageTagsForUser(user.getId(), 10L, 20L);
 	}
 
 	@Test
 	void 업데이트_사용자_없으면_CoreException_던진다() {
 		// given
-		LoginUser loginUser = mock(LoginUser.class);
-		when(loginUser.getUsername()).thenReturn("noUser");
-		when(userRepository.findByUsername("noUser")).thenReturn(Optional.empty());
+		User user = DummyObject.newUser("noUser");
 
-		// when / then
-		assertThrows(CoreException.class, () -> imageTagService.update(loginUser, 1L, 2L));
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> imageTagService.update(new LoginUser(user), 1L, 2L))
+			.isInstanceOf(CoreException.class);
 		verifyNoInteractions(imageTagRepository);
 	}
 
 	@Test
 	void 삭제_사용자_태그_존재하면_레포지토리_호출한다() {
 		// given
-		LoginUser loginUser = mock(LoginUser.class);
-		when(loginUser.getUsername()).thenReturn("existingUser");
+		User user = DummyObject.newUser("test");
 
-		User user = mock(User.class);
-		when(userRepository.findByUsername("existingUser")).thenReturn(Optional.of(user));
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
 
-		Tag tag = mock(Tag.class);
-		when(tagRepository.findById(10L)).thenReturn(Optional.of(tag));
+		Tag tag = TagFixture.createTag(10L, "testTag");
+		given(tagRepository.findById(anyLong())).willReturn(Optional.of(tag));
 
 		// when
-		imageTagService.delete(loginUser, 10L);
+		imageTagService.delete(new LoginUser(user), tag.getId());
 
 		// then
 		verify(imageTagRepository, times(1)).deleteByTagAndUser(tag, user);
@@ -90,28 +89,27 @@ class ImageTagServiceTest {
 	@Test
 	void 삭제_사용자_없으면_CoreException_던진다() {
 		// given
-		LoginUser loginUser = mock(LoginUser.class);
-		when(loginUser.getUsername()).thenReturn("noUser");
-		when(userRepository.findByUsername("noUser")).thenReturn(Optional.empty());
+		User user = DummyObject.newUser("noUser");
 
-		// when / then
-		assertThrows(CoreException.class, () -> imageTagService.delete(loginUser, 1L));
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> imageTagService.delete(new LoginUser(user), 1L))
+			.isInstanceOf(CoreException.class);
 		verifyNoInteractions(imageTagRepository, tagRepository);
 	}
 
 	@Test
 	void 삭제_태그_없으면_CoreException_던진다() {
 		// given
-		LoginUser loginUser = mock(LoginUser.class);
-		when(loginUser.getUsername()).thenReturn("existingUser");
+		User user = DummyObject.newUser("test");
 
-		User user = mock(User.class);
-		when(userRepository.findByUsername("existingUser")).thenReturn(Optional.of(user));
+		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
+		given(tagRepository.findById(anyLong())).willReturn(Optional.empty());
 
-		when(tagRepository.findById(2L)).thenReturn(Optional.empty());
-
-		// when / then
-		assertThrows(CoreException.class, () -> imageTagService.delete(loginUser, 2L));
+		// when & then
+		assertThatThrownBy(() -> imageTagService.delete(new LoginUser(user), 2L))
+			.isInstanceOf(CoreException.class);
 		verifyNoInteractions(imageTagRepository);
 	}
 }
