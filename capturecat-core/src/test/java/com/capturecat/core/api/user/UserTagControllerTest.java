@@ -29,6 +29,7 @@ import io.restassured.http.ContentType;
 
 import com.capturecat.core.config.jwt.JwtUtil;
 import com.capturecat.core.service.image.TagResponse;
+import com.capturecat.core.service.tag.ImageTagService;
 import com.capturecat.core.service.user.UserTagService;
 import com.capturecat.core.support.response.CursorResponse;
 import com.capturecat.test.api.RestDocsTest;
@@ -39,11 +40,13 @@ class UserTagControllerTest extends RestDocsTest {
 
 	private UserTagController userTagController;
 	private UserTagService userTagService;
+	private ImageTagService imageTagService;
 
 	@BeforeEach
 	void setUp() {
 		userTagService = mock(UserTagService.class);
-		userTagController = new UserTagController(userTagService);
+		imageTagService = mock(ImageTagService.class);
+		userTagController = new UserTagController(userTagService, imageTagService);
 		mockMvc = mockController(userTagController);
 	}
 
@@ -101,6 +104,7 @@ class UserTagControllerTest extends RestDocsTest {
 	void 유저_태그_수정() {
 		// given
 		BDDMockito.given(userTagService.update(any(), anyLong(), anyString())).willReturn(new TagResponse(1L, "java"));
+		BDDMockito.willDoNothing().given(imageTagService).update(any(), anyLong(), anyLong());
 
 		// when & then
 		given()
