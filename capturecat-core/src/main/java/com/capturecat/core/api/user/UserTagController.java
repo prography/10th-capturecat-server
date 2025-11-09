@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import com.capturecat.core.api.user.dto.TagRenameRequest;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.service.image.TagResponse;
+import com.capturecat.core.service.tag.ImageTagService;
 import com.capturecat.core.service.user.UserTagService;
 import com.capturecat.core.support.response.ApiResponse;
 import com.capturecat.core.support.response.CursorResponse;
@@ -27,6 +28,7 @@ import com.capturecat.core.support.response.CursorResponse;
 public class UserTagController {
 
 	private final UserTagService userTagService;
+	private final ImageTagService imageTagService;
 
 	@PostMapping
 	public ApiResponse<TagResponse> create(@AuthenticationPrincipal LoginUser loginUser, @RequestParam String tagName) {
@@ -44,9 +46,12 @@ public class UserTagController {
 	}
 
 	@PatchMapping
-	public ApiResponse<TagResponse> update(@AuthenticationPrincipal LoginUser loginUser,
-		@RequestBody TagRenameRequest request) {
+	public ApiResponse<TagResponse> update(
+		@AuthenticationPrincipal LoginUser loginUser,
+		@RequestBody TagRenameRequest request
+	) {
 		TagResponse response = userTagService.update(loginUser, request.currentTagId(), request.newTagName());
+		imageTagService.update(loginUser, request.currentTagId(), response.id());
 
 		return ApiResponse.success(response);
 	}
@@ -54,6 +59,7 @@ public class UserTagController {
 	@DeleteMapping
 	public ApiResponse<?> delete(@AuthenticationPrincipal LoginUser loginUser, @RequestParam Long tagId) {
 		userTagService.delete(loginUser, tagId);
+		imageTagService.delete(loginUser, tagId);
 
 		return ApiResponse.success();
 	}

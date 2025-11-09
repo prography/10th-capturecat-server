@@ -33,6 +33,10 @@ public interface ImageTagRepository extends JpaRepository<ImageTag, Long> {
 	void deleteByTagAndUser(Tag tag, User user);
 
 	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("UPDATE ImageTag it SET it.tag.id = :newTagId WHERE it.tag.id = :oldTagId AND it.image.user.id = :userId")
+	void updateImageTagsForUser(Long userId, Long oldTagId, Long newTagId);
+
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query("DELETE FROM ImageTag it WHERE it.image.id IN (SELECT i.id FROM Image i WHERE i.user.id = :userId)")
 	void deleteAllTagsByUserId(Long userId);
 }
