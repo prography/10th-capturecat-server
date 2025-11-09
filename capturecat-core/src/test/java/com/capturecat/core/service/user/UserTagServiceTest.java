@@ -115,7 +115,7 @@ class UserTagServiceTest {
 		given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
 		given(tagRegister.registerTagsFor(anyString())).willReturn(tag);
 		given(userTagRepository.existsByUserAndTag(eq(user), eq(tag))).willReturn(false);
-		given(userTagRepository.countByUser(eq(user))).willReturn(30L);
+		given(userTagRepository.countByUser(eq(user))).willReturn(40L);
 
 		// when & then
 		assertThatThrownBy(() -> userTagService.create(new LoginUser(DummyObject.newUser("test")), "java"))

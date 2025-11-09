@@ -30,7 +30,7 @@ import com.capturecat.core.support.util.CursorUtil;
 @RequiredArgsConstructor
 public class UserTagService {
 
-	private static final int MAX_USER_TAG_COUNT = 30;
+	private static final int MAX_USER_TAG_COUNT = 40;
 
 	private final UserRepository userRepository;
 	private final UserTagRepository userTagRepository;
