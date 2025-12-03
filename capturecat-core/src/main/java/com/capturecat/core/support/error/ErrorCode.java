@@ -42,7 +42,8 @@ public enum ErrorCode {
 	ALREADY_EXISTS_USER_TAG("이미 등록된 유저 태그입니다."),
 	EXCEED_MAX_USER_TAG_COUNT("태그는 한 계정당 최대 30개까지 추가할 수 있어요."),
 	NOT_FOUND_USER_TAG("유저 태그를 찾을 수 없습니다."),
-	NOT_FOUND_USER_SETTINGS("유저 설정 정보를 찾을 수 없습니다.");
+	NOT_FOUND_USER_SETTINGS("유저 설정 정보를 찾을 수 없습니다."),
+	ALREADY_REGISTERED_EMAIL("이미 가입된 이메일입니다.");
 
 	private final String message;
 

@@ -29,6 +29,7 @@ import com.capturecat.core.domain.user.UserRepository;
 import com.capturecat.core.domain.user.UserSettings;
 import com.capturecat.core.domain.user.UserSettingsRepository;
 import com.capturecat.core.domain.user.UserSocialAccountRepository;
+import com.capturecat.core.domain.user.UserTagRepository;
 import com.capturecat.core.service.auth.LoginUser;
 import com.capturecat.core.support.error.CoreException;
 import com.capturecat.core.support.error.ErrorType;
@@ -59,6 +60,9 @@ class UserServiceTest {
 
 	@Mock
 	private UserSettingsRepository userSettingsRepository;
+
+	@Mock
+	private UserTagRepository userTagRepository;
 
 	@Spy
 	private PasswordEncoder passwordEncoder;
@@ -118,6 +122,8 @@ class UserServiceTest {
 		verify(bookmarkRepository).deleteByUserId(savedUser.getId());
 		verify(imageTagRepository).deleteAllTagsByUserId(savedUser.getId());
 		verify(imageRepository).deleteAllImagesByUserId(savedUser.getId());
+		verify(userSettingsRepository).deleteById(savedUser.getId());
+		verify(userTagRepository).deleteAllByUserId(savedUser.getId());
 
 		ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
 		verify(userRepository).deleteById(captor.capture());
